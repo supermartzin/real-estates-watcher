@@ -6,6 +6,8 @@ namespace RealEstatesWatcher.Models
     {
         public string Title { get; }
 
+        public string Text { get; }
+
         public decimal Price { get; }
 
         public Currency Currency { get; }
@@ -21,6 +23,7 @@ namespace RealEstatesWatcher.Models
         public DateTime? PublishTime { get; }
 
         public RealEstateAdPost(string title,
+                                string text,
                                 decimal price,
                                 Currency currency,
                                 string address,
@@ -30,6 +33,7 @@ namespace RealEstatesWatcher.Models
                                 DateTime? publishTime = default)
         {
             Title = title ?? throw new ArgumentNullException(nameof(title));
+            Text = text ?? throw new ArgumentNullException(nameof(text));
             Address = address ?? throw new ArgumentNullException(nameof(address));
             WebUrl = webUrl is not null ? new Uri(webUrl) : throw new ArgumentNullException(nameof(webUrl));
             Currency = currency;
