@@ -28,36 +28,43 @@ namespace RealEstatesWatcher.Scrapers
                 runner = "cmd.exe";
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 runner = "/bin/bash";
-            else throw new Exception("Unknown operating system for running the script.");
+            else throw new WebScraperException("Unknown operating system for running the script.");
 
-            // create process
-            var process = new Process
+            try
             {
-                StartInfo =
+                // create process
+                var process = new Process
                 {
-                    FileName = runner,
-                    RedirectStandardError = true,
-                    RedirectStandardInput = true,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = true,
-                    UseShellExecute = false,
-                }
-            };
-            process.Start();
+                    StartInfo =
+                    {
+                        FileName = runner,
+                        RedirectStandardError = true,
+                        RedirectStandardInput = true,
+                        RedirectStandardOutput = true,
+                        CreateNoWindow = true,
+                        UseShellExecute = false,
+                    }
+                };
+                process.Start();
 
-            // execute external Node.js script
-            await process.StandardInput.WriteLineAsync($"node ./scraper/index.js {uri.AbsoluteUri}");
-            
-            await process.StandardInput.FlushAsync();
-            process.StandardInput.Close();
-            process.WaitForExit(5000);
+                // execute external Node.js script
+                await process.StandardInput.WriteLineAsync($"node ./scraper/index.js {uri.AbsoluteUri}");
 
-            // process downloaded page
-            var output = await process.StandardOutput.ReadToEndAsync();
-            var startIndex = output.IndexOf("<html", StringComparison.Ordinal);
-            var endIndex = output.LastIndexOf("</html>", StringComparison.Ordinal) + 7;
+                await process.StandardInput.FlushAsync();
+                process.StandardInput.Close();
+                process.WaitForExit(3000);
 
-            return output[startIndex..endIndex];
+                // process downloaded page
+                var output = await process.StandardOutput.ReadToEndAsync();
+                var startIndex = output.IndexOf("<html", StringComparison.Ordinal);
+                var endIndex = output.LastIndexOf("</html>", StringComparison.Ordinal) + 7;
+
+                return output[startIndex..endIndex];
+            }
+            catch (Exception ex)
+            {
+                throw new WebScraperException($"Error scraping web page: {ex.Message}", ex);
+            }
         }
     }
 }

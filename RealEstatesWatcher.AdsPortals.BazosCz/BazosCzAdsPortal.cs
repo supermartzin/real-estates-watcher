@@ -42,18 +42,19 @@ namespace RealEstatesWatcher.AdsPortals.BazosCz
                 _logger?.LogDebug($"({Name}): Downloaded page with ads.");
 
                 // parse posts
-                var posts = new List<RealEstateAdPost>(pageContent.DocumentNode
-                                                                            .SelectNodes("//span[@class=\"vypis\"]")
-                                                                            .Select(adNode => adNode.SelectSingleNode(".//tr[1]"))
-                                                                            .Select(ParseRealEstateAdPost));
+                var posts = pageContent.DocumentNode
+                                                           .SelectNodes("//span[@class=\"vypis\"]")
+                                                           .Select(adNode => adNode.SelectSingleNode(".//tr[1]"))
+                                                           .Select(ParseRealEstateAdPost)
+                                                           .ToList();
 
                 _logger?.LogDebug($"({Name}): Successfully parsed {posts.Count} ads from page.");
 
                 return posts;
             }
-            catch (Exception ex)
+            catch (ArgumentException aEx)
             {
-                _logger?.LogError(ex, $"({Name}): Error getting latest ads: {ex.Message}");
+                _logger?.LogError(aEx, $"({Name}): Error getting latest ads: {aEx.Message}");
 
                 return new List<RealEstateAdPost>();
             }
@@ -79,7 +80,7 @@ namespace RealEstatesWatcher.AdsPortals.BazosCz
 
         private static Uri ParseWebUrl(HtmlNode node, string rootHost)
         {
-            var relativePath = node.SelectSingleNode(".//span[@class=\"nadpis\"]").FirstChild.GetAttributeValue("href", null);
+            var relativePath = node.SelectSingleNode(".//span[@class=\"nadpis\"]").FirstChild.GetAttributeValue("href", string.Empty);
 
             return new Uri(rootHost + relativePath);
         }
@@ -88,7 +89,7 @@ namespace RealEstatesWatcher.AdsPortals.BazosCz
         {
             var path = node.SelectSingleNode(".//img[@class=\"obrazek\"]")?.GetAttributeValue("src", null);
 
-            return path != null
+            return path is not null
                 ? new Uri(path)
                 : default;
         }

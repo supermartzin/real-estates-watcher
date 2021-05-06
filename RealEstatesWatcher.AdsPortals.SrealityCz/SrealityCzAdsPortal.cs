@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 
 using RealEstatesWatcher.AdsPortals.Contracts;
 using RealEstatesWatcher.Models;
+using RealEstatesWatcher.Scrapers;
 
 namespace RealEstatesWatcher.AdsPortals.SrealityCz
 {
@@ -47,29 +49,99 @@ namespace RealEstatesWatcher.AdsPortals.SrealityCz
 
                 _logger?.LogDebug($"({Name}): Downloaded page with ads.");
 
-                foreach (var adNode in htmlDoc.DocumentNode.SelectNodes("//div[@class=\"dir-property-list\"]/div"))
-                {
-                    var firstNode = adNode.FirstChild;
-                    var link = firstNode.GetAttributeValue("href", null);
-                    var imageUrl = firstNode.SelectSingleNode(".//img[@class=\"img\"]").GetAttributeValue("src", null);
+                // parse posts
+                var posts = htmlDoc.DocumentNode
+                                                       .SelectNodes("//div[@class=\"dir-property-list\"]/div[contains(@class,\"property\")]")
+                                                       .Select(ParseRealEstateAdPost)
+                                                       .ToList();
 
-                    var lastNode = adNode.LastChild;
-                    var title = lastNode.SelectSingleNode(".//a[@class=\"title\"]").InnerText;
-                    var address = lastNode.SelectSingleNode(".//span[contains(@class, \"locality\")]").InnerText;
-                    var price = lastNode.SelectSingleNode(".//span[contains(@class, \"norm-price\")]").InnerText;
+                _logger?.LogDebug($"({Name}): Successfully parsed {posts.Count} ads from page.");
 
-                }
+                return posts;
+            }
+            catch (WebScraperException wsEx)
+            {
+                _logger?.LogError(wsEx, $"({Name}): Error getting latest ads: {wsEx.Message}");
 
                 return new List<RealEstateAdPost>();
             }
-            catch (Exception ex)
+            catch (ArgumentException aEx)
             {
-                _logger?.LogError(ex, $"({Name}): Error getting latest ads: {ex.Message}");
+                _logger?.LogError(aEx, $"({Name}): Error getting latest ads: {aEx.Message}");
 
                 return new List<RealEstateAdPost>();
             }
         }
-        
+
+        private RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
+                                                                             ParseTitle(node),
+                                                                             string.Empty,
+                                                                             ParsePrice(node),
+                                                                             Currency.CZK,
+                                                                             ParseAddress(node),
+                                                                             ParseWebUrl(node, _rootHost),
+                                                                             ParseFloorArea(node),
+                                                                             ParseImageUrl(node));
+
+        private static string ParseTitle(HtmlNode node) => HttpUtility.HtmlDecode(node.SelectSingleNode("./div//a[@class=\"title\"]").InnerText.Trim());
+
+        private static string ParseAddress(HtmlNode node) => node.SelectSingleNode("./div//span[contains(@class,\"locality\")]").InnerText;
+
+        private static Uri ParseWebUrl(HtmlNode node, string rootHost)
+        {
+            var relativePath = node.FirstChild.GetAttributeValue("href", string.Empty);
+
+            return new Uri(rootHost + relativePath);
+        }
+
+        private static Uri? ParseImageUrl(HtmlNode node)
+        {
+            var path = node.FirstChild?.SelectSingleNode(".//img[@class=\"img\"]")?.GetAttributeValue("src", null);
+
+            return path is not null
+                ? new Uri(path)
+                : default;
+        }
+
+        private static decimal ParsePrice(HtmlNode node)
+        {
+            const string priceRegex = "([0-9\\s]+)";
+
+            var value = node.SelectSingleNode("./div//span[contains(@class,\"norm-price\")]")?.InnerText;
+            if (value == null)
+                return decimal.Zero;
+
+            value = HttpUtility.HtmlDecode(value).Replace(" ", "");
+            var result = Regex.Match(value, priceRegex);
+            if (!result.Success)
+                return decimal.Zero;
+
+            var priceValue = result.Groups[1].Value;
+
+            return decimal.TryParse(priceValue, out var price)
+                ? price
+                : decimal.Zero;
+        }
+
+        private static decimal ParseFloorArea(HtmlNode node)
+        {
+            const string floorAreaRegex = "([0-9]+)\\s?m2|([0-9]+)\\s?m²";
+
+            var value = node.SelectSingleNode("./div//a[@class=\"title\"]")?.InnerText?.Trim();
+            if (value == null)
+                return decimal.Zero;
+
+            value = HttpUtility.HtmlDecode(value);
+            var result = Regex.Match(value, floorAreaRegex);
+            if (!result.Success)
+                return decimal.Zero;
+
+            var floorAreaValue = result.Groups.Where(group => group.Success).ToArray()[1].Value;
+
+            return decimal.TryParse(floorAreaValue, out var floorArea)
+                ? floorArea
+                : decimal.Zero;
+        }
 
         private static string ParseRootHost(string url) => $"https://{new Uri(url).Host}";
     }
