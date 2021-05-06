@@ -38,16 +38,22 @@ namespace RealEstatesWatcher.AdsPortals.BazosCz
                 // get page content
                 var pageContent = await webHtml.LoadFromWebAsync(_adsUrl)
                                                            .ConfigureAwait(false);
+                
+                _logger?.LogDebug($"({Name}): Downloaded page with ads.");
 
                 // parse posts
-                return new List<RealEstateAdPost>(pageContent.DocumentNode
-                                                                       .SelectNodes("//span[@class=\"vypis\"]")
-                                                                       .Select(adNode => adNode.SelectSingleNode(".//tr[1]"))
-                                                                       .Select(ParseRealEstateAdPost));
+                var posts = new List<RealEstateAdPost>(pageContent.DocumentNode
+                                                                            .SelectNodes("//span[@class=\"vypis\"]")
+                                                                            .Select(adNode => adNode.SelectSingleNode(".//tr[1]"))
+                                                                            .Select(ParseRealEstateAdPost));
+
+                _logger?.LogDebug($"({Name}): Successfully parsed {posts.Count} ads from page.");
+
+                return posts;
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, $"Error parsing latest Ad posts from Bazos.cz: {ex.Message}");
+                _logger?.LogError(ex, $"({Name}): Error getting latest ads: {ex.Message}");
 
                 return new List<RealEstateAdPost>();
             }
@@ -65,24 +71,22 @@ namespace RealEstatesWatcher.AdsPortals.BazosCz
                                                                                   ParseImageUrl(innerNode), 
                                                                                   ParsePublishDate(innerNode));
 
-        private static string ParseTitle(HtmlNode node) => node?.SelectSingleNode(".//span[@class=\"nadpis\"]")?.FirstChild?.InnerText;
+        private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//span[@class=\"nadpis\"]").FirstChild.InnerText;
 
-        private static string ParseAdText(HtmlNode node) => node?.SelectSingleNode(".//div[@class=\"popis\"]").InnerText;
+        private static string ParseAdText(HtmlNode node) => node.SelectSingleNode(".//div[@class=\"popis\"]").InnerText;
 
-        private static string ParseAddress(HtmlNode node) => node?.SelectSingleNode("./td[3]").InnerHtml?.Replace("<br>", " ");
+        private static string ParseAddress(HtmlNode node) => node.SelectSingleNode("./td[3]").InnerHtml.Replace("<br>", " ");
 
         private static Uri ParseWebUrl(HtmlNode node, string rootHost)
         {
-            var relativePath = node?.SelectSingleNode(".//span[@class=\"nadpis\"]")?.FirstChild?.GetAttributeValue("href", null);
-            
-            return relativePath != null
-                ? new Uri(rootHost + relativePath)
-                : default;
+            var relativePath = node.SelectSingleNode(".//span[@class=\"nadpis\"]").FirstChild.GetAttributeValue("href", null);
+
+            return new Uri(rootHost + relativePath);
         }
 
         private static Uri? ParseImageUrl(HtmlNode node)
         {
-            var path = node?.SelectSingleNode(".//img[@class=\"obrazek\"]")?.GetAttributeValue("src", null);
+            var path = node.SelectSingleNode(".//img[@class=\"obrazek\"]")?.GetAttributeValue("src", null);
 
             return path != null
                 ? new Uri(path)
@@ -94,7 +98,7 @@ namespace RealEstatesWatcher.AdsPortals.BazosCz
             const string dateTimeFormat = "d.M.yyyy";
             const string dateTimeParseRegex = "\\[([0-9.\\s]+)\\]";
 
-            var value = node?.SelectSingleNode(".//span[@class=\"velikost10\"]")?.InnerText;
+            var value = node.SelectSingleNode(".//span[@class=\"velikost10\"]")?.InnerText;
             if (value == null)
                 return default;
 
@@ -113,7 +117,7 @@ namespace RealEstatesWatcher.AdsPortals.BazosCz
         {
             const string priceRegex = "([0-9\\s]+)";
 
-            var value = node?.SelectSingleNode(".//span[@class=\"cena\"]")?.InnerText;
+            var value = node.SelectSingleNode(".//span[@class=\"cena\"]")?.InnerText;
             if (value == null)
                 return default;
 
@@ -132,7 +136,7 @@ namespace RealEstatesWatcher.AdsPortals.BazosCz
         {
             const string floorAreaRegex = "([0-9]+)\\s?m2|([0-9]+)\\s?m²";
 
-            var value = node?.SelectSingleNode(".//span[@class=\"nadpis\"]")?.FirstChild?.InnerText;
+            var value = node.SelectSingleNode(".//span[@class=\"nadpis\"]")?.FirstChild?.InnerText;
             if (value == null)
                 return decimal.Zero;
 

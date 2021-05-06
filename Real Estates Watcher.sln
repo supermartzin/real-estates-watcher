@@ -13,11 +13,20 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealEstatesWatcher.AdsPorta
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealEstatesWatcher.Console", "RealEstatesWatcher.Console\RealEstatesWatcher.Console.csproj", "{46E3F61A-A57D-4E91-8BE6-32A4A6606148}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealEstatesWatcher.AdsPortals.SrealityCz", "RealEstatesWatcher.AdsPortals.SrealityCz\RealEstatesWatcher.AdsPortals.SrealityCz.csproj", "{76A964A0-B369-4BE3-B1FD-15ECE901F153}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealEstatesWatcher.AdsPortals.SrealityCz", "RealEstatesWatcher.AdsPortals.SrealityCz\RealEstatesWatcher.AdsPortals.SrealityCz.csproj", "{76A964A0-B369-4BE3-B1FD-15ECE901F153}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealEstatesWatcher.AdsPortals.RemaxCz", "RealEstatesWatcher.AdsPortals.RemaxCz\RealEstatesWatcher.AdsPortals.RemaxCz.csproj", "{A4B0DFED-D0C9-433C-9116-44BC850095E5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealEstatesWatcher.AdsPortals.RemaxCz", "RealEstatesWatcher.AdsPortals.RemaxCz\RealEstatesWatcher.AdsPortals.RemaxCz.csproj", "{A4B0DFED-D0C9-433C-9116-44BC850095E5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealEstatesWatcher.AdsPortals.FlatZoneCz", "RealEstatesWatcher.AdsPortals.FlatZoneCz\RealEstatesWatcher.AdsPortals.FlatZoneCz.csproj", "{AA468675-44EC-4DB5-A0F8-70E5E8C7E041}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealEstatesWatcher.AdsPortals.FlatZoneCz", "RealEstatesWatcher.AdsPortals.FlatZoneCz\RealEstatesWatcher.AdsPortals.FlatZoneCz.csproj", "{AA468675-44EC-4DB5-A0F8-70E5E8C7E041}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{AE7F9527-3C1B-4BF2-8A00-A082877ECA22}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web scraper", "Web scraper", "{D7508825-5BDC-4F8F-9D3E-F36456A5BBC8}"
+	ProjectSection(SolutionItems) = preProject
+		Tools\scraper\index.js = Tools\scraper\index.js
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealEstatesWatcher.Scrapers", "RealEstatesWatcher.Scrapers\RealEstatesWatcher.Scrapers.csproj", "{E2E32BA6-64F5-4E49-AC6E-4574F3FC5CE0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,6 +62,10 @@ Global
 		{AA468675-44EC-4DB5-A0F8-70E5E8C7E041}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA468675-44EC-4DB5-A0F8-70E5E8C7E041}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA468675-44EC-4DB5-A0F8-70E5E8C7E041}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2E32BA6-64F5-4E49-AC6E-4574F3FC5CE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2E32BA6-64F5-4E49-AC6E-4574F3FC5CE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2E32BA6-64F5-4E49-AC6E-4574F3FC5CE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2E32BA6-64F5-4E49-AC6E-4574F3FC5CE0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -62,6 +75,8 @@ Global
 		{76A964A0-B369-4BE3-B1FD-15ECE901F153} = {D11D1C74-A620-4DB5-A319-576B7BBCECA1}
 		{A4B0DFED-D0C9-433C-9116-44BC850095E5} = {D11D1C74-A620-4DB5-A319-576B7BBCECA1}
 		{AA468675-44EC-4DB5-A0F8-70E5E8C7E041} = {D11D1C74-A620-4DB5-A319-576B7BBCECA1}
+		{D7508825-5BDC-4F8F-9D3E-F36456A5BBC8} = {AE7F9527-3C1B-4BF2-8A00-A082877ECA22}
+		{E2E32BA6-64F5-4E49-AC6E-4574F3FC5CE0} = {AE7F9527-3C1B-4BF2-8A00-A082877ECA22}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D2618839-27DA-461E-81D0-0989C4827D9F}
