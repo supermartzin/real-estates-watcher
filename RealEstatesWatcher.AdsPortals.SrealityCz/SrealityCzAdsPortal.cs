@@ -9,7 +9,6 @@ using Microsoft.Extensions.Logging;
 
 using RealEstatesWatcher.AdsPortals.Contracts;
 using RealEstatesWatcher.Models;
-using RealEstatesWatcher.Scrapers;
 
 namespace RealEstatesWatcher.AdsPortals.SrealityCz
 {
@@ -59,17 +58,11 @@ namespace RealEstatesWatcher.AdsPortals.SrealityCz
 
                 return posts;
             }
-            catch (WebScraperException wsEx)
+            catch (Exception ex)
             {
-                _logger?.LogError(wsEx, $"({Name}): Error getting latest ads: {wsEx.Message}");
+                _logger?.LogError(ex, $"({Name}): Error getting latest ads: {ex.Message}");
 
-                return new List<RealEstateAdPost>();
-            }
-            catch (ArgumentException aEx)
-            {
-                _logger?.LogError(aEx, $"({Name}): Error getting latest ads: {aEx.Message}");
-
-                return new List<RealEstateAdPost>();
+                throw new RealEstateAdsPortalException($"({Name}): Error getting latest ads: {ex.Message}", ex);
             }
         }
 

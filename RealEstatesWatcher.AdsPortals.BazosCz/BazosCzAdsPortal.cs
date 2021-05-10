@@ -37,7 +37,7 @@ namespace RealEstatesWatcher.AdsPortals.BazosCz
 
                 // get page content
                 var pageContent = await webHtml.LoadFromWebAsync(_adsUrl)
-                                                           .ConfigureAwait(false);
+                                                            .ConfigureAwait(false);
                 
                 _logger?.LogDebug($"({Name}): Downloaded page with ads.");
 
@@ -52,11 +52,11 @@ namespace RealEstatesWatcher.AdsPortals.BazosCz
 
                 return posts;
             }
-            catch (ArgumentException aEx)
+            catch (Exception ex)
             {
-                _logger?.LogError(aEx, $"({Name}): Error getting latest ads: {aEx.Message}");
+                _logger?.LogError(ex, $"({Name}): Error getting latest ads: {ex.Message}");
 
-                return new List<RealEstateAdPost>();
+                throw new RealEstateAdsPortalException($"({Name}): Error getting latest ads: {ex.Message}", ex);
             }
         }
 
