@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -10,28 +11,26 @@ using Microsoft.Extensions.Logging;
 using RealEstatesWatcher.AdsPortals.Contracts;
 using RealEstatesWatcher.Models;
 
-namespace RealEstatesWatcher.AdsPortals.SrealityCz
+namespace RealEstatesWatcher.AdsPortals.FlatZoneCz
 {
-    public class SrealityCzAdsPortal : IRealEstateAdsPortal
+    public class FlatZoneCzAdsPortal : IRealEstateAdsPortal
     {
-        private readonly ILogger<SrealityCzAdsPortal>? _logger;
+        private readonly ILogger<FlatZoneCzAdsPortal>? _logger;
 
         private readonly IWebScraper _webScraper;
         private readonly string _adsUrl;
-        private readonly string _rootHost;
 
-        public string Name => "Sreality.cz";
+        public string Name => "FlatZone.cz";
 
-        public SrealityCzAdsPortal(string adsUrl,
+        public FlatZoneCzAdsPortal(string adsUrl,
                                    IWebScraper webScraper,
-                                   ILogger<SrealityCzAdsPortal>? logger = default)
+                                   ILogger<FlatZoneCzAdsPortal>? logger = default)
         {
             _adsUrl = adsUrl ?? throw new ArgumentNullException(nameof(adsUrl));
             _webScraper = webScraper ?? throw new ArgumentNullException(nameof(webScraper));
-            _rootHost = ParseRootHost(adsUrl);
             _logger = logger;
         }
-        
+
         public async Task<IList<RealEstateAdPost>> GetLatestRealEstateAdsAsync()
         {
             try
@@ -46,12 +45,15 @@ namespace RealEstatesWatcher.AdsPortals.SrealityCz
                 htmlDoc.LoadHtml(pageContent);
 
                 _logger?.LogDebug($"({Name}): Downloaded page with ads.");
+                
+                // get HTML elements
+                var elements = htmlDoc.DocumentNode.SelectNodes("//div[contains(@class,\"apartment-card\")]");
+                
+                // remove last element - template
+                elements.RemoveAt(elements.Count - 1);
 
                 // parse posts
-                var posts = htmlDoc.DocumentNode
-                                                       .SelectNodes("//div[@class=\"dir-property-list\"]/div[contains(@class,\"property\")]")
-                                                       .Select(ParseRealEstateAdPost)
-                                                       .ToList();
+                var posts = elements.Select(ParseRealEstateAdPost).ToList();
 
                 _logger?.LogDebug($"({Name}): Successfully parsed {posts.Count} ads from page.");
 
@@ -75,70 +77,62 @@ namespace RealEstatesWatcher.AdsPortals.SrealityCz
                                                                              ParsePrice(node),
                                                                              Currency.CZK,
                                                                              ParseAddress(node),
-                                                                             ParseWebUrl(node, _rootHost),
+                                                                             ParseWebUrl(node),
                                                                              ParseFloorArea(node),
                                                                              imageUrl: ParseImageUrl(node));
-
-        private static string ParseTitle(HtmlNode node) => HttpUtility.HtmlDecode(node.SelectSingleNode("./div//a[@class=\"title\"]").InnerText.Trim());
-
-        private static string ParseAddress(HtmlNode node) => node.SelectSingleNode("./div//span[contains(@class,\"locality\")]").InnerText;
-
-        private static Uri ParseWebUrl(HtmlNode node, string rootHost)
+        
+        private static string ParseTitle(HtmlNode node)
         {
-            var relativePath = node.FirstChild.GetAttributeValue("href", string.Empty);
+            var name = node.SelectSingleNode(".//span[contains(@class,\"apartment-name\")]").InnerText;
+            var developer = node.SelectSingleNode(".//span[contains(@class,\"apartment-developer\") and not(contains(@class,\"apartment-developer-slash\"))]").InnerText;
 
-            return new Uri(rootHost + relativePath);
-        }
-
-        private static Uri? ParseImageUrl(HtmlNode node)
-        {
-            var path = node.FirstChild?.SelectSingleNode(".//img[@class=\"img\"]")?.GetAttributeValue("src", null);
-
-            return path is not null
-                ? new Uri(path)
-                : default;
+            return $"{HttpUtility.HtmlDecode(name)} | {HttpUtility.HtmlDecode(developer)}";
         }
 
         private static decimal ParsePrice(HtmlNode node)
         {
-            const string priceRegex = @"([0-9\s]+)";
-
-            var value = node.SelectSingleNode("./div//span[contains(@class,\"norm-price\")]")?.InnerText;
+            var value = node.SelectSingleNode(".//h3[@class=\"apartment-price\"]")?.InnerText;
             if (value == null)
                 return decimal.Zero;
 
-            value = HttpUtility.HtmlDecode(value).Replace(" ", "");
-            var result = Regex.Match(value, priceRegex);
-            if (!result.Success)
-                return decimal.Zero;
+            var numberValue = Regex.Replace(value, @"\D+", "");
 
-            var priceValue = result.Groups[1].Value;
-
-            return decimal.TryParse(priceValue, out var price)
+            return decimal.TryParse(numberValue, out var price)
                 ? price
                 : decimal.Zero;
         }
 
+        private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//span[@class=\"apartment-address\"]").InnerText;
+
+        private static Uri ParseWebUrl(HtmlNode node) => new(node.SelectSingleNode(".//div[contains(@class,\"apartment-developer-url\")]")
+                                                                 .GetAttributeValue("href", null));
+
         private static decimal ParseFloorArea(HtmlNode node)
         {
-            const string floorAreaRegex = @"([0-9]+)\s?m2|([0-9]+)\s?m²";
+            const string floorAreaRegex = @"(\d+\.?\d+)";
 
-            var value = node.SelectSingleNode("./div//a[@class=\"title\"]")?.InnerText?.Trim();
+            var value = node.SelectSingleNode(".//span[@class=\"apartment-floorarea\"]")?.InnerText;
             if (value == null)
                 return decimal.Zero;
 
-            value = HttpUtility.HtmlDecode(value);
             var result = Regex.Match(value, floorAreaRegex);
             if (!result.Success)
                 return decimal.Zero;
 
             var floorAreaValue = result.Groups.Where(group => group.Success).ToArray()[1].Value;
 
-            return decimal.TryParse(floorAreaValue, out var floorArea)
+            return decimal.TryParse(floorAreaValue, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var floorArea)
                 ? floorArea
                 : decimal.Zero;
         }
 
-        private static string ParseRootHost(string url) => $"https://{new Uri(url).Host}";
+        private static Uri? ParseImageUrl(HtmlNode node)
+        {
+            var path = node.SelectSingleNode(".//amp-img")?.GetAttributeValue("src", null);
+
+            return path is not null
+                ? new Uri(path)
+                : default;
+        }
     }
 }

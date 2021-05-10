@@ -9,6 +9,13 @@ namespace RealEstatesWatcher.Scrapers
 {
     public class LocalNodejsConsoleWebScraper : IWebScraper
     {
+        private readonly string _pathToScript;
+
+        public LocalNodejsConsoleWebScraper(string pathToScript)
+        {
+            _pathToScript = pathToScript ?? throw new ArgumentNullException(nameof(pathToScript));
+        }
+
         public async Task<string> GetFullWebPageContentAsync(string url)
         {
             if (url == null)
@@ -48,7 +55,7 @@ namespace RealEstatesWatcher.Scrapers
                 process.Start();
 
                 // execute external Node.js script
-                await process.StandardInput.WriteLineAsync($"node ./scraper/index.js {uri.AbsoluteUri}");
+                await process.StandardInput.WriteLineAsync($"node {_pathToScript} {uri.AbsoluteUri}");
 
                 await process.StandardInput.FlushAsync();
                 process.StandardInput.Close();

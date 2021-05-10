@@ -1,15 +1,16 @@
 ﻿using System.Threading.Tasks;
-using RealEstatesWatcher.AdsPortals.RemaxCz;
+using RealEstatesWatcher.AdsPortals.FlatZoneCz;
+using RealEstatesWatcher.Scrapers;
 
 namespace RealEstatesWatcher.Console
 {
     class Program
     {
-        private const string Url = "https://www.remax-czech.cz/reality/vyhledavani/?area_from=40&floor_from=1&object_types%5B2%5D=on&object_types%5B5%5D=on&object_types%5B7%5D=on&ownerships%5B1%5D=on&price_to=6000000&regions%5B116%5D%5B3702%5D=on&sale=1";
+        private const string Url = "https://www.flatzone.cz/novostavby/prodej/byty/jihomoravsky-kraj-brno-mesto/2-1_2-kk_3-kk/?query=Česko~Jihomoravský%20kraj~okres%20Brno-město~Brno";
 
         public static async Task Main(string[] args)
         {
-            var portal = new RemaxCzAdsProtal(Url);
+            var portal = new FlatZoneCzAdsPortal(Url, new LocalNodejsConsoleWebScraper("./scraper/index.js"));
 
             var ads = await portal.GetLatestRealEstateAdsAsync();
         }
