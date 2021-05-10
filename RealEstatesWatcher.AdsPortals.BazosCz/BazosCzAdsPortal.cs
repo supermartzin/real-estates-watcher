@@ -69,8 +69,8 @@ namespace RealEstatesWatcher.AdsPortals.BazosCz
                                                                                   ParseAddress(innerNode),
                                                                                   ParseWebUrl(innerNode, _rootHost), 
                                                                                   ParseFloorArea(innerNode),
-                                                                                  ParseImageUrl(innerNode), 
-                                                                                  ParsePublishDate(innerNode));
+                                                                                  imageUrl: ParseImageUrl(innerNode), 
+                                                                                  publishTime: ParsePublishDate(innerNode));
 
         private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//span[@class=\"nadpis\"]").FirstChild.InnerText;
 

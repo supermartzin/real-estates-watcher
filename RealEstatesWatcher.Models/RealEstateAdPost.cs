@@ -12,6 +12,8 @@ namespace RealEstatesWatcher.Models
 
         public decimal Price { get; }
 
+        public string? PriceComment { get; set; }
+
         public Currency Currency { get; }
 
         public string Address { get; }
@@ -32,6 +34,7 @@ namespace RealEstatesWatcher.Models
                                 string address,
                                 Uri webUrl,
                                 decimal floorArea = decimal.Zero,
+                                string? priceComment = default,
                                 Uri? imageUrl = default,
                                 DateTime? publishTime = default)
         {
@@ -44,6 +47,7 @@ namespace RealEstatesWatcher.Models
             Price = price >= decimal.Zero ? price : throw new ArgumentOutOfRangeException(nameof(price));
 
             FloorArea = floorArea;
+            PriceComment = priceComment;
             ImageUrl = imageUrl;
             PublishTime = publishTime;
         }

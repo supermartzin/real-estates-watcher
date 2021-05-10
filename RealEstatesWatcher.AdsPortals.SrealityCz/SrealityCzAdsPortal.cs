@@ -74,7 +74,7 @@ namespace RealEstatesWatcher.AdsPortals.SrealityCz
                                                                              ParseAddress(node),
                                                                              ParseWebUrl(node, _rootHost),
                                                                              ParseFloorArea(node),
-                                                                             ParseImageUrl(node));
+                                                                             imageUrl: ParseImageUrl(node));
 
         private static string ParseTitle(HtmlNode node) => HttpUtility.HtmlDecode(node.SelectSingleNode("./div//a[@class=\"title\"]").InnerText.Trim());
 
