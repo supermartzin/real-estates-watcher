@@ -9,6 +9,7 @@ using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 
 using RealEstatesWatcher.AdsPortals.Contracts;
+using RealEstatesWatcher.Scrapers.Contracts;
 using RealEstatesWatcher.Models;
 
 namespace RealEstatesWatcher.AdsPortals.FlatZoneCz

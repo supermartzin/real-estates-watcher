@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace RealEstatesWatcher.AdsPortals.Contracts
+namespace RealEstatesWatcher.Scrapers.Contracts
 {
     public interface IWebScraper
     {

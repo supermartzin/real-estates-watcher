@@ -2,7 +2,7 @@
 using RealEstatesWatcher.AdsPortals.FlatZoneCz;
 using RealEstatesWatcher.Scrapers;
 
-namespace RealEstatesWatcher.Console
+namespace RealEstatesWatcher.UI.Console
 {
     class Program
     {

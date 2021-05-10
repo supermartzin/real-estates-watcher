@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-using RealEstatesWatcher.AdsPortals.Contracts;
+using RealEstatesWatcher.Scrapers.Contracts;
 
 namespace RealEstatesWatcher.Scrapers
 {

@@ -3,16 +3,15 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <RootNamespace>RealEstatesWatcher.Console</RootNamespace>
+    <RootNamespace>RealEstatesWatcher.UI.Console</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\RealEstatesWatcher.AdsPortals.BazosCz\RealEstatesWatcher.AdsPortals.BazosCz.csproj" />
-    <ProjectReference Include="..\RealEstatesWatcher.AdsPortals.Contracts\RealEstatesWatcher.AdsPortals.Contracts.csproj" />
     <ProjectReference Include="..\RealEstatesWatcher.AdsPortals.FlatZoneCz\RealEstatesWatcher.AdsPortals.FlatZoneCz.csproj" />
     <ProjectReference Include="..\RealEstatesWatcher.AdsPortals.RemaxCz\RealEstatesWatcher.AdsPortals.RemaxCz.csproj" />
     <ProjectReference Include="..\RealEstatesWatcher.AdsPortals.SrealityCz\RealEstatesWatcher.AdsPortals.SrealityCz.csproj" />
-    <ProjectReference Include="..\RealEstatesWatcher.Models\RealEstatesWatcher.Models.csproj" />
+    <ProjectReference Include="..\RealEstatesWatcher.Core\RealEstatesWatcher.Core.csproj" />
     <ProjectReference Include="..\RealEstatesWatcher.Scrapers\RealEstatesWatcher.Scrapers.csproj" />
   </ItemGroup>
 </Project>

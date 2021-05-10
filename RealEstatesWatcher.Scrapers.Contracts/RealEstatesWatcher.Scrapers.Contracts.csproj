@@ -6,8 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\RealEstatesWatcher.Scrapers.Contracts\RealEstatesWatcher.Scrapers.Contracts.csproj" />
-  </ItemGroup>
-
 </Project>
