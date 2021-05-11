@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog;
 using NLog.Extensions.Logging;
+using RealEstatesWatcher.AdsPortals.BazosCz;
+using RealEstatesWatcher.AdsPortals.FlatZoneCz;
+using RealEstatesWatcher.AdsPortals.RemaxCz;
+using RealEstatesWatcher.AdsPortals.SrealityCz;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 using RealEstatesWatcher.Core;
@@ -77,12 +82,42 @@ namespace RealEstatesWatcher.UI.Console
 
         private static void RegisterAdsPortals(RealEstatesWatchEngine watcher)
         {
+            _logger?.LogInformation("Registering Ads portals..");
 
+            var configuration = new ConfigurationBuilder().AddIniFile("./portals.ini").Build();
+
+            foreach (var section in configuration.GetChildren())
+            {
+                switch (section.Key)
+                {
+                    case "Bazos.cz":
+                        watcher.RegisterAdsPortal(new BazosCzAdsPortal(section["url"], _container.GetService<ILogger<BazosCzAdsPortal>>()));
+                        break;
+
+                    case "FlatZone.cz":
+                        watcher.RegisterAdsPortal(new FlatZoneCzAdsPortal(section["url"],
+                                                                          _container.GetRequiredService<IWebScraper>(),
+                                                                          _container.GetService<ILogger<FlatZoneCzAdsPortal>>()));
+                        break;
+
+                    case "Remax.cz":
+                        watcher.RegisterAdsPortal(new RemaxCzAdsProtal(section["url"], _container.GetService<ILogger<RemaxCzAdsProtal>>()));
+                        break;
+
+                    case "Sreality.cz":
+                        watcher.RegisterAdsPortal(new SrealityCzAdsPortal(section["url"],
+                                                                          _container.GetRequiredService<IWebScraper>(),
+                                                                          _container.GetService<ILogger<SrealityCzAdsPortal>>()));
+                        break;
+                }
+            }
         }
 
         private static void RegisterAdPostsHandlers(RealEstatesWatchEngine watcher)
         {
+            _logger?.LogInformation("Registering Ad posts handlers..");
 
+            watcher.RegisterAdPostsHandler(new EmailNotifyingAdPostsHandler(_container.GetService<ILogger<EmailNotifyingAdPostsHandler>>()));
         }
 
         private static void WaitForExitSignal()

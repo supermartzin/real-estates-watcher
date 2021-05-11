@@ -47,6 +47,8 @@ namespace RealEstatesWatcher.Core
 
             // add to watched portals
             _adsPortals.Add(adsPortal);
+
+            _logger?.LogInformation($"Ads portal '{adsPortal.Name}' successfully registered.");
         }
 
         public void RegisterAdPostsHandler(IRealEstateAdPostsHandler adPostsHandler)
@@ -62,6 +64,8 @@ namespace RealEstatesWatcher.Core
 
             // add to registered handlers
             _handlers.Add(adPostsHandler);
+
+            _logger?.LogInformation($"Ad posts handler of type '{adPostsHandler.GetType().FullName}' successfully registered.");
         }
 
         public async Task StartAsync()
@@ -117,7 +121,7 @@ namespace RealEstatesWatcher.Core
 
             IsRunning = true;
 
-            _logger?.LogInformation($"Real estates Watcher has been started with periodic checking interval of {_settings.CheckIntervalMinutes} minutes.");
+            _logger?.LogInformation($"Real estates Watcher has been started with periodic checking interval of {_settings.CheckIntervalMinutes} minute(s).");
         }
 
         public Task StopAsync()
