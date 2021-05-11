@@ -90,8 +90,7 @@ namespace RealEstatesWatcher.Core
                     _posts.Add(post);
                 }
 
-                _logger?.LogDebug(
-                    $"Successfully downloaded initial {posts.Count} post(s) from {_adsPortals.Count} portal(s).");
+                _logger?.LogDebug($"Successfully downloaded initial {posts.Count} post(s) from {_adsPortals.Count} portal(s).");
 
                 // notify handlers
                 foreach (var handler in _handlers)
@@ -99,7 +98,7 @@ namespace RealEstatesWatcher.Core
                     await handler.HandleInitialRealEstateAdPostsAsync(posts).ConfigureAwait(false);
                 }
 
-                _logger?.LogDebug("Handlers notified abou initial posts.");
+                _logger?.LogDebug("Handlers notified about initial posts.");
             }
             catch (RealEstateAdsPortalException reapEx)
             {

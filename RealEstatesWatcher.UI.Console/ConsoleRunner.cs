@@ -6,12 +6,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog;
 using NLog.Extensions.Logging;
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+
 using RealEstatesWatcher.AdsPortals.BazosCz;
 using RealEstatesWatcher.AdsPortals.FlatZoneCz;
 using RealEstatesWatcher.AdsPortals.RemaxCz;
 using RealEstatesWatcher.AdsPortals.SrealityCz;
-using LogLevel = Microsoft.Extensions.Logging.LogLevel;
-
 using RealEstatesWatcher.Core;
 using RealEstatesWatcher.Scrapers;
 using RealEstatesWatcher.Scrapers.Contracts;
@@ -41,14 +41,13 @@ namespace RealEstatesWatcher.UI.Console
                 await watcher.StartAsync();
 
                 WaitForExitSignal();
+
+                // stop watcher
+                await watcher.StopAsync();
             }
             catch (RealEstatesWatchEngineException reweEx)
             {
                 _logger?.LogCritical(reweEx, $"Error starting Real estates Watcher: {reweEx.Message}");
-            }
-            finally
-            {
-                System.Console.ReadKey();
             }
         }
         
@@ -71,20 +70,29 @@ namespace RealEstatesWatcher.UI.Console
             collection.AddSingleton<IWebScraper>(new LocalNodejsConsoleWebScraper("./scraper/index.js"));
             
             // add engine
-            collection.AddSingleton(new WatchEngineSettings
-            {
-                CheckIntervalMinutes = 1
-            });
+            collection.AddSingleton(LoadWatchEngineSettings());
             collection.AddSingleton<RealEstatesWatchEngine>();
 
             _container = collection.BuildServiceProvider();
+        }
+
+        private static WatchEngineSettings LoadWatchEngineSettings()
+        {
+            var configuration = new ConfigurationBuilder().AddIniFile("./configs/engine.ini")
+                                                          .Build()
+                                                          .GetSection("settings");
+
+            return new WatchEngineSettings
+            {
+                CheckIntervalMinutes = configuration.GetValue<int>("check_interval_minutes")
+            };
         }
 
         private static void RegisterAdsPortals(RealEstatesWatchEngine watcher)
         {
             _logger?.LogInformation("Registering Ads portals..");
 
-            var configuration = new ConfigurationBuilder().AddIniFile("./portals.ini").Build();
+            var configuration = new ConfigurationBuilder().AddIniFile("./configs/portals.ini").Build();
 
             foreach (var section in configuration.GetChildren())
             {
@@ -117,7 +125,28 @@ namespace RealEstatesWatcher.UI.Console
         {
             _logger?.LogInformation("Registering Ad posts handlers..");
 
-            watcher.RegisterAdPostsHandler(new EmailNotifyingAdPostsHandler(_container.GetService<ILogger<EmailNotifyingAdPostsHandler>>()));
+            watcher.RegisterAdPostsHandler(new EmailNotifyingAdPostsHandler(LoadSettings(),
+                                                                            _container.GetService<ILogger<EmailNotifyingAdPostsHandler>>()));
+
+            static EmailNotifyingAdPostsHandlerSettings LoadSettings()
+            {
+                var configuration = new ConfigurationBuilder().AddIniFile("./configs/handlers.ini")
+                                                              .Build()
+                                                              .GetSection("email");
+
+                return new EmailNotifyingAdPostsHandlerSettings
+                {
+                    EmailAddressFrom = configuration["email_address_from"],
+                    EmailAddressTo = configuration["email_address_to"],
+                    SenderName = configuration["sender_name"],
+                    RecipientName = configuration["recipient_name"],
+                    SmtpServerHost = configuration["smtp_server_host"],
+                    SmtpServerPort = configuration.GetValue<int>("smtp_server_port"),
+                    UseSecureConnection = configuration.GetValue<bool>("use_secure_connection"),
+                    Username = configuration["username"],
+                    Password = configuration["password"]
+                };
+            }
         }
 
         private static void WaitForExitSignal()
