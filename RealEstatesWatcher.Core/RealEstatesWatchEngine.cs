@@ -24,7 +24,7 @@ namespace RealEstatesWatcher.Core
         public bool IsRunning { get; private set; }
 
         public RealEstatesWatchEngine(WatchEngineSettings settings,
-                                  ILogger<RealEstatesWatchEngine>? logger = default)
+                                      ILogger<RealEstatesWatchEngine>? logger = default)
         {
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
             _logger = logger;
