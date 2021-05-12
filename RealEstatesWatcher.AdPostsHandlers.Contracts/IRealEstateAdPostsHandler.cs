@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 using RealEstatesWatcher.Models;
 
-namespace RealEstatesWatcher.Core
+namespace RealEstatesWatcher.AdPostsHandlers.Contracts
 {
     public interface IRealEstateAdPostsHandler
     {

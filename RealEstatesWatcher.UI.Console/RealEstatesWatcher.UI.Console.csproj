@@ -4,6 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>RealEstatesWatcher.UI.Console</RootNamespace>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\RealEstatesWatcher.AdPostsHandlers.Email\RealEstatesWatcher.AdPostsHandlers.Email.csproj" />
     <ProjectReference Include="..\RealEstatesWatcher.AdsPortals.BazosCz\RealEstatesWatcher.AdsPortals.BazosCz.csproj" />
     <ProjectReference Include="..\RealEstatesWatcher.AdsPortals.FlatZoneCz\RealEstatesWatcher.AdsPortals.FlatZoneCz.csproj" />
     <ProjectReference Include="..\RealEstatesWatcher.AdsPortals.RemaxCz\RealEstatesWatcher.AdsPortals.RemaxCz.csproj" />

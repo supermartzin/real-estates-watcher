@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.31205.134
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealEstatesWatcher.Models", "RealEstatesWatcher.Models\RealEstatesWatcher.Models.csproj", "{8427F23B-9B9B-4AA7-B31A-E8D0AE710886}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AdsPortals", "AdsPortals", "{D11D1C74-A620-4DB5-A319-576B7BBCECA1}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Portals", "Portals", "{D11D1C74-A620-4DB5-A319-576B7BBCECA1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealEstatesWatcher.AdsPortals.BazosCz", "RealEstatesWatcher.AdsPortals.BazosCz\RealEstatesWatcher.AdsPortals.BazosCz.csproj", "{47DFD9CB-C9C0-46F7-9EC9-74C6D4AEF28D}"
 EndProject
@@ -19,18 +19,26 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealEstatesWatcher.AdsPorta
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{AE7F9527-3C1B-4BF2-8A00-A082877ECA22}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web scraper", "Web scraper", "{D7508825-5BDC-4F8F-9D3E-F36456A5BBC8}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Node.js web scraper", "Node.js web scraper", "{D7508825-5BDC-4F8F-9D3E-F36456A5BBC8}"
 	ProjectSection(SolutionItems) = preProject
 		Tools\scraper\index.js = Tools\scraper\index.js
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealEstatesWatcher.Scrapers", "RealEstatesWatcher.Scrapers\RealEstatesWatcher.Scrapers.csproj", "{E2E32BA6-64F5-4E49-AC6E-4574F3FC5CE0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealEstatesWatcher.Core", "RealEstatesWatcher.Core\RealEstatesWatcher.Core.csproj", "{EB96ED5F-67B4-422A-9EEC-FBCF86F85DCB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealEstatesWatcher.Core", "RealEstatesWatcher.Core\RealEstatesWatcher.Core.csproj", "{EB96ED5F-67B4-422A-9EEC-FBCF86F85DCB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealEstatesWatcher.Scrapers.Contracts", "RealEstatesWatcher.Scrapers.Contracts\RealEstatesWatcher.Scrapers.Contracts.csproj", "{D133E3C3-F251-420E-A4EF-167B07231594}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealEstatesWatcher.Scrapers.Contracts", "RealEstatesWatcher.Scrapers.Contracts\RealEstatesWatcher.Scrapers.Contracts.csproj", "{D133E3C3-F251-420E-A4EF-167B07231594}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealEstatesWatcher.UI.Console", "RealEstatesWatcher.UI.Console\RealEstatesWatcher.UI.Console.csproj", "{2182FC22-E967-4D26-8D47-CB6713DA8AF3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scrapers", "Scrapers", "{6E16A0E9-337F-4A04-9679-7B29DFDF1E18}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Handlers", "Handlers", "{950562AB-B166-4BDB-88E4-B2496D84D311}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealEstatesWatcher.AdPostsHandlers.Contracts", "RealEstatesWatcher.AdPostsHandlers.Contracts\RealEstatesWatcher.AdPostsHandlers.Contracts.csproj", "{DD54E6FB-8CC7-4956-B338-53C8598BEAFB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealEstatesWatcher.AdPostsHandlers.Email", "RealEstatesWatcher.AdPostsHandlers.Email\RealEstatesWatcher.AdPostsHandlers.Email.csproj", "{F6AAFB57-F70C-4145-92AB-4B1B9749D777}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -78,18 +86,30 @@ Global
 		{2182FC22-E967-4D26-8D47-CB6713DA8AF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2182FC22-E967-4D26-8D47-CB6713DA8AF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2182FC22-E967-4D26-8D47-CB6713DA8AF3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD54E6FB-8CC7-4956-B338-53C8598BEAFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD54E6FB-8CC7-4956-B338-53C8598BEAFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD54E6FB-8CC7-4956-B338-53C8598BEAFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD54E6FB-8CC7-4956-B338-53C8598BEAFB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6AAFB57-F70C-4145-92AB-4B1B9749D777}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6AAFB57-F70C-4145-92AB-4B1B9749D777}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6AAFB57-F70C-4145-92AB-4B1B9749D777}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6AAFB57-F70C-4145-92AB-4B1B9749D777}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{47DFD9CB-C9C0-46F7-9EC9-74C6D4AEF28D} = {D11D1C74-A620-4DB5-A319-576B7BBCECA1}
+		{947B87C6-5233-4947-A581-023565164C7F} = {D11D1C74-A620-4DB5-A319-576B7BBCECA1}
 		{76A964A0-B369-4BE3-B1FD-15ECE901F153} = {D11D1C74-A620-4DB5-A319-576B7BBCECA1}
 		{A4B0DFED-D0C9-433C-9116-44BC850095E5} = {D11D1C74-A620-4DB5-A319-576B7BBCECA1}
 		{AA468675-44EC-4DB5-A0F8-70E5E8C7E041} = {D11D1C74-A620-4DB5-A319-576B7BBCECA1}
+		{AE7F9527-3C1B-4BF2-8A00-A082877ECA22} = {6E16A0E9-337F-4A04-9679-7B29DFDF1E18}
 		{D7508825-5BDC-4F8F-9D3E-F36456A5BBC8} = {AE7F9527-3C1B-4BF2-8A00-A082877ECA22}
-		{E2E32BA6-64F5-4E49-AC6E-4574F3FC5CE0} = {AE7F9527-3C1B-4BF2-8A00-A082877ECA22}
-		{D133E3C3-F251-420E-A4EF-167B07231594} = {AE7F9527-3C1B-4BF2-8A00-A082877ECA22}
+		{E2E32BA6-64F5-4E49-AC6E-4574F3FC5CE0} = {6E16A0E9-337F-4A04-9679-7B29DFDF1E18}
+		{D133E3C3-F251-420E-A4EF-167B07231594} = {6E16A0E9-337F-4A04-9679-7B29DFDF1E18}
+		{DD54E6FB-8CC7-4956-B338-53C8598BEAFB} = {950562AB-B166-4BDB-88E4-B2496D84D311}
+		{F6AAFB57-F70C-4145-92AB-4B1B9749D777} = {950562AB-B166-4BDB-88E4-B2496D84D311}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D2618839-27DA-461E-81D0-0989C4827D9F}

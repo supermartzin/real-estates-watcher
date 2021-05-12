@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RealEstatesWatcher.Core
+namespace RealEstatesWatcher.AdPostsHandlers.Contracts
 {
     public class RealEstateAdPostsHandlerException : Exception
     {

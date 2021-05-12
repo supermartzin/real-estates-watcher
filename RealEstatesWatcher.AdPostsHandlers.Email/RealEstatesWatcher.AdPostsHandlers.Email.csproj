@@ -7,12 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MailKit" Version="2.11.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\RealEstatesWatcher.AdPostsHandlers.Contracts\RealEstatesWatcher.AdPostsHandlers.Contracts.csproj" />
-    <ProjectReference Include="..\RealEstatesWatcher.AdsPortals.Contracts\RealEstatesWatcher.AdsPortals.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

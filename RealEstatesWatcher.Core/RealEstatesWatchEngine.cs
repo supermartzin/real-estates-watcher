@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using Microsoft.Extensions.Logging;
 
+using RealEstatesWatcher.AdPostsHandlers.Contracts;
 using RealEstatesWatcher.AdsPortals.Contracts;
 using RealEstatesWatcher.Models;
 

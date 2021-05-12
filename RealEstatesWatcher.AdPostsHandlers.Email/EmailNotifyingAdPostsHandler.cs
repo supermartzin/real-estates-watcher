@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using MailKit.Net.Smtp;
 using Microsoft.Extensions.Logging;
 using MimeKit;
 using MimeKit.Text;
+using MailKit.Net.Smtp;
 
+using RealEstatesWatcher.AdPostsHandlers.Contracts;
 using RealEstatesWatcher.Models;
 
-namespace RealEstatesWatcher.Core
+namespace RealEstatesWatcher.AdPostsHandlers.Email
 {
     public class EmailNotifyingAdPostsHandler : IRealEstateAdPostsHandler
     {
@@ -39,6 +40,11 @@ namespace RealEstatesWatcher.Core
         {
             if (adPosts == null)
                 throw new ArgumentNullException(nameof(adPosts));
+            if (_settings.SkipInitialNotification)
+            {
+                _logger?.LogDebug($"Skipping initial notification on {adPosts.Count} Real Estate Ad posts");
+                return;
+            }
             
             _logger?.LogDebug($"Received initial {adPosts.Count} Real Estate Ad Posts.");
 
@@ -50,20 +56,17 @@ namespace RealEstatesWatcher.Core
         {
             var message = new MimeMessage
             {
+                Subject = subject,
                 Body = new TextPart(TextFormat.Plain)
                 {
-                    Text = body,
+                    Text = body
                 },
-                Subject = subject,
                 From =
                 {
                     new MailboxAddress(_settings.SenderName, _settings.EmailAddressFrom)
-                },
-                To =
-                {
-                    new MailboxAddress(_settings.RecipientName, _settings.EmailAddressTo)
                 }
             };
+            message.To.AddRange(_settings.EmailAddressesTo.Select(address => new MailboxAddress(address, address)));
 
             try
             {

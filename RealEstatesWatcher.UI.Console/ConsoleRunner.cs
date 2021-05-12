@@ -12,6 +12,7 @@ using RealEstatesWatcher.AdsPortals.BazosCz;
 using RealEstatesWatcher.AdsPortals.FlatZoneCz;
 using RealEstatesWatcher.AdsPortals.RemaxCz;
 using RealEstatesWatcher.AdsPortals.SrealityCz;
+using RealEstatesWatcher.AdPostsHandlers.Email;
 using RealEstatesWatcher.Core;
 using RealEstatesWatcher.Scrapers;
 using RealEstatesWatcher.Scrapers.Contracts;
@@ -137,14 +138,14 @@ namespace RealEstatesWatcher.UI.Console
                 return new EmailNotifyingAdPostsHandlerSettings
                 {
                     EmailAddressFrom = configuration["email_address_from"],
-                    EmailAddressTo = configuration["email_address_to"],
+                    EmailAddressesTo = configuration["email_addresses_to"].Split(','),
                     SenderName = configuration["sender_name"],
-                    RecipientName = configuration["recipient_name"],
                     SmtpServerHost = configuration["smtp_server_host"],
                     SmtpServerPort = configuration.GetValue<int>("smtp_server_port"),
                     UseSecureConnection = configuration.GetValue<bool>("use_secure_connection"),
                     Username = configuration["username"],
-                    Password = configuration["password"]
+                    Password = configuration["password"],
+                    SkipInitialNotification = configuration.GetValue<bool>("skip_initial_notification")
                 };
             }
         }

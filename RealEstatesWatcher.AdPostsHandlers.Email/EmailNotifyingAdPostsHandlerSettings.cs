@@ -1,4 +1,6 @@
-﻿namespace RealEstatesWatcher.Core
+﻿using System.Collections.Generic;
+
+namespace RealEstatesWatcher.AdPostsHandlers.Email
 {
     public class EmailNotifyingAdPostsHandlerSettings
     {
@@ -6,10 +8,8 @@
 
         public string? SenderName { get; set; }
         
-        public string? EmailAddressTo { get; set; }
+        public IEnumerable<string> EmailAddressesTo { get; set; }
         
-        public string? RecipientName { get; set; }
-
         public string? SmtpServerHost { get; set; }
 
         public int SmtpServerPort { get; set; }
@@ -19,5 +19,12 @@
         public string? Username { get; set; }
 
         public string? Password { get; set; }
+
+        public bool SkipInitialNotification { get; set; }
+
+        public EmailNotifyingAdPostsHandlerSettings()
+        {
+            EmailAddressesTo = new List<string>();
+        }
     }
 }
