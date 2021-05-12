@@ -126,8 +126,8 @@ namespace RealEstatesWatcher.UI.Console
         {
             _logger?.LogInformation("Registering Ad posts handlers..");
 
-            watcher.RegisterAdPostsHandler(new EmailNotifyingAdPostsHandler(LoadSettings(),
-                                                                            _container.GetService<ILogger<EmailNotifyingAdPostsHandler>>()));
+            watcher.RegisterAdPostsHandler(new EmailNotifyingAdPostsHandler(LoadSettings(), _container.GetService<ILogger<EmailNotifyingAdPostsHandler>>()));
+            //watcher.RegisterAdPostsHandler(new FileAdPostsHandler());
 
             static EmailNotifyingAdPostsHandlerSettings LoadSettings()
             {

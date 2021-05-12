@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Real Estate Ad Post</title>
+</head>
+<body style="max-width: 800px; margin:10px auto;">
+    {$posts}
+</body>
+</html>
+
+
+<div style="padding: 10px; background: #ededed; min-height: 200px;">
+    <div style="float: left; margin-right: 1em; width: 30%; height: 180px; display: {$img-display};">
+        <img src="{$img-link}" style="height: 100%; width: 100%; object-fit: cover;" />
+    </div>
+    <a href="{$post-link}">
+        <h3 style="margin: 0.2em;">{$title}</h3>
+    </a>
+    <span style="font-size: medium; color: grey; display: {$price-display};">
+        <b>{$price}</b> {$currency}<br/>
+    </span>
+    <span style="font-size: medium; color: grey; display: {$price-comment-display};">
+        <b>{$price-comment}</b><br/>
+    </span>
+    <span>
+        <b>Server:</b> {$portal-name}<br/>
+        <b>Adresa:</b> {$address}<br/>
+        <b>Výmera:</b> {$floor-area}<br/>
+    </span>
+    <p style="margin: 0.2em; font-size: small; text-align: justify; display: {$text-display};">{$text}</p>
+</div>

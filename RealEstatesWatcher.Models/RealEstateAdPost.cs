@@ -12,7 +12,7 @@ namespace RealEstatesWatcher.Models
 
         public decimal Price { get; }
 
-        public string? PriceComment { get; set; }
+        public string? PriceComment { get; }
 
         public Currency Currency { get; }
 
