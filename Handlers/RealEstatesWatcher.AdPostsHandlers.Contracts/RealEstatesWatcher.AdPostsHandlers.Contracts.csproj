@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RealEstatesWatcher.Models\RealEstatesWatcher.Models.csproj" />
+    <ProjectReference Include="..\..\RealEstatesWatcher.Models\RealEstatesWatcher.Models.csproj" />
   </ItemGroup>
 
 </Project>

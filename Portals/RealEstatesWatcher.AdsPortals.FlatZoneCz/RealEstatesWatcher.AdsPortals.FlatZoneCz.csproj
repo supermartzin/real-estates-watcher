@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RealEstatesWatcher.AdsPortals.Contracts\RealEstatesWatcher.AdsPortals.Contracts.csproj" />
-    <ProjectReference Include="..\RealEstatesWatcher.Scrapers.Contracts\RealEstatesWatcher.Scrapers.Contracts.csproj" />
+    <ProjectReference Include="..\..\Scrapers\RealEstatesWatcher.Scrapers.Contracts\RealEstatesWatcher.Scrapers.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

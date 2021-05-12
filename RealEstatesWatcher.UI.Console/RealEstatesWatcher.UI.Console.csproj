@@ -15,13 +15,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RealEstatesWatcher.AdPostsHandlers.Email\RealEstatesWatcher.AdPostsHandlers.Email.csproj" />
-    <ProjectReference Include="..\RealEstatesWatcher.AdsPortals.BazosCz\RealEstatesWatcher.AdsPortals.BazosCz.csproj" />
-    <ProjectReference Include="..\RealEstatesWatcher.AdsPortals.FlatZoneCz\RealEstatesWatcher.AdsPortals.FlatZoneCz.csproj" />
-    <ProjectReference Include="..\RealEstatesWatcher.AdsPortals.RemaxCz\RealEstatesWatcher.AdsPortals.RemaxCz.csproj" />
-    <ProjectReference Include="..\RealEstatesWatcher.AdsPortals.SrealityCz\RealEstatesWatcher.AdsPortals.SrealityCz.csproj" />
+    <ProjectReference Include="..\Handlers\RealEstatesWatcher.AdPostsHandlers.Email\RealEstatesWatcher.AdPostsHandlers.Email.csproj" />
+    <ProjectReference Include="..\Portals\RealEstatesWatcher.AdsPortals.BazosCz\RealEstatesWatcher.AdsPortals.BazosCz.csproj" />
+    <ProjectReference Include="..\Portals\RealEstatesWatcher.AdsPortals.FlatZoneCz\RealEstatesWatcher.AdsPortals.FlatZoneCz.csproj" />
+    <ProjectReference Include="..\Portals\RealEstatesWatcher.AdsPortals.RemaxCz\RealEstatesWatcher.AdsPortals.RemaxCz.csproj" />
+    <ProjectReference Include="..\Portals\RealEstatesWatcher.AdsPortals.SrealityCz\RealEstatesWatcher.AdsPortals.SrealityCz.csproj" />
     <ProjectReference Include="..\RealEstatesWatcher.Core\RealEstatesWatcher.Core.csproj" />
-    <ProjectReference Include="..\RealEstatesWatcher.Scrapers\RealEstatesWatcher.Scrapers.csproj" />
+    <ProjectReference Include="..\Scrapers\RealEstatesWatcher.Scrapers\RealEstatesWatcher.Scrapers.csproj" />
   </ItemGroup>
 
   <ItemGroup>
