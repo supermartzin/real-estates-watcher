@@ -33,7 +33,7 @@ namespace RealEstatesWatcher.AdPostsHandlers.Email
             _logger?.LogDebug($"Received new Real Estate Ad Post: {adPost}");
 
             await SendEmail("New Real Estate Ad published!",
-                            $"Received new Real Estate Ad Post: {adPost}{Environment.NewLine}Link: {adPost.WebUrl.AbsolutePath}").ConfigureAwait(false);
+                            $"Received new Real Estate Ad Post:{Environment.NewLine + Environment.NewLine}{adPost}{Environment.NewLine}Link: {adPost.WebUrl.AbsoluteUri}").ConfigureAwait(false);
         }
 
         public async Task HandleInitialRealEstateAdPostsAsync(IList<RealEstateAdPost> adPosts)

@@ -2,7 +2,7 @@ const puppeteer = require("puppeteer");
 
 (async function () {
     try {
-        const browser = await puppeteer.launch();
+        const browser = await puppeteer.launch({ignoreDefaultArgs: ['--disable-extensions']});
         const [page] = await browser.pages();
 
         await page.goto(process.argv[2], { waitUntil: "networkidle0" });
