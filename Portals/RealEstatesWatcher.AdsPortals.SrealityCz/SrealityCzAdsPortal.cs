@@ -39,7 +39,7 @@ namespace RealEstatesWatcher.AdsPortals.SrealityCz
             {
                 // get page content
                 var pageContent = await _webScraper.GetFullWebPageContentAsync(_adsUrl)
-                                                          .ConfigureAwait(false);
+                                                   .ConfigureAwait(false);
                 if (pageContent == null)
                     throw new RealEstateAdsPortalException("Page content has not been correctly downloaded.");
 
@@ -50,9 +50,9 @@ namespace RealEstatesWatcher.AdsPortals.SrealityCz
 
                 // parse posts
                 var posts = htmlDoc.DocumentNode
-                                                       .SelectNodes("//div[@class=\"dir-property-list\"]/div[contains(@class,\"property\")]")
-                                                       .Select(ParseRealEstateAdPost)
-                                                       .ToList();
+                                   .SelectNodes("//div[@class=\"dir-property-list\"]/div[contains(@class,\"property\")]")
+                                   .Select(ParseRealEstateAdPost)
+                                   .ToList();
 
                 _logger?.LogDebug($"({Name}): Successfully parsed {posts.Count} ads from page.");
 
@@ -104,7 +104,7 @@ namespace RealEstatesWatcher.AdsPortals.SrealityCz
         {
             const string priceRegex = @"([0-9\s]+)";
 
-            var value = node.SelectSingleNode("./div//span[contains(@class,\"norm-price\")]")?.InnerText;
+            var value = node.SelectSingleNode(".//span[contains(@class,\"norm-price\")]")?.InnerText;
             if (value == null)
                 return decimal.Zero;
 

@@ -143,42 +143,38 @@ namespace RealEstatesWatcher.Core
 
         private async void Timer_OnElapsed(object sender, ElapsedEventArgs e)
         {
-            _logger?.LogDebug("Periodic check started...");
+            _logger?.LogDebug("Periodic check started.");
 
-            try
+            // get posts snapshot from portals
+            var posts = await GetCurrentAdsPortalsSnapshot().ConfigureAwait(false);
+
+            foreach (var post in posts)
             {
-                // get posts snapshot from portals
-                var posts = await GetCurrentAdsPortalsSnapshot().ConfigureAwait(false);
+                if (_posts.Contains(post))
+                    continue; //skip
 
-                foreach (var post in posts)
-                {
-                    if (_posts.Contains(post))
-                        continue; //skip
+                // add to collection
+                _posts.Add(post);
 
-                    // add to collection
-                    _posts.Add(post);
-
-                    // notify
-                    await NotifyHandlers(post).ConfigureAwait(false);
-                }
-
-                _logger?.LogDebug("Periodic check finished.");
+                // notify
+                await NotifyHandlers(post).ConfigureAwait(false);
             }
-            catch (RealEstateAdsPortalException reapEx)
-            {
-                _logger?.LogError(reapEx, $"Error downloading new ad posts during periodic check: {reapEx.Message}");
-            }
-            catch (RealEstateAdPostsHandlerException reaphEx)
-            {
-                _logger?.LogError(reaphEx, $"Error notifying Ad post handlers during periodic check: {reaphEx.Message}");
-            }
+
+            _logger?.LogDebug("Periodic check finished.");
         }
 
         private async Task NotifyHandlers(RealEstateAdPost adPost)
         {
             foreach (var handler in _handlers)
             {
-                await handler.HandleNewRealEstateAdPostAsync(adPost).ConfigureAwait(false);
+                try
+                {
+                    await handler.HandleNewRealEstateAdPostAsync(adPost).ConfigureAwait(false);
+                }
+                catch (RealEstateAdPostsHandlerException reaphEx)
+                {
+                    _logger?.LogError(reaphEx, $"Error notifying Ad posts Handler '{handler.GetType().FullName}': {reaphEx.Message}");
+                }
             }
         }
 
@@ -188,7 +184,14 @@ namespace RealEstatesWatcher.Core
 
             foreach (var adsPortal in _adsPortals)
             {
-                posts.AddRange(await adsPortal.GetLatestRealEstateAdsAsync().ConfigureAwait(false));
+                try
+                {
+                    posts.AddRange(await adsPortal.GetLatestRealEstateAdsAsync().ConfigureAwait(false));
+                }
+                catch (RealEstateAdsPortalException reapEx)
+                {
+                    _logger?.LogError(reapEx, $"Error downloading new Ad posts from '{adsPortal.Name}': {reapEx.Message}");
+                }
             }
 
             return posts;
