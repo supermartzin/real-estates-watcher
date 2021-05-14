@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -79,7 +80,8 @@ namespace RealEstatesWatcher.AdsPortals.SrealityCz
                                                                              ParseAddress(node),
                                                                              ParseWebUrl(node, _rootHost),
                                                                              ParseFloorArea(node),
-                                                                             imageUrl: ParseImageUrl(node));
+                                                                             imageUrl: ParseImageUrl(node),
+                                                                             priceComment: ParsePriceComment(node));
 
         private static string ParseTitle(HtmlNode node) => HttpUtility.HtmlDecode(node.SelectSingleNode("./div//a[@class=\"title\"]").InnerText.Trim());
 
@@ -122,13 +124,30 @@ namespace RealEstatesWatcher.AdsPortals.SrealityCz
             if (!result.Success)
                 return decimal.Zero;
 
-            var priceValue = result.Groups[1].Value;
+            var priceValue = result.Groups[1].Value.Replace(" ", "");
 
             _logger?.LogDebug($"Price value is {priceValue}");
 
-            return decimal.TryParse(priceValue, out var price)
+            return decimal.TryParse(priceValue, NumberStyles.Any, CultureInfo.InvariantCulture, out var price)
                 ? price
                 : decimal.Zero;
+        }
+
+        private static string? ParsePriceComment(HtmlNode node)
+        {
+            const string priceRegex = @"([0-9\s]+)";
+
+            var result = Regex.Match(node.InnerHtml, @"<span class=""norm-price ng-binding"">(.+?)<\/span>");
+            if (!result.Success)
+                return null;
+            var value = result.Groups.Where(group => group.Success).ToArray()[1].Value;
+            if (value == null)
+                return null;
+
+            value = HttpUtility.HtmlDecode(value);
+            result = Regex.Match(value, priceRegex);
+
+            return !result.Success && value.Length > 0 ? value : null;
         }
 
         private static decimal ParseFloorArea(HtmlNode node)
