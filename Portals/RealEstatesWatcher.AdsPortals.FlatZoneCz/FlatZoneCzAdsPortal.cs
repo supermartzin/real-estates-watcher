@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -48,10 +47,14 @@ namespace RealEstatesWatcher.AdsPortals.FlatZoneCz
                 _logger?.LogDebug($"({Name}): Downloaded page with ads.");
                 
                 // get HTML elements
-                var elements = htmlDoc.DocumentNode.SelectNodes("//div[contains(@class,\"apartment-card\")]");
+                var elements = htmlDoc.DocumentNode.SelectNodes("//div[contains(@class,\"project-apartment-card\")]");
                 
-                // remove last element - template
-                elements.RemoveAt(elements.Count - 1);
+                // remove first and last elements - templates
+                if (elements.Count > 1)
+                {
+                    elements.RemoveAt(0);
+                    elements.RemoveAt(elements.Count - 1);
+                }
 
                 // parse posts
                 var posts = elements.Select(ParseRealEstateAdPost).ToList();
@@ -79,20 +82,20 @@ namespace RealEstatesWatcher.AdsPortals.FlatZoneCz
                                                                              Currency.CZK,
                                                                              ParseAddress(node),
                                                                              ParseWebUrl(node),
-                                                                             ParseFloorArea(node),
+                                                                             decimal.Zero,
                                                                              imageUrl: ParseImageUrl(node));
         
         private static string ParseTitle(HtmlNode node)
         {
-            var name = node.SelectSingleNode(".//span[contains(@class,\"apartment-name\")]").InnerText;
-            var developer = node.SelectSingleNode(".//span[contains(@class,\"apartment-developer\") and not(contains(@class,\"apartment-developer-slash\"))]").InnerText;
+            var name = node.SelectSingleNode(".//span[contains(@class,\"js-project\")]").InnerText;
+            var developer = node.SelectSingleNode(".//span[contains(@class,\"js-developer\")]").InnerText;
 
             return $"{HttpUtility.HtmlDecode(name)} | {HttpUtility.HtmlDecode(developer)}";
         }
 
         private static decimal ParsePrice(HtmlNode node)
         {
-            var value = node.SelectSingleNode(".//h3[@class=\"apartment-price\"]")?.InnerText;
+            var value = node.SelectSingleNode(".//span[contains(@class,\"js-price\")]")?.InnerText;
             if (value == null)
                 return decimal.Zero;
 
@@ -103,29 +106,10 @@ namespace RealEstatesWatcher.AdsPortals.FlatZoneCz
                 : decimal.Zero;
         }
 
-        private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//span[@class=\"apartment-address\"]").InnerText;
+        private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//span[contains(@class,\"js-locality\")]").InnerText;
 
-        private static Uri ParseWebUrl(HtmlNode node) => new(node.SelectSingleNode(".//div[contains(@class,\"apartment-developer-url\")]")
+        private static Uri ParseWebUrl(HtmlNode node) => new(node.SelectSingleNode(".//a[contains(@class,\"js-project-detail-btn\")]")
                                                                  .GetAttributeValue("href", null));
-
-        private static decimal ParseFloorArea(HtmlNode node)
-        {
-            const string floorAreaRegex = @"(\d+\.?\d+)";
-
-            var value = node.SelectSingleNode(".//span[@class=\"apartment-floorarea\"]")?.InnerText;
-            if (value == null)
-                return decimal.Zero;
-
-            var result = Regex.Match(value, floorAreaRegex);
-            if (!result.Success)
-                return decimal.Zero;
-
-            var floorAreaValue = result.Groups.Where(group => group.Success).ToArray()[1].Value;
-
-            return decimal.TryParse(floorAreaValue, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var floorArea)
-                ? floorArea
-                : decimal.Zero;
-        }
 
         private static Uri? ParseImageUrl(HtmlNode node)
         {

@@ -111,9 +111,17 @@ namespace RealEstatesWatcher.AdPostsHandlers.Email
             var postHtml = HtmlTemplates.Post.Replace("{$title}", post.Title)
                                                    .Replace("{$portal-name}", post.AdsPortalName)
                                                    .Replace("{$post-link}", post.WebUrl.AbsoluteUri)
-                                                   .Replace("{$address}", post.Address)
-                                                   .Replace("{$floor-area}", post.FloorArea + " m²");
+                                                   .Replace("{$address}", post.Address);
 
+            // floor area
+            if (post.FloorArea != decimal.Zero)
+            {
+                postHtml = postHtml.Replace("{$floor-area}", post.FloorArea + " m²");
+            }
+            else
+            {
+                postHtml = postHtml.Replace("{$floor-area}", " -");
+            }
             // image
             if (post.ImageUrl is not null)
             {
