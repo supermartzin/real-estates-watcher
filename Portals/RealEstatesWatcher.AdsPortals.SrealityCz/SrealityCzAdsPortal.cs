@@ -43,15 +43,7 @@ namespace RealEstatesWatcher.AdsPortals.SrealityCz
                                                    .ConfigureAwait(false);
                 if (pageContent == null)
                     throw new RealEstateAdsPortalException("Page content has not been correctly downloaded.");
-
-                // -- DEBUG
-
-                // save HTML content to file
-                Directory.CreateDirectory("./portals-content/sreality");
-                await File.WriteAllTextAsync($"./portals-content/sreality/page-{DateTime.Now:t}", pageContent).ConfigureAwait(false);
-
-                // -- END DEBUG
-
+                
                 var htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(pageContent);
 
@@ -109,9 +101,13 @@ namespace RealEstatesWatcher.AdsPortals.SrealityCz
                 : default;
         }
 
-        private static decimal ParsePrice(HtmlNode node)
+        private decimal ParsePrice(HtmlNode node)
         {
             const string priceRegex = @"([0-9\s]+)";
+
+            _logger?.LogDebug("--- Sreality.cz post DEBUG ---\n" +
+                              $"{node.InnerHtml}\n" +
+                              "--- DEBUG END ---");
 
             //var value = node.SelectSingleNode(".//span[contains(@class,\"norm-price\")]")?.InnerText;
             var result = Regex.Match(node.InnerHtml, @"<span class=""norm-price ng-binding"">(.+?)<\/span>");
@@ -127,6 +123,8 @@ namespace RealEstatesWatcher.AdsPortals.SrealityCz
                 return decimal.Zero;
 
             var priceValue = result.Groups[1].Value;
+
+            _logger?.LogDebug($"Price value is {priceValue}");
 
             return decimal.TryParse(priceValue, out var price)
                 ? price

@@ -47,9 +47,9 @@ namespace RealEstatesWatcher.UI.Console
             var posts = adPosts.Select(post =>
             {
                 var postHtml = HtmlTemplates.Post.Replace("{$title}", post.Title)
-                                                       .Replace("{$post-link}", post.WebUrl.AbsoluteUri)
-                                                       .Replace("{$address}", post.Address)
-                                                       .Replace("{$floor-area}", post.FloorArea + " m²");
+                                                 .Replace("{$post-link}", post.WebUrl.AbsoluteUri)
+                                                 .Replace("{$address}", post.Address)
+                                                 .Replace("{$floor-area}", post.FloorArea + " m²");
 
                 // image
                 if (post.ImageUrl is not null)

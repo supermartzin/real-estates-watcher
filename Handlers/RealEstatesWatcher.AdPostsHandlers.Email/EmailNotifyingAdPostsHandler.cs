@@ -51,14 +51,14 @@ namespace RealEstatesWatcher.AdPostsHandlers.Email
             await SendEmail("New Real Estate Advert published!", CreateHtmlBody(adPost)).ConfigureAwait(false);
         }
 
-        public Task HandleNewRealEstatesAdPostsAsync(IList<RealEstateAdPost> adPosts)
+        public async Task HandleNewRealEstatesAdPostsAsync(IList<RealEstateAdPost> adPosts)
         {
             if (adPosts == null)
                 throw new ArgumentNullException(nameof(adPosts));
 
             _logger?.LogDebug($"Received '{adPosts.Count}' new Real Estate Ad Posts.");
 
-            return Task.CompletedTask;
+            await SendEmail("New Real Estate Adverts published!", CreateHtmlBody(adPosts)).ConfigureAwait(false);
         }
 
         public async Task HandleInitialRealEstateAdPostsAsync(IList<RealEstateAdPost> adPosts)

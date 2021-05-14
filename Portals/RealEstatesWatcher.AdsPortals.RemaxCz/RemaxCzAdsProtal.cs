@@ -37,14 +37,14 @@ namespace RealEstatesWatcher.AdsPortals.RemaxCz
 
                 // get page content
                 var pageContent = await webHtml.LoadFromWebAsync(_adsUrl)
-                                                            .ConfigureAwait(false);
+                                               .ConfigureAwait(false);
 
                 _logger?.LogDebug($"({Name}): Downloaded page with ads.");
 
                 var posts = pageContent.DocumentNode
-                                                           .SelectNodes("//a[@class=\"pl-items__link\"]")
-                                                           .Select(ParseRealEstateAdPost)
-                                                           .ToList();
+                                       .SelectNodes("//a[@class=\"pl-items__link\"]")
+                                       .Select(ParseRealEstateAdPost)
+                                       .ToList();
 
                 _logger?.LogDebug($"({Name}): Successfully parsed {posts.Count} ads from page.");
 
@@ -83,8 +83,8 @@ namespace RealEstatesWatcher.AdsPortals.RemaxCz
         
         private static decimal ParsePrice(HtmlNode node)
         {
-            var value = node.SelectSingleNode(".//div[contains(@class,\"item-price\")]/strong/span[@data-advert-price]")?
-                                   .GetAttributeValue("data-advert-price", null);
+            var value = node.SelectSingleNode(".//div[contains(@class,\"item-price\")]//span[@data-advert-price]")?
+                            .GetAttributeValue("data-advert-price", null);
             if (value == null)
                 return decimal.Zero;
 
@@ -93,7 +93,7 @@ namespace RealEstatesWatcher.AdsPortals.RemaxCz
                 : decimal.Zero;
         }
 
-        private static string? ParsePriceComment(HtmlNode node) => node.SelectSingleNode("./div[contains(@class,\"item-price\")]/strong")?.GetDirectInnerText() ?? string.Empty;
+        private static string? ParsePriceComment(HtmlNode node) => node.SelectSingleNode(".//div[contains(@class,\"item-price\")]/strong")?.InnerText;
 
         private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//h2/strong").InnerText;
 
