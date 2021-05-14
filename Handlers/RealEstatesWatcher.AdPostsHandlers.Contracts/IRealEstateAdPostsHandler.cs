@@ -9,6 +9,8 @@ namespace RealEstatesWatcher.AdPostsHandlers.Contracts
     {
         Task HandleNewRealEstateAdPostAsync(RealEstateAdPost adPost);
 
+        Task HandleNewRealEstatesAdPostsAsync(IList<RealEstateAdPost> adPosts);
+
         Task HandleInitialRealEstateAdPostsAsync(IList<RealEstateAdPost> adPosts);
     }
 }

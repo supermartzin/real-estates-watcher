@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -42,6 +43,14 @@ namespace RealEstatesWatcher.AdsPortals.SrealityCz
                                                    .ConfigureAwait(false);
                 if (pageContent == null)
                     throw new RealEstateAdsPortalException("Page content has not been correctly downloaded.");
+
+                // -- DEBUG
+
+                // save HTML content to file
+                Directory.CreateDirectory("./portals-content/sreality");
+                await File.WriteAllTextAsync($"./portals-content/sreality/page-{DateTime.Now:t}", pageContent).ConfigureAwait(false);
+
+                // -- END DEBUG
 
                 var htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(pageContent);
@@ -104,12 +113,16 @@ namespace RealEstatesWatcher.AdsPortals.SrealityCz
         {
             const string priceRegex = @"([0-9\s]+)";
 
-            var value = node.SelectSingleNode(".//span[contains(@class,\"norm-price\")]")?.InnerText;
+            //var value = node.SelectSingleNode(".//span[contains(@class,\"norm-price\")]")?.InnerText;
+            var result = Regex.Match(node.InnerHtml, @"<span class=""norm-price ng-binding"">(.+?)<\/span>");
+            if (!result.Success)
+                return decimal.Zero;
+            var value = result.Groups.Where(group => group.Success).ToArray()[1].Value;
             if (value == null)
                 return decimal.Zero;
 
             value = HttpUtility.HtmlDecode(value).Replace(" ", "");
-            var result = Regex.Match(value, priceRegex);
+            result = Regex.Match(value, priceRegex);
             if (!result.Success)
                 return decimal.Zero;
 

@@ -36,6 +36,12 @@ namespace RealEstatesWatcher.UI.Console
             return Task.CompletedTask;
         }
 
+        public Task HandleNewRealEstatesAdPostsAsync(IList<RealEstateAdPost> adPosts)
+        {
+            // skip
+            return Task.CompletedTask;
+        }
+
         public async Task HandleInitialRealEstateAdPostsAsync(IList<RealEstateAdPost> adPosts)
         {
             var posts = adPosts.Select(post =>
