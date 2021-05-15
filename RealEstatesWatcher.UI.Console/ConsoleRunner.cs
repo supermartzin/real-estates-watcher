@@ -14,6 +14,7 @@ using RealEstatesWatcher.AdsPortals.RemaxCz;
 using RealEstatesWatcher.AdsPortals.SrealityCz;
 using RealEstatesWatcher.AdPostsHandlers.Email;
 using RealEstatesWatcher.AdsPortals.BezrealitkyCz;
+using RealEstatesWatcher.AdsPortals.RealityIdnesCz;
 using RealEstatesWatcher.Core;
 using RealEstatesWatcher.Scrapers;
 using RealEstatesWatcher.Scrapers.Contracts;
@@ -114,6 +115,10 @@ namespace RealEstatesWatcher.UI.Console
                         watcher.RegisterAdsPortal(new FlatZoneCzAdsPortal(section["url"],
                                                                           _container.GetRequiredService<IWebScraper>(),
                                                                           _container.GetService<ILogger<FlatZoneCzAdsPortal>>()));
+                        break;
+
+                    case "Reality.idnes.cz":
+                        watcher.RegisterAdsPortal(new RealityIdnesCzAdsPortal(section["url"], _container.GetService<ILogger<RealityIdnesCzAdsPortal>>()));
                         break;
 
                     case "Remax.cz":

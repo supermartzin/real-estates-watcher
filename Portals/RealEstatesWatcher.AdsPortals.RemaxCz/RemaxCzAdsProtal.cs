@@ -52,8 +52,6 @@ namespace RealEstatesWatcher.AdsPortals.RemaxCz
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, $"({Name}): Error getting latest ads: {ex.Message}");
-
                 throw new RealEstateAdsPortalException($"({Name}): Error getting latest ads: {ex.Message}", ex);
             }
         }

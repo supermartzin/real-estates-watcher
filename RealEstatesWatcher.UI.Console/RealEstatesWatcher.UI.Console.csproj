@@ -18,6 +18,7 @@
     <ProjectReference Include="..\Handlers\RealEstatesWatcher.AdPostsHandlers.Email\RealEstatesWatcher.AdPostsHandlers.Email.csproj" />
     <ProjectReference Include="..\Portals\RealEstatesWatcher.AdsPortals.BazosCz\RealEstatesWatcher.AdsPortals.BazosCz.csproj" />
     <ProjectReference Include="..\Portals\RealEstatesWatcher.AdsPortals.FlatZoneCz\RealEstatesWatcher.AdsPortals.FlatZoneCz.csproj" />
+    <ProjectReference Include="..\Portals\RealEstatesWatcher.AdsPortals.RealityIdnesCz\RealEstatesWatcher.AdsPortals.RealityIdnesCz.csproj" />
     <ProjectReference Include="..\Portals\RealEstatesWatcher.AdsPortals.RemaxCz\RealEstatesWatcher.AdsPortals.RemaxCz.csproj" />
     <ProjectReference Include="..\Portals\RealEstatesWatcher.AdsPortals.SrealityCz\RealEstatesWatcher.AdsPortals.SrealityCz.csproj" />
     <ProjectReference Include="..\Portals\RealEstatesWatcher.AdsPortals.BezrealitkyCz\RealEstatesWatcher.AdsPortals.BezrealitkyCz.csproj" />
