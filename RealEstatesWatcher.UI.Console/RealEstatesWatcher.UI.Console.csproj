@@ -20,6 +20,7 @@
     <ProjectReference Include="..\Portals\RealEstatesWatcher.AdsPortals.FlatZoneCz\RealEstatesWatcher.AdsPortals.FlatZoneCz.csproj" />
     <ProjectReference Include="..\Portals\RealEstatesWatcher.AdsPortals.RemaxCz\RealEstatesWatcher.AdsPortals.RemaxCz.csproj" />
     <ProjectReference Include="..\Portals\RealEstatesWatcher.AdsPortals.SrealityCz\RealEstatesWatcher.AdsPortals.SrealityCz.csproj" />
+    <ProjectReference Include="..\RealEstatesWatcher.AdsPortals.BezrealitkyCz\RealEstatesWatcher.AdsPortals.BezrealitkyCz.csproj" />
     <ProjectReference Include="..\RealEstatesWatcher.Core\RealEstatesWatcher.Core.csproj" />
     <ProjectReference Include="..\Scrapers\RealEstatesWatcher.Scrapers\RealEstatesWatcher.Scrapers.csproj" />
   </ItemGroup>

@@ -13,6 +13,7 @@ using RealEstatesWatcher.AdsPortals.FlatZoneCz;
 using RealEstatesWatcher.AdsPortals.RemaxCz;
 using RealEstatesWatcher.AdsPortals.SrealityCz;
 using RealEstatesWatcher.AdPostsHandlers.Email;
+using RealEstatesWatcher.AdsPortals.BezrealitkyCz;
 using RealEstatesWatcher.Core;
 using RealEstatesWatcher.Scrapers;
 using RealEstatesWatcher.Scrapers.Contracts;
@@ -101,6 +102,12 @@ namespace RealEstatesWatcher.UI.Console
                 {
                     case "Bazos.cz":
                         watcher.RegisterAdsPortal(new BazosCzAdsPortal(section["url"], _container.GetService<ILogger<BazosCzAdsPortal>>()));
+                        break;
+
+                    case "Bezrealitky.cz":
+                        watcher.RegisterAdsPortal(new BezrealitkyCzAdsPortal(section["url"],
+                                                                             _container.GetRequiredService<IWebScraper>(),
+                                                                             _container.GetService<ILogger<BezrealitkyCzAdsPortal>>()));
                         break;
 
                     case "FlatZone.cz":

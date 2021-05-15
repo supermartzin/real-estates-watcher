@@ -37,7 +37,7 @@ namespace RealEstatesWatcher.AdsPortals.FlatZoneCz
             {
                 // get page content
                 var pageContent = await _webScraper.GetFullWebPageContentAsync(_adsUrl)
-                                                          .ConfigureAwait(false);
+                                                   .ConfigureAwait(false);
                 if (pageContent == null)
                     throw new RealEstateAdsPortalException("Page content has not been correctly downloaded.");
 
@@ -67,10 +67,12 @@ namespace RealEstatesWatcher.AdsPortals.FlatZoneCz
             {
                 throw;
             }
+            catch (WebScraperException wsEx)
+            {
+                throw new RealEstateAdsPortalException($"({Name}): Error getting latest ads: {wsEx.Message}", wsEx);
+            }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, $"({Name}): Error getting latest ads: {ex.Message}");
-
                 throw new RealEstateAdsPortalException($"({Name}): Error getting latest ads: {ex.Message}", ex);
             }
         }

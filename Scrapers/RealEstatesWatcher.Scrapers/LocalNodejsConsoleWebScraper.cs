@@ -55,14 +55,22 @@ namespace RealEstatesWatcher.Scrapers
                 process.Start();
 
                 // execute external Node.js script
-                await process.StandardInput.WriteLineAsync($"node {_pathToScript} {uri.AbsoluteUri}");
+                await process.StandardInput
+                             .WriteLineAsync($"node {_pathToScript} \"{uri.AbsoluteUri}\"")
+                             .ConfigureAwait(false);
 
-                await process.StandardInput.FlushAsync();
+                await process.StandardInput
+                             .FlushAsync()
+                             .ConfigureAwait(false);
+
                 process.StandardInput.Close();
-                process.WaitForExit(3000);
+                process.WaitForExit(10000);
+
+                var output = await process.StandardOutput
+                                          .ReadToEndAsync()
+                                          .ConfigureAwait(false);
 
                 // process downloaded page
-                var output = await process.StandardOutput.ReadToEndAsync();
                 var startIndex = output.IndexOf("<html", StringComparison.Ordinal);
                 var endIndex = output.LastIndexOf("</html>", StringComparison.Ordinal) + 7;
 

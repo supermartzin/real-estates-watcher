@@ -25,8 +25,8 @@ namespace RealEstatesWatcher.UI.Console
 </body>
 </html>";
 
-            public const string Post = "<div style=\"padding: 10px; background: #ededed; min-height: 170px;\">\r\n    <div style=\"float: left; margin-right: 1em; width: 30%; height: 150px; display: {$img-display};\">\r\n        <img src=\"{$img-link}\" style=\"height: 100%; width: 100%; object-fit: cover;\" />\r\n    </div>\r\n    <a href=\"{$post-link}\">\r\n        <h3 style=\"margin-block-end: 0.2em; margin-block-start: 0em;\">{$title}</h3>\r\n    </a>\r\n    <span style=\"font-size: medium; color: grey; display: {$price-display};\">\r\n        <b>{$price}</b> {$currency}<br/>\r\n    </span>\r\n    <span style=\"font-size: medium; color: grey; display: {$price-comment-display};\">\r\n        <b>{$price-comment}</b><br/>\r\n    </span>\r\n    <span>\r\n        <b>Adresa:</b> {$address}<br/>\r\n        <b>Výmera:</b> {$floor-area}<br/>\r\n    </span>\r\n    <p style=\"margin-block-start: 0.2em; margin-block-end: 0em; font-size: small; display: {$text-display};\">{$text}</p>\r\n</div>";
-        } 
+            public const string Post = "<div style=\"padding: 10px; background: #ededed; min-height: 200px;\">\r\n    <div style=\"float: left; margin-right: 1em; width: 30%; height: 180px; display: {$img-display};\">\r\n        <img src=\"{$img-link}\" style=\"height: 100%; width: 100%; object-fit: cover;\" />\r\n    </div>\r\n    <a href=\"{$post-link}\">\r\n        <h3 style=\"margin: 0.2em;\">{$title}</h3>\r\n    </a>\r\n    <span style=\"font-size: medium; color: grey; display: {$price-display};\">\r\n        <b>{$price}</b> {$currency}<br/>\r\n    </span>\r\n    <span style=\"font-size: medium; color: grey; display: {$price-comment-display};\">\r\n        <b>{$price-comment}</b><br/>\r\n    </span>\r\n    <span>\r\n        <b>Server:</b> {$portal-name}<br/>\r\n        <b>Adresa:</b> {$address}<br/>\r\n        <b>Výmera:</b> {$floor-area}<br/>\r\n    </span>\r\n    <p style=\"margin: 0.2em; font-size: small; text-align: justify; display: {$text-display};\">{$text}</p>\r\n</div>";
+        }
 
         private static readonly string FilePath =  Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + Path.DirectorySeparatorChar + "ads.html";
 
@@ -47,10 +47,19 @@ namespace RealEstatesWatcher.UI.Console
             var posts = adPosts.Select(post =>
             {
                 var postHtml = HtmlTemplates.Post.Replace("{$title}", post.Title)
-                                                 .Replace("{$post-link}", post.WebUrl.AbsoluteUri)
-                                                 .Replace("{$address}", post.Address)
-                                                 .Replace("{$floor-area}", post.FloorArea + " m²");
+                                             .Replace("{$portal-name}", post.AdsPortalName)
+                                             .Replace("{$post-link}", post.WebUrl.AbsoluteUri)
+                                             .Replace("{$address}", post.Address);
 
+                // floor area
+                if (post.FloorArea != decimal.Zero)
+                {
+                    postHtml = postHtml.Replace("{$floor-area}", post.FloorArea + " m²");
+                }
+                else
+                {
+                    postHtml = postHtml.Replace("{$floor-area}", " -");
+                }
                 // image
                 if (post.ImageUrl is not null)
                 {
@@ -61,6 +70,7 @@ namespace RealEstatesWatcher.UI.Console
                 {
                     postHtml = postHtml.Replace("{$img-display}", "none");
                 }
+
                 // price
                 if (post.Price != decimal.Zero)
                 {
@@ -75,6 +85,7 @@ namespace RealEstatesWatcher.UI.Console
                                        .Replace("{$price-display}", "none")
                                        .Replace("{$price-comment-display}", "block");
                 }
+
                 // text
                 if (!string.IsNullOrEmpty(post.Text))
                 {
@@ -85,7 +96,7 @@ namespace RealEstatesWatcher.UI.Console
                 {
                     postHtml = postHtml.Replace("{$text-display}", "none");
                 }
-                        
+
                 return postHtml;
             });
 

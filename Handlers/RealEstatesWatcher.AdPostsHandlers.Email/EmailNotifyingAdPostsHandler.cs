@@ -119,9 +119,9 @@ namespace RealEstatesWatcher.AdPostsHandlers.Email
         private static string CreateSingleHtmlPost(RealEstateAdPost post)
         {
             var postHtml = HtmlTemplates.Post.Replace("{$title}", post.Title)
-                                                   .Replace("{$portal-name}", post.AdsPortalName)
-                                                   .Replace("{$post-link}", post.WebUrl.AbsoluteUri)
-                                                   .Replace("{$address}", post.Address);
+                                             .Replace("{$portal-name}", post.AdsPortalName)
+                                             .Replace("{$post-link}", post.WebUrl.AbsoluteUri)
+                                             .Replace("{$address}", post.Address);
 
             // floor area
             if (post.FloorArea != decimal.Zero)
