@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -103,49 +101,35 @@ namespace RealEstatesWatcher.AdsPortals.SrealityCz
                 : default;
         }
 
-        private decimal ParsePrice(HtmlNode node)
+        private static decimal ParsePrice(HtmlNode node)
         {
             const string priceRegex = @"([0-9\s]+)";
-
-            _logger?.LogDebug("--- Sreality.cz post DEBUG ---\n" +
-                              $"{node.InnerHtml}\n" +
-                              "--- DEBUG END ---");
-
-            //var value = node.SelectSingleNode(".//span[contains(@class,\"norm-price\")]")?.InnerText;
-            var result = Regex.Match(node.InnerHtml, @"<span class=""norm-price ng-binding"">(.+?)<\/span>");
-            if (!result.Success)
-                return decimal.Zero;
-            var value = result.Groups.Where(group => group.Success).ToArray()[1].Value;
+            
+            var value = node.SelectSingleNode(".//span[contains(@class,\"norm-price\")]")?.InnerText;
             if (value == null)
                 return decimal.Zero;
 
-            value = HttpUtility.HtmlDecode(value).Replace(" ", "");
-            result = Regex.Match(value, priceRegex);
+            value = HttpUtility.HtmlDecode(value);
+            var result = Regex.Match(value, priceRegex);
             if (!result.Success)
                 return decimal.Zero;
 
-            var priceValue = result.Groups[1].Value.Replace(" ", "");
+            var priceValue = result.Groups[1].Value;
+            priceValue = Regex.Replace(priceValue, @"\D+", "");
 
-            _logger?.LogDebug($"Price value is {priceValue}");
-
-            return decimal.TryParse(priceValue, NumberStyles.Any, CultureInfo.InvariantCulture, out var price)
+            return decimal.TryParse(priceValue, out var price)
                 ? price
                 : decimal.Zero;
         }
 
         private static string? ParsePriceComment(HtmlNode node)
         {
-            const string priceRegex = @"([0-9\s]+)";
-
-            var result = Regex.Match(node.InnerHtml, @"<span class=""norm-price ng-binding"">(.+?)<\/span>");
-            if (!result.Success)
-                return null;
-            var value = result.Groups.Where(group => group.Success).ToArray()[1].Value;
+            var value = node.SelectSingleNode(".//span[contains(@class,\"norm-price\")]")?.InnerText;
             if (value == null)
                 return null;
-
+            
             value = HttpUtility.HtmlDecode(value);
-            result = Regex.Match(value, priceRegex);
+            var result = Regex.Match(value, @"\d");
 
             return !result.Success && value.Length > 0 ? value : null;
         }
