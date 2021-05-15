@@ -40,7 +40,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealEstatesWatcher.AdPostsH
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealEstatesWatcher.AdPostsHandlers.Email", "Handlers\RealEstatesWatcher.AdPostsHandlers.Email\RealEstatesWatcher.AdPostsHandlers.Email.csproj", "{F6AAFB57-F70C-4145-92AB-4B1B9749D777}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealEstatesWatcher.AdsPortals.BezrealitkyCz", "RealEstatesWatcher.AdsPortals.BezrealitkyCz\RealEstatesWatcher.AdsPortals.BezrealitkyCz.csproj", "{BDFC7A2A-3152-49A3-92AF-BD2079044463}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealEstatesWatcher.AdsPortals.BezrealitkyCz", "Portals\RealEstatesWatcher.AdsPortals.BezrealitkyCz\RealEstatesWatcher.AdsPortals.BezrealitkyCz.csproj", "{BDFC7A2A-3152-49A3-92AF-BD2079044463}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
