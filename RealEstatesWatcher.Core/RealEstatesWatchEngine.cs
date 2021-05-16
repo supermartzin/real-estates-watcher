@@ -146,18 +146,28 @@ namespace RealEstatesWatcher.Core
             _logger?.LogDebug("Periodic check started.");
 
             // get posts snapshot from portals
-            var posts = await GetCurrentAdsPortalsSnapshot().ConfigureAwait(false);
-
-            foreach (var post in posts)
+            var allPosts = await GetCurrentAdsPortalsSnapshot().ConfigureAwait(false);
+            
+            var newPosts = new List<RealEstateAdPost>();
+            foreach (var post in allPosts)
             {
                 if (_posts.Contains(post))
                     continue; //skip
 
-                // add to collection
+                // add to collections
                 _posts.Add(post);
+                newPosts.Add(post);
+            }
 
-                // notify
-                await NotifyHandlers(post).ConfigureAwait(false);
+            // notify
+            switch (newPosts.Count)
+            {
+                case 1:
+                    await NotifyHandlers(newPosts[0]).ConfigureAwait(false);
+                    break;
+                case > 1:
+                    await NotifyHandlers(newPosts).ConfigureAwait(false);
+                    break;
             }
 
             _logger?.LogDebug("Periodic check finished.");
@@ -170,6 +180,21 @@ namespace RealEstatesWatcher.Core
                 try
                 {
                     await handler.HandleNewRealEstateAdPostAsync(adPost).ConfigureAwait(false);
+                }
+                catch (RealEstateAdPostsHandlerException reaphEx)
+                {
+                    _logger?.LogError(reaphEx, $"Error notifying Ad posts Handler '{handler.GetType().FullName}': {reaphEx.Message}");
+                }
+            }
+        }
+
+        private async Task NotifyHandlers(IList<RealEstateAdPost> adPosts)
+        {
+            foreach (var handler in _handlers)
+            {
+                try
+                {
+                    await handler.HandleNewRealEstatesAdPostsAsync(adPosts).ConfigureAwait(false);
                 }
                 catch (RealEstateAdPostsHandlerException reaphEx)
                 {
