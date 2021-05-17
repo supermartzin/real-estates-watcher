@@ -43,10 +43,10 @@ namespace RealEstatesWatcher.AdsPortals.BazosCz
 
                 // parse posts
                 var posts = pageContent.DocumentNode
-                                                           .SelectNodes("//span[@class=\"vypis\"]")
-                                                           .Select(adNode => adNode.SelectSingleNode(".//tr[1]"))
-                                                           .Select(ParseRealEstateAdPost)
-                                                           .ToList();
+                                       .SelectNodes("//span[@class=\"vypis\"]")
+                                       .Select(adNode => adNode.SelectSingleNode(".//tr[1]"))
+                                       .Select(ParseRealEstateAdPost)
+                                       .ToList();
 
                 _logger?.LogDebug($"({Name}): Successfully parsed {posts.Count} ads from page.");
 
@@ -61,16 +61,17 @@ namespace RealEstatesWatcher.AdsPortals.BazosCz
         }
 
 
-        private RealEstateAdPost ParseRealEstateAdPost(HtmlNode innerNode) => new(Name,
-                                                                                  ParseTitle(innerNode),
-                                                                                  ParseAdText(innerNode),
-                                                                                  ParsePrice(innerNode),
-                                                                                  Currency.CZK,
-                                                                                  ParseAddress(innerNode),
-                                                                                  ParseWebUrl(innerNode, _rootHost), 
-                                                                                  ParseFloorArea(innerNode),
-                                                                                  imageUrl: ParseImageUrl(innerNode), 
-                                                                                  publishTime: ParsePublishDate(innerNode));
+        private RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
+                                                                             ParseTitle(node),
+                                                                             ParseAdText(node),
+                                                                             ParsePrice(node),
+                                                                             Currency.CZK,
+                                                                             ParseLayout(node),
+                                                                             ParseAddress(node),
+                                                                             ParseWebUrl(node, _rootHost), 
+                                                                             ParseFloorArea(node),
+                                                                             imageUrl: ParseImageUrl(node), 
+                                                                             publishTime: ParsePublishDate(node));
 
         private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//span[@class=\"nadpis\"]").FirstChild.InnerText;
 
@@ -150,6 +151,26 @@ namespace RealEstatesWatcher.AdsPortals.BazosCz
             return decimal.TryParse(floorAreaValue, out var floorArea)
                 ? floorArea
                 : decimal.Zero;
+        }
+
+        private static Layout ParseLayout(HtmlNode node)
+        {
+            const string layoutRegex = @"(2\s?\+\s?kk|1\s?\+\s?kk|2\s?\+\s?1|1\s?\+\s?1|3\s?\+\s?1|3\s?\+\s?kk|4\s?\+\s?1|4\s?\+\s?kk|5\s?\+\s?1|5\s?\+\s?kk)";
+
+            var value = node.SelectSingleNode(".//span[@class=\"nadpis\"]").FirstChild.InnerText;
+
+            var result = Regex.Match(value, layoutRegex);
+            if (!result.Success)
+                value = node.SelectSingleNode(".//div[@class=\"popis\"]").InnerText;
+
+            result = Regex.Match(value, layoutRegex);
+            if (!result.Success)
+                return Layout.NotSpecified;
+
+            var layoutValue = result.Groups.Where(group => group.Success).ToArray()[1].Value;
+            layoutValue = Regex.Replace(layoutValue, @"\s+", "");
+
+            return LayoutExtensions.ToLayout(layoutValue);
         }
 
         private static string ParseRootHost(string url) => $"https://{new Uri(url).Host}";

@@ -82,6 +82,7 @@ namespace RealEstatesWatcher.AdsPortals.FlatZoneCz
                                                                              string.Empty,
                                                                              ParsePrice(node),
                                                                              Currency.CZK,
+                                                                             Layout.NotSpecified,
                                                                              ParseAddress(node),
                                                                              ParseWebUrl(node),
                                                                              decimal.Zero,

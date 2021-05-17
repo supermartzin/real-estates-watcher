@@ -49,7 +49,7 @@ namespace RealEstatesWatcher.AdsPortals.BezrealitkyCz
 
                 // parse posts
                 var posts = htmlDoc.DocumentNode
-                                   .SelectNodes("//div[contains(@class,\"pb-0\")]/div")
+                                   .SelectNodes("//article[contains(@class,\"product\")]")
                                    .Select(ParseRealEstateAdPost)
                                    .ToList();
 
@@ -76,6 +76,7 @@ namespace RealEstatesWatcher.AdsPortals.BezrealitkyCz
                                                                              string.Empty,
                                                                              ParsePrice(node),
                                                                              Currency.CZK,
+                                                                             ParseLayout(node),
                                                                              ParseAddress(node),
                                                                              ParseWebUrl(node),
                                                                              ParseFloorArea(node),
@@ -94,6 +95,22 @@ namespace RealEstatesWatcher.AdsPortals.BezrealitkyCz
             return decimal.TryParse(value, out var price)
                 ? price
                 : decimal.Zero;
+        }
+
+        private static Layout ParseLayout(HtmlNode node)
+        {
+            const string layoutRegex = @"(2\s?\+\s?kk|1\s?\+\s?kk|2\s?\+\s?1|1\s?\+\s?1|3\s?\+\s?1|3\s?\+\s?kk|4\s?\+\s?1|4\s?\+\s?kk|5\s?\+\s?1|5\s?\+\s?kk)";
+
+            var value = node.SelectSingleNode(".//p[@class=\"product__note\"]").InnerText;
+
+            var result = Regex.Match(value, layoutRegex);
+            if (!result.Success)
+                return Layout.NotSpecified;
+
+            var layoutValue = result.Groups.Where(group => group.Success).ToArray()[1].Value;
+            layoutValue = Regex.Replace(layoutValue, @"\s+", "");
+
+            return LayoutExtensions.ToLayout(layoutValue);
         }
 
         private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//a[contains(@class,\"product__link\")]/strong").InnerText;

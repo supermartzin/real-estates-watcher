@@ -72,6 +72,7 @@ namespace RealEstatesWatcher.AdsPortals.RemaxCz
                                         string.Empty,
                                         price,
                                         priceCurrency,
+                                        ParseLayout(node),
                                         ParseAddress(node),
                                         ParseWebUrl(node, _rootHost),
                                         ParseFloorArea(node),
@@ -142,6 +143,22 @@ namespace RealEstatesWatcher.AdsPortals.RemaxCz
             return decimal.TryParse(floorAreaValue, out var floorArea)
                 ? floorArea
                 : decimal.Zero;
+        }
+
+        private static Layout ParseLayout(HtmlNode node)
+        {
+            const string layoutRegex = @"(2\s?\+\s?kk|1\s?\+\s?kk|2\s?\+\s?1|1\s?\+\s?1|3\s?\+\s?1|3\s?\+\s?kk|4\s?\+\s?1|4\s?\+\s?kk|5\s?\+\s?1|5\s?\+\s?kk)";
+
+            var value = node.SelectSingleNode(".//h2/strong").InnerText;
+
+            var result = Regex.Match(value, layoutRegex);
+            if (!result.Success)
+                return Layout.NotSpecified;
+
+            var layoutValue = result.Groups.Where(group => group.Success).ToArray()[1].Value;
+            layoutValue = Regex.Replace(layoutValue, @"\s+", "");
+
+            return LayoutExtensions.ToLayout(layoutValue);
         }
 
         private static string ParseRootHost(string url) => $"https://{new Uri(url).Host}";

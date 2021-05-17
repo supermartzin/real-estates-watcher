@@ -16,6 +16,8 @@ namespace RealEstatesWatcher.Models
 
         public Currency Currency { get; }
 
+        public Layout Layout { get; }
+
         public string Address { get; }
 
         public decimal FloorArea { get; }
@@ -31,6 +33,7 @@ namespace RealEstatesWatcher.Models
                                 string text,
                                 decimal price,
                                 Currency currency,
+                                Layout layout,
                                 string address,
                                 Uri webUrl,
                                 decimal floorArea = decimal.Zero,
@@ -44,6 +47,7 @@ namespace RealEstatesWatcher.Models
             Address = address ?? throw new ArgumentNullException(nameof(address));
             WebUrl = webUrl ?? throw new ArgumentNullException(nameof(webUrl));
             Currency = currency;
+            Layout = layout;
             Price = price >= decimal.Zero ? price : throw new ArgumentOutOfRangeException(nameof(price));
 
             FloorArea = floorArea;
@@ -52,9 +56,11 @@ namespace RealEstatesWatcher.Models
             PublishTime = publishTime;
         }
 
-        public override string ToString() => $"[{AdsPortalName}]: {Title} | {Currency} {Price}";
+        public override string ToString() => $"[{AdsPortalName}]: {Title} | {Currency} {Price} | {Layout.ToDisplayString()}";
 
-        protected bool Equals(RealEstateAdPost other) => WebUrl.Equals(other.WebUrl);
+        protected bool Equals(RealEstateAdPost other) => WebUrl.GetLeftPart(UriPartial.Path)
+                                                               .Equals(other.WebUrl
+                                                                            .GetLeftPart(UriPartial.Path));
 
         public override bool Equals(object obj)
         {
@@ -66,6 +72,6 @@ namespace RealEstatesWatcher.Models
             return obj.GetType() == GetType() && Equals((RealEstateAdPost) obj);
         }
 
-        public override int GetHashCode() => WebUrl.GetHashCode();
+        public override int GetHashCode() => WebUrl.GetLeftPart(UriPartial.Path).GetHashCode();
     }
 }
