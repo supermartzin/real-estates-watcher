@@ -1,76 +1,36 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 
-using RealEstatesWatcher.AdsPortals.Contracts;
+using RealEstatesWatcher.AdsPortals.Base;
 using RealEstatesWatcher.Models;
 
 namespace RealEstatesWatcher.AdsPortals.BazosCz
 {
-    public class BazosCzAdsPortal : IRealEstateAdsPortal
+    public class BazosCzAdsPortal : RealEstateAdsPortalBase
     {
-        private readonly ILogger<BazosCzAdsPortal>? _logger;
-
-        private readonly string _adsUrl;
-        private readonly string _rootHost;
-
-        public string Name => "Bazoš.cz";
+        public override string Name => "Bazoš.cz";
 
         public BazosCzAdsPortal(string adsUrl,
-                                ILogger<BazosCzAdsPortal>? logger = default)
+                                ILogger<BazosCzAdsPortal>? logger = default) : base(adsUrl, logger)
         {
-            _adsUrl = adsUrl ?? throw new ArgumentNullException(nameof(adsUrl));
-            _rootHost = ParseRootHost(adsUrl);
-            _logger = logger;
         }
-
-        public async Task<IList<RealEstateAdPost>> GetLatestRealEstateAdsAsync()
-        {
-            try
-            {
-                var webHtml = new HtmlWeb();
-
-                // get page content
-                var pageContent = await webHtml.LoadFromWebAsync(_adsUrl)
-                                                            .ConfigureAwait(false);
-                
-                _logger?.LogDebug($"({Name}): Downloaded page with ads.");
-
-                // parse posts
-                var posts = pageContent.DocumentNode
-                                       .SelectNodes("//span[@class=\"vypis\"]")
-                                       .Select(adNode => adNode.SelectSingleNode(".//tr[1]"))
-                                       .Select(ParseRealEstateAdPost)
-                                       .ToList();
-
-                _logger?.LogDebug($"({Name}): Successfully parsed {posts.Count} ads from page.");
-
-                return posts;
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogError(ex, $"({Name}): Error getting latest ads: {ex.Message}");
-
-                throw new RealEstateAdsPortalException($"({Name}): Error getting latest ads: {ex.Message}", ex);
-            }
-        }
-
-
-        private RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
+        
+        protected override string GetPathToAdsElements() => "//span[@class=\"vypis\"]//tr[1]";
+        
+        protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
                                                                              ParseTitle(node),
                                                                              ParseAdText(node),
                                                                              ParsePrice(node),
                                                                              Currency.CZK,
                                                                              ParseLayout(node),
                                                                              ParseAddress(node),
-                                                                             ParseWebUrl(node, _rootHost), 
+                                                                             ParseWebUrl(node, RootHost),
                                                                              ParseFloorArea(node),
-                                                                             imageUrl: ParseImageUrl(node), 
+                                                                             imageUrl: ParseImageUrl(node),
                                                                              publishTime: ParsePublishDate(node));
 
         private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//span[@class=\"nadpis\"]").FirstChild.InnerText;
@@ -172,7 +132,5 @@ namespace RealEstatesWatcher.AdsPortals.BazosCz
 
             return LayoutExtensions.ToLayout(layoutValue);
         }
-
-        private static string ParseRootHost(string url) => $"https://{new Uri(url).Host}";
     }
 }

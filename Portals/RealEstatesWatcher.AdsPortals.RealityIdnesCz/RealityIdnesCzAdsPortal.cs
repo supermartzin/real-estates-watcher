@@ -1,71 +1,36 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Web;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 
-using RealEstatesWatcher.AdsPortals.Contracts;
+using RealEstatesWatcher.AdsPortals.Base;
 using RealEstatesWatcher.Models;
 
 namespace RealEstatesWatcher.AdsPortals.RealityIdnesCz
 {
-    public class RealityIdnesCzAdsPortal : IRealEstateAdsPortal
+    public class RealityIdnesCzAdsPortal : RealEstateAdsPortalBase
     {
-        private readonly ILogger<RealityIdnesCzAdsPortal>? _logger;
-
-        private readonly string _adsUrl;
-        private readonly string _rootHost;
-
-        public string Name => "Reality.idnes.cz";
+        public override string Name => "Reality.idnes.cz";
 
         public RealityIdnesCzAdsPortal(string adsUrl,
-                                       ILogger<RealityIdnesCzAdsPortal>? logger = default)
+                                       ILogger<RealityIdnesCzAdsPortal>? logger = default) : base(adsUrl, logger)
         {
-            _adsUrl = adsUrl ?? throw new ArgumentNullException(nameof(adsUrl));
-            _rootHost = ParseRootHost(adsUrl);
-            _logger = logger;
         }
+        
+        protected override string GetPathToAdsElements() => "//div[@class=\"c-products__item\"]";
 
-        public async Task<IList<RealEstateAdPost>> GetLatestRealEstateAdsAsync()
-        {
-            try
-            {
-                var webHtml = new HtmlWeb();
-
-                // get page content
-                var pageContent = await webHtml.LoadFromWebAsync(_adsUrl)
-                                               .ConfigureAwait(false);
-
-                _logger?.LogDebug($"({Name}): Downloaded page with ads.");
-
-                var posts = pageContent.DocumentNode
-                                       .SelectNodes("//div[@class=\"c-products__item\"]")
-                                       .Select(ParseRealEstateAdPost)
-                                       .ToList();
-
-                _logger?.LogDebug($"({Name}): Successfully parsed {posts.Count} ads from page.");
-
-                return posts;
-            }
-            catch (Exception ex)
-            {
-                throw new RealEstateAdsPortalException($"({Name}): Error getting latest ads: {ex.Message}", ex);
-            }
-        }
-
-        private RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
-                                                                             ParseTitle(node),
-                                                                             string.Empty,
-                                                                             ParsePrice(node),
-                                                                             Currency.CZK,
-                                                                             ParseLayout(node),
-                                                                             ParseAddress(node),
-                                                                             ParseWebUrl(node, _rootHost),
-                                                                             ParseFloorArea(node),
-                                                                             imageUrl: ParseImageUrl(node));
+        protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
+                                                                                        ParseTitle(node),
+                                                                                        string.Empty,
+                                                                                        ParsePrice(node),
+                                                                                        Currency.CZK,
+                                                                                        ParseLayout(node),
+                                                                                        ParseAddress(node),
+                                                                                        ParseWebUrl(node, RootHost),
+                                                                                        ParseFloorArea(node),
+                                                                                        imageUrl: ParseImageUrl(node));
 
         private static string ParseTitle(HtmlNode node)
         {
@@ -120,8 +85,7 @@ namespace RealEstatesWatcher.AdsPortals.RealityIdnesCz
         {
             const string floorAreaRegex = @"([0-9]+)\s?m2|([0-9]+)\s?m²";
 
-            var value = node.SelectSingleNode(".//h2[@class=\"c-products__title\"]").InnerText.Trim();
-            value = HttpUtility.HtmlDecode(value);
+            var value = HttpUtility.HtmlDecode(ParseTitle(node)).Trim();
 
             var result = Regex.Match(value, floorAreaRegex);
             if (!result.Success)
@@ -142,7 +106,5 @@ namespace RealEstatesWatcher.AdsPortals.RealityIdnesCz
                 ? new Uri(path)
                 : default;
         }
-
-        private static string ParseRootHost(string url) => $"https://{new Uri(url).Host}";
     }
 }

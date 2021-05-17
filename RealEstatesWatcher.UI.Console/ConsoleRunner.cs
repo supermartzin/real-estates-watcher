@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
@@ -14,10 +16,13 @@ using RealEstatesWatcher.AdsPortals.RemaxCz;
 using RealEstatesWatcher.AdsPortals.SrealityCz;
 using RealEstatesWatcher.AdPostsHandlers.Email;
 using RealEstatesWatcher.AdsPortals.BezrealitkyCz;
+using RealEstatesWatcher.AdsPortals.Contracts;
+using RealEstatesWatcher.AdsPortals.RealcityCz;
 using RealEstatesWatcher.AdsPortals.RealityIdnesCz;
 using RealEstatesWatcher.Core;
 using RealEstatesWatcher.Scrapers;
 using RealEstatesWatcher.Scrapers.Contracts;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace RealEstatesWatcher.UI.Console
 {
@@ -99,34 +104,40 @@ namespace RealEstatesWatcher.UI.Console
 
             foreach (var section in configuration.GetChildren())
             {
+                var url = section["url"];
+
                 switch (section.Key)
                 {
                     case "Bazos.cz":
-                        watcher.RegisterAdsPortal(new BazosCzAdsPortal(section["url"], _container.GetService<ILogger<BazosCzAdsPortal>>()));
+                        watcher.RegisterAdsPortal(new BazosCzAdsPortal(url, _container.GetService<ILogger<BazosCzAdsPortal>>()));
                         break;
 
                     case "Bezrealitky.cz":
-                        watcher.RegisterAdsPortal(new BezrealitkyCzAdsPortal(section["url"],
+                        watcher.RegisterAdsPortal(new BezrealitkyCzAdsPortal(url,
                                                                              _container.GetRequiredService<IWebScraper>(),
                                                                              _container.GetService<ILogger<BezrealitkyCzAdsPortal>>()));
                         break;
 
                     case "FlatZone.cz":
-                        watcher.RegisterAdsPortal(new FlatZoneCzAdsPortal(section["url"],
+                        watcher.RegisterAdsPortal(new FlatZoneCzAdsPortal(url,
                                                                           _container.GetRequiredService<IWebScraper>(),
                                                                           _container.GetService<ILogger<FlatZoneCzAdsPortal>>()));
                         break;
 
+                    case "Realcity.cz":
+                        watcher.RegisterAdsPortal(new RealcityCzAdsPortal(url, _container.GetService<ILogger<RealcityCzAdsPortal>>()));
+                        break;
+
                     case "Reality.idnes.cz":
-                        watcher.RegisterAdsPortal(new RealityIdnesCzAdsPortal(section["url"], _container.GetService<ILogger<RealityIdnesCzAdsPortal>>()));
+                        watcher.RegisterAdsPortal(new RealityIdnesCzAdsPortal(url, _container.GetService<ILogger<RealityIdnesCzAdsPortal>>()));
                         break;
 
                     case "Remax.cz":
-                        watcher.RegisterAdsPortal(new RemaxCzAdsProtal(section["url"], _container.GetService<ILogger<RemaxCzAdsProtal>>()));
+                        watcher.RegisterAdsPortal(new RemaxCzAdsProtal(url, _container.GetService<ILogger<RemaxCzAdsProtal>>()));
                         break;
 
                     case "Sreality.cz":
-                        watcher.RegisterAdsPortal(new SrealityCzAdsPortal(section["url"],
+                        watcher.RegisterAdsPortal(new SrealityCzAdsPortal(url,
                                                                           _container.GetRequiredService<IWebScraper>(),
                                                                           _container.GetService<ILogger<SrealityCzAdsPortal>>()));
                         break;

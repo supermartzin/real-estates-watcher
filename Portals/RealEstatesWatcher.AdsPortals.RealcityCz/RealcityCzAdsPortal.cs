@@ -1,44 +1,45 @@
 ﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Web;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 
 using RealEstatesWatcher.AdsPortals.Base;
 using RealEstatesWatcher.Models;
-using RealEstatesWatcher.Scrapers.Contracts;
 
-namespace RealEstatesWatcher.AdsPortals.BezrealitkyCz
+namespace RealEstatesWatcher.AdsPortals.RealcityCz
 {
-    public class BezrealitkyCzAdsPortal : RealEstateAdsPortalBase
+    public class RealcityCzAdsPortal : RealEstateAdsPortalBase
     {
-        public override string Name => "Bezrealitky.cz";
+        public override string Name => "Realcity.cz";
 
-        public BezrealitkyCzAdsPortal(string adsUrl,
-                                      IWebScraper webScraper,
-                                      ILogger<BezrealitkyCzAdsPortal>? logger = default) : base(adsUrl, webScraper, logger)
+        public RealcityCzAdsPortal(string adsUrl,
+                                   ILogger<RealEstateAdsPortalBase>? logger = default) : base(adsUrl, logger)
         {
         }
 
-        protected override string GetPathToAdsElements() => "//article[contains(@class,\"product\")]";
+        protected override string GetPathToAdsElements() => "//div[@class=\"media advertise item\"]";
 
         protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
                                                                                         ParseTitle(node),
-                                                                                        string.Empty,
+                                                                                        ParseText(node),
                                                                                         ParsePrice(node),
                                                                                         Currency.CZK,
                                                                                         ParseLayout(node),
                                                                                         ParseAddress(node),
-                                                                                        ParseWebUrl(node),
+                                                                                        ParseWebUrl(node, RootHost),
                                                                                         ParseFloorArea(node),
-                                                                                        imageUrl: ParseImageUrl(node, RootHost));
+                                                                                        imageUrl: ParseImageUrl(node));
 
-        private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//p[@class=\"product__note\"]").InnerText;
+        private static string ParseTitle(HtmlNode node) => HttpUtility.HtmlDecode(node.SelectSingleNode(".//div[@class=\"title\"]").InnerText);
+
+        private static string ParseText(HtmlNode node) => HttpUtility.HtmlDecode(node.SelectSingleNode(".//div[@class=\"description\"]").InnerText).Trim();
 
         private static decimal ParsePrice(HtmlNode node)
         {
-            var value = node.SelectSingleNode(".//strong[@class=\"product__value\"]")?.InnerText;
-            if (value == null)
+            var value = node.SelectSingleNode(".//div[@class=\"price\"]/span")?.InnerText;
+            if (value is null)
                 return decimal.Zero;
 
             value = Regex.Replace(value, @"\D+", "");
@@ -52,7 +53,7 @@ namespace RealEstatesWatcher.AdsPortals.BezrealitkyCz
         {
             const string layoutRegex = @"(2\s?\+\s?kk|1\s?\+\s?kk|2\s?\+\s?1|1\s?\+\s?1|3\s?\+\s?1|3\s?\+\s?kk|4\s?\+\s?1|4\s?\+\s?kk|5\s?\+\s?1|5\s?\+\s?kk)";
 
-            var value = node.SelectSingleNode(".//p[@class=\"product__note\"]").InnerText;
+            var value = node.SelectSingleNode(".//div[@class=\"title\"]").InnerText;
 
             var result = Regex.Match(value, layoutRegex);
             if (!result.Success)
@@ -64,21 +65,29 @@ namespace RealEstatesWatcher.AdsPortals.BezrealitkyCz
             return LayoutExtensions.ToLayout(layoutValue);
         }
 
-        private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//a[contains(@class,\"product__link\")]/strong").InnerText;
+        private static string ParseAddress(HtmlNode node) => HttpUtility.HtmlDecode(node.SelectSingleNode(".//div[@class=\"address\"]").InnerText).Trim();
 
-        private static Uri ParseWebUrl(HtmlNode node) => new(node.SelectSingleNode(".//a[contains(@class,\"product__link\")]").GetAttributeValue("href", string.Empty));
+        private static Uri ParseWebUrl(HtmlNode node, string rootHost)
+        {
+            var relativePath = node.SelectSingleNode(".//div[@class=\"title\"]/a").GetAttributeValue("href", string.Empty);
 
+            return new Uri(rootHost + relativePath);
+        }
+        
         private static decimal ParseFloorArea(HtmlNode node)
         {
             const string floorAreaRegex = @"([0-9]+)\s?m2|([0-9]+)\s?m²";
-            
-            var value = node.SelectSingleNode(".//p[@class=\"product__note\"]").InnerText;
-            if (value == null)
-                return decimal.Zero;
+
+            var value = ParseTitle(node);
 
             var result = Regex.Match(value, floorAreaRegex);
             if (!result.Success)
-                return decimal.Zero;
+            {
+                value = ParseText(node);
+                result = Regex.Match(value, floorAreaRegex);
+                if (!result.Success)
+                    return decimal.Zero;
+            }
 
             var floorAreaValue = result.Groups.Where(group => group.Success).ToArray()[1].Value;
 
@@ -87,15 +96,13 @@ namespace RealEstatesWatcher.AdsPortals.BezrealitkyCz
                 : decimal.Zero;
         }
 
-        private static Uri? ParseImageUrl(HtmlNode node, string hostUrlPart)
+        private static Uri? ParseImageUrl(HtmlNode node)
         {
-            var path = node.SelectSingleNode(".//div[@class=\"slick-list\"]//img")?.GetAttributeValue("src", null);
+            var path = node.SelectSingleNode(".//div[contains(@class,\"image\")]//img")?.GetAttributeValue("src", null);
             if (path is null)
                 return default;
-            
-            return path.Contains(hostUrlPart)
-                ? new Uri(path)
-                : new Uri(hostUrlPart + path);
+
+            return new Uri($"https://{path[2..]}");  // skip leading '//' characters
         }
     }
 }

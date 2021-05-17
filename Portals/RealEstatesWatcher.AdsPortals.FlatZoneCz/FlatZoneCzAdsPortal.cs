@@ -7,47 +7,40 @@ using System.Web;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 
+using RealEstatesWatcher.AdsPortals.Base;
 using RealEstatesWatcher.AdsPortals.Contracts;
 using RealEstatesWatcher.Scrapers.Contracts;
 using RealEstatesWatcher.Models;
 
 namespace RealEstatesWatcher.AdsPortals.FlatZoneCz
 {
-    public class FlatZoneCzAdsPortal : IRealEstateAdsPortal
+    public class FlatZoneCzAdsPortal : RealEstateAdsPortalBase
     {
-        private readonly ILogger<FlatZoneCzAdsPortal>? _logger;
-
-        private readonly IWebScraper _webScraper;
-        private readonly string _adsUrl;
-
-        public string Name => "FlatZone.cz";
+        public override string Name => "FlatZone.cz";
 
         public FlatZoneCzAdsPortal(string adsUrl,
                                    IWebScraper webScraper,
-                                   ILogger<FlatZoneCzAdsPortal>? logger = default)
+                                   ILogger<FlatZoneCzAdsPortal>? logger = default) : base(adsUrl, webScraper, logger)
         {
-            _adsUrl = adsUrl ?? throw new ArgumentNullException(nameof(adsUrl));
-            _webScraper = webScraper ?? throw new ArgumentNullException(nameof(webScraper));
-            _logger = logger;
         }
 
-        public async Task<IList<RealEstateAdPost>> GetLatestRealEstateAdsAsync()
+        public override async Task<IList<RealEstateAdPost>> GetLatestRealEstateAdsAsync()
         {
             try
             {
                 // get page content
-                var pageContent = await _webScraper.GetFullWebPageContentAsync(_adsUrl)
+                var pageContent = await WebScraper!.GetFullWebPageContentAsync(AdsUrl)
                                                    .ConfigureAwait(false);
                 if (pageContent == null)
                     throw new RealEstateAdsPortalException("Page content has not been correctly downloaded.");
 
                 var htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(pageContent);
-
-                _logger?.LogDebug($"({Name}): Downloaded page with ads.");
+                
+                Logger?.LogDebug($"({Name}): Downloaded page with ads.");
                 
                 // get HTML elements
-                var elements = htmlDoc.DocumentNode.SelectNodes("//div[contains(@class,\"project-apartment-card\")]");
+                var elements = htmlDoc.DocumentNode.SelectNodes(GetPathToAdsElements());
                 
                 // remove first and last elements - templates
                 if (elements.Count > 1)
@@ -59,7 +52,7 @@ namespace RealEstatesWatcher.AdsPortals.FlatZoneCz
                 // parse posts
                 var posts = elements.Select(ParseRealEstateAdPost).ToList();
 
-                _logger?.LogDebug($"({Name}): Successfully parsed {posts.Count} ads from page.");
+                Logger?.LogDebug($"({Name}): Successfully parsed {posts.Count} ads from page.");
 
                 return posts;
             }
@@ -77,16 +70,18 @@ namespace RealEstatesWatcher.AdsPortals.FlatZoneCz
             }
         }
 
-        private RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
-                                                                             ParseTitle(node),
-                                                                             string.Empty,
-                                                                             ParsePrice(node),
-                                                                             Currency.CZK,
-                                                                             Layout.NotSpecified,
-                                                                             ParseAddress(node),
-                                                                             ParseWebUrl(node),
-                                                                             decimal.Zero,
-                                                                             imageUrl: ParseImageUrl(node));
+        protected override string GetPathToAdsElements() => "//div[contains(@class,\"project-apartment-card\")]";
+
+        protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
+                                                                                        ParseTitle(node),
+                                                                                        string.Empty,
+                                                                                        ParsePrice(node),
+                                                                                        Currency.CZK,
+                                                                                        Layout.NotSpecified,
+                                                                                        ParseAddress(node),
+                                                                                        ParseWebUrl(node),
+                                                                                        decimal.Zero,
+                                                                                        imageUrl: ParseImageUrl(node));
         
         private static string ParseTitle(HtmlNode node)
         {

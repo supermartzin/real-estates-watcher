@@ -1,62 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Web;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 
-using RealEstatesWatcher.AdsPortals.Contracts;
+using RealEstatesWatcher.AdsPortals.Base;
 using RealEstatesWatcher.Models;
 
 namespace RealEstatesWatcher.AdsPortals.RemaxCz
 {
-    public class RemaxCzAdsProtal : IRealEstateAdsPortal
+    public class RemaxCzAdsProtal : RealEstateAdsPortalBase
     {
-        private readonly ILogger<RemaxCzAdsProtal>? _logger;
-
-        private readonly string _adsUrl;
-        private readonly string _rootHost;
-
-        public string Name => "Remax.cz";
+        public override string Name => "Remax.cz";
 
         public RemaxCzAdsProtal(string adsUrl,
-                                ILogger<RemaxCzAdsProtal>? logger = default)
+                                ILogger<RemaxCzAdsProtal>? logger = default) : base(adsUrl, logger)
         {
-            _adsUrl = adsUrl ?? throw new ArgumentNullException(nameof(adsUrl));
-            _rootHost = ParseRootHost(adsUrl);
-            _logger = logger;
         }
         
-        public async Task<IList<RealEstateAdPost>> GetLatestRealEstateAdsAsync()
-        {
-            try
-            {
-                var webHtml = new HtmlWeb();
+        protected override string GetPathToAdsElements() => "//a[@class=\"pl-items__link\"]";
 
-                // get page content
-                var pageContent = await webHtml.LoadFromWebAsync(_adsUrl)
-                                               .ConfigureAwait(false);
-
-                _logger?.LogDebug($"({Name}): Downloaded page with ads.");
-
-                var posts = pageContent.DocumentNode
-                                       .SelectNodes("//a[@class=\"pl-items__link\"]")
-                                       .Select(ParseRealEstateAdPost)
-                                       .ToList();
-
-                _logger?.LogDebug($"({Name}): Successfully parsed {posts.Count} ads from page.");
-
-                return posts;
-            }
-            catch (Exception ex)
-            {
-                throw new RealEstateAdsPortalException($"({Name}): Error getting latest ads: {ex.Message}", ex);
-            }
-        }
-
-        private RealEstateAdPost ParseRealEstateAdPost(HtmlNode node)
+        protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node)
         {
             var price = ParsePrice(node);
             var priceCurrency = Currency.CZK;
@@ -74,7 +39,7 @@ namespace RealEstatesWatcher.AdsPortals.RemaxCz
                                         priceCurrency,
                                         ParseLayout(node),
                                         ParseAddress(node),
-                                        ParseWebUrl(node, _rootHost),
+                                        ParseWebUrl(node, RootHost),
                                         ParseFloorArea(node),
                                         priceComment,
                                         ParseImageUrl(node));
@@ -160,7 +125,5 @@ namespace RealEstatesWatcher.AdsPortals.RemaxCz
 
             return LayoutExtensions.ToLayout(layoutValue);
         }
-
-        private static string ParseRootHost(string url) => $"https://{new Uri(url).Host}";
     }
 }

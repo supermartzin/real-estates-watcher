@@ -7,13 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.33" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
+    <ProjectReference Include="..\RealEstatesWatcher.AdsPortals.Base\RealEstatesWatcher.AdsPortals.Base.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\RealEstatesWatcher.AdsPortals.Contracts\RealEstatesWatcher.AdsPortals.Contracts.csproj" />
-    <ProjectReference Include="..\..\Scrapers\RealEstatesWatcher.Scrapers.Contracts\RealEstatesWatcher.Scrapers.Contracts.csproj" />
-  </ItemGroup>
-
 </Project>
