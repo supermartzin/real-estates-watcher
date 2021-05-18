@@ -92,7 +92,7 @@ namespace RealEstatesWatcher.AdsPortals.CeskeRealityCz
             var path = node.SelectSingleNode(".//a/img")?.GetAttributeValue("src", null);
 
             return path is not null
-                ? new Uri($"https://{path[2..]}")
+                ? new Uri($"https://{path[2..]}")   // skip leading '//' characters
                 : default;
         }
     }

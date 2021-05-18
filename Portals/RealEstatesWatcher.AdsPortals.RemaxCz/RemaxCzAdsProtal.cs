@@ -69,7 +69,7 @@ namespace RealEstatesWatcher.AdsPortals.RemaxCz
                 return string.Empty;
 
             address = HttpUtility.HtmlDecode(address);
-            address = Regex.Replace(address, @"\s+", " ");
+            address = Regex.Replace(address, RegexPatterns.AllWhitespaceValues, " ");
             address = address.TrimEnd(',', '.');
 
             return address;
@@ -93,13 +93,9 @@ namespace RealEstatesWatcher.AdsPortals.RemaxCz
 
         private static decimal ParseFloorArea(HtmlNode node)
         {
-            const string floorAreaRegex = "([0-9]+)\\s?m2|([0-9]+)\\s?m²";
+            var value = ParseTitle(node);
 
-            var value = node.SelectSingleNode(".//h2/strong").InnerText;
-            if (value == null)
-                return decimal.Zero;
-
-            var result = Regex.Match(value, floorAreaRegex);
+            var result = Regex.Match(value, RegexPatterns.FloorArea);
             if (!result.Success)
                 return decimal.Zero;
 
@@ -112,16 +108,14 @@ namespace RealEstatesWatcher.AdsPortals.RemaxCz
 
         private static Layout ParseLayout(HtmlNode node)
         {
-            const string layoutRegex = @"(2\s?\+\s?kk|1\s?\+\s?kk|2\s?\+\s?1|1\s?\+\s?1|3\s?\+\s?1|3\s?\+\s?kk|4\s?\+\s?1|4\s?\+\s?kk|5\s?\+\s?1|5\s?\+\s?kk)";
+            var value = ParseTitle(node);
 
-            var value = node.SelectSingleNode(".//h2/strong").InnerText;
-
-            var result = Regex.Match(value, layoutRegex);
+            var result = Regex.Match(value, RegexPatterns.Layout);
             if (!result.Success)
                 return Layout.NotSpecified;
 
             var layoutValue = result.Groups.Where(group => group.Success).ToArray()[1].Value;
-            layoutValue = Regex.Replace(layoutValue, @"\s+", "");
+            layoutValue = Regex.Replace(layoutValue, RegexPatterns.AllWhitespaceValues, "");
 
             return LayoutExtensions.ToLayout(layoutValue);
         }

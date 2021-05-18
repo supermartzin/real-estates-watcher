@@ -97,7 +97,7 @@ namespace RealEstatesWatcher.AdsPortals.FlatZoneCz
             if (value == null)
                 return decimal.Zero;
 
-            var numberValue = Regex.Replace(value, @"\D+", "");
+            var numberValue = Regex.Replace(value, RegexPatterns.AllNonNumberValues, "");
 
             return decimal.TryParse(numberValue, out var price)
                 ? price

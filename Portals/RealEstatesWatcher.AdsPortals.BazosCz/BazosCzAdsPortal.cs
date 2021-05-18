@@ -23,7 +23,7 @@ namespace RealEstatesWatcher.AdsPortals.BazosCz
         
         protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
                                                                              ParseTitle(node),
-                                                                             ParseAdText(node),
+                                                                             ParseText(node),
                                                                              ParsePrice(node),
                                                                              Currency.CZK,
                                                                              ParseLayout(node),
@@ -35,7 +35,7 @@ namespace RealEstatesWatcher.AdsPortals.BazosCz
 
         private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//span[@class=\"nadpis\"]").FirstChild.InnerText;
 
-        private static string ParseAdText(HtmlNode node) => node.SelectSingleNode(".//div[@class=\"popis\"]").InnerText;
+        private static string ParseText(HtmlNode node) => node.SelectSingleNode(".//div[@class=\"popis\"]").InnerText;
 
         private static string ParseAddress(HtmlNode node) => node.SelectSingleNode("./td[3]").InnerHtml.Replace("<br>", " ");
 
@@ -77,58 +77,53 @@ namespace RealEstatesWatcher.AdsPortals.BazosCz
 
         private static decimal ParsePrice(HtmlNode node)
         {
-            const string priceRegex = "([0-9\\s]+)";
-
             var value = node.SelectSingleNode(".//span[@class=\"cena\"]")?.InnerText;
             if (value == null)
-                return default;
-
-            var result = Regex.Match(value, priceRegex);
-            if (!result.Success)
                 return decimal.Zero;
 
-            var priceValue = result.Groups[1].Value.Replace(" ", "");
-
-            return decimal.TryParse(priceValue, out var price)
+            value = Regex.Replace(value, RegexPatterns.AllNonNumberValues, "");
+            
+            return decimal.TryParse(value, out var price)
                 ? price
                 : decimal.Zero;
         }
 
         private static decimal ParseFloorArea(HtmlNode node)
         {
-            const string floorAreaRegex = "([0-9]+)\\s?m2|([0-9]+)\\s?m²";
+            var value = ParseTitle(node);
 
-            var value = node.SelectSingleNode(".//span[@class=\"nadpis\"]")?.FirstChild?.InnerText;
-            if (value == null)
-                return decimal.Zero;
-
-            var result = Regex.Match(value, floorAreaRegex);
+            var result = Regex.Match(value, RegexPatterns.FloorArea);
             if (!result.Success)
-                return decimal.Zero;
+            {
+                value = ParseText(node);
+                result = Regex.Match(value, RegexPatterns.FloorArea);
+                if (!result.Success)
+                    return decimal.Zero;
+            }
 
             var floorAreaValue = result.Groups.Where(group => group.Success).ToArray()[1].Value;
+            floorAreaValue = floorAreaValue.Replace(".", ",");
 
-            return decimal.TryParse(floorAreaValue, out var floorArea)
+            return decimal.TryParse(floorAreaValue, NumberStyles.AllowDecimalPoint, new NumberFormatInfo{ NumberDecimalSeparator = ","}, out var floorArea)
                 ? floorArea
                 : decimal.Zero;
         }
 
         private static Layout ParseLayout(HtmlNode node)
         {
-            const string layoutRegex = @"(2\s?\+\s?kk|1\s?\+\s?kk|2\s?\+\s?1|1\s?\+\s?1|3\s?\+\s?1|3\s?\+\s?kk|4\s?\+\s?1|4\s?\+\s?kk|5\s?\+\s?1|5\s?\+\s?kk)";
+            var value = ParseTitle(node);
 
-            var value = node.SelectSingleNode(".//span[@class=\"nadpis\"]").FirstChild.InnerText;
-
-            var result = Regex.Match(value, layoutRegex);
+            var result = Regex.Match(value, RegexPatterns.Layout);
             if (!result.Success)
-                value = node.SelectSingleNode(".//div[@class=\"popis\"]").InnerText;
-
-            result = Regex.Match(value, layoutRegex);
-            if (!result.Success)
-                return Layout.NotSpecified;
+            {
+                value = ParseText(node);
+                result = Regex.Match(value, RegexPatterns.Layout);
+                if (!result.Success)
+                    return Layout.NotSpecified;
+            }
 
             var layoutValue = result.Groups.Where(group => group.Success).ToArray()[1].Value;
-            layoutValue = Regex.Replace(layoutValue, @"\s+", "");
+            layoutValue = Regex.Replace(layoutValue, RegexPatterns.AllWhitespaceValues, "");
 
             return LayoutExtensions.ToLayout(layoutValue);
         }

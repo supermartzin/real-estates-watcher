@@ -57,38 +57,29 @@ namespace RealEstatesWatcher.AdsPortals.SrealityCz
 
         private static decimal ParsePrice(HtmlNode node)
         {
-            const string priceRegex = @"([0-9\s]+)";
-            
             var value = node.SelectSingleNode(".//span[contains(@class,\"norm-price\")]")?.InnerText;
             if (value == null)
                 return decimal.Zero;
 
             value = HttpUtility.HtmlDecode(value);
-            var result = Regex.Match(value, priceRegex);
-            if (!result.Success)
-                return decimal.Zero;
+            value = Regex.Replace(value, RegexPatterns.AllNonNumberValues, "");
 
-            var priceValue = result.Groups[1].Value;
-            priceValue = Regex.Replace(priceValue, @"\D+", "");
-
-            return decimal.TryParse(priceValue, out var price)
+            return decimal.TryParse(value, out var price)
                 ? price
                 : decimal.Zero;
         }
 
         private static Layout ParseLayout(HtmlNode node)
         {
-            const string layoutRegex = @"(2\s?\+\s?kk|1\s?\+\s?kk|2\s?\+\s?1|1\s?\+\s?1|3\s?\+\s?1|3\s?\+\s?kk|4\s?\+\s?1|4\s?\+\s?kk|5\s?\+\s?1|5\s?\+\s?kk)";
-
             var value = node.SelectSingleNode("./div//a[@class=\"title\"]").InnerText.Trim();
             value = HttpUtility.HtmlDecode(value);
 
-            var result = Regex.Match(value, layoutRegex);
+            var result = Regex.Match(value, RegexPatterns.Layout);
             if (!result.Success)
                 return Layout.NotSpecified;
 
             var layoutValue = result.Groups.Where(group => group.Success).ToArray()[1].Value;
-            layoutValue = Regex.Replace(layoutValue, @"\s+", "");
+            layoutValue = Regex.Replace(layoutValue, RegexPatterns.AllWhitespaceValues, "");
 
             return LayoutExtensions.ToLayout(layoutValue);
         }
@@ -107,14 +98,9 @@ namespace RealEstatesWatcher.AdsPortals.SrealityCz
 
         private static decimal ParseFloorArea(HtmlNode node)
         {
-            const string floorAreaRegex = @"([0-9]+)\s?m2|([0-9]+)\s?m²";
-
-            var value = node.SelectSingleNode("./div//a[@class=\"title\"]")?.InnerText?.Trim();
-            if (value == null)
-                return decimal.Zero;
-
-            value = HttpUtility.HtmlDecode(value);
-            var result = Regex.Match(value, floorAreaRegex);
+            var value = ParseTitle(node);
+            
+            var result = Regex.Match(value, RegexPatterns.FloorArea);
             if (!result.Success)
                 return decimal.Zero;
 
