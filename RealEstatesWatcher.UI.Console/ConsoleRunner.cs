@@ -17,6 +17,7 @@ using RealEstatesWatcher.AdsPortals.SrealityCz;
 using RealEstatesWatcher.AdPostsHandlers.Email;
 using RealEstatesWatcher.AdsPortals.BezrealitkyCz;
 using RealEstatesWatcher.AdsPortals.Contracts;
+using RealEstatesWatcher.AdsPortals.MMRealityCz;
 using RealEstatesWatcher.AdsPortals.RealcityCz;
 using RealEstatesWatcher.AdsPortals.RealityIdnesCz;
 using RealEstatesWatcher.Core;
@@ -124,6 +125,10 @@ namespace RealEstatesWatcher.UI.Console
                                                                           _container.GetService<ILogger<FlatZoneCzAdsPortal>>()));
                         break;
 
+                    case "MMReality.cz":
+                        watcher.RegisterAdsPortal(new MMRealityCzAdsPortal(url, _container.GetService<ILogger<MMRealityCzAdsPortal>>()));
+                        break;
+
                     case "Realcity.cz":
                         watcher.RegisterAdsPortal(new RealcityCzAdsPortal(url, _container.GetService<ILogger<RealcityCzAdsPortal>>()));
                         break;
@@ -149,8 +154,8 @@ namespace RealEstatesWatcher.UI.Console
         {
             _logger?.LogInformation("Registering Ad posts handlers..");
 
-            watcher.RegisterAdPostsHandler(new EmailNotifyingAdPostsHandler(LoadSettings(), _container.GetService<ILogger<EmailNotifyingAdPostsHandler>>()));
-            //watcher.RegisterAdPostsHandler(new FileAdPostsHandler());
+            //watcher.RegisterAdPostsHandler(new EmailNotifyingAdPostsHandler(LoadSettings(), _container.GetService<ILogger<EmailNotifyingAdPostsHandler>>()));
+            watcher.RegisterAdPostsHandler(new FileAdPostsHandler());
 
             static EmailNotifyingAdPostsHandlerSettings LoadSettings()
             {

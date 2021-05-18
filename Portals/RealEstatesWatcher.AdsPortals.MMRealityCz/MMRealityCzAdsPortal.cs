@@ -1,25 +1,24 @@
 ﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Web;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 
 using RealEstatesWatcher.AdsPortals.Base;
 using RealEstatesWatcher.Models;
 
-namespace RealEstatesWatcher.AdsPortals.RealityIdnesCz
+namespace RealEstatesWatcher.AdsPortals.MMRealityCz
 {
-    public class RealityIdnesCzAdsPortal : RealEstateAdsPortalBase
+    public class MMRealityCzAdsPortal : RealEstateAdsPortalBase
     {
-        public override string Name => "Reality.idnes.cz";
+        public override string Name => "M&M Reality.cz";
 
-        public RealityIdnesCzAdsPortal(string adsUrl,
-                                       ILogger<RealityIdnesCzAdsPortal>? logger = default) : base(adsUrl, logger)
+        public MMRealityCzAdsPortal(string adsUrl,
+                                    ILogger<RealEstateAdsPortalBase>? logger = default) : base(adsUrl, logger)
         {
         }
-        
-        protected override string GetPathToAdsElements() => "//div[@class=\"c-products__item\"]";
+
+        protected override string GetPathToAdsElements() => "//div[contains(@class,\"grid-x\")]//div[contains(@class, \"cell\")]//a[@data-realty-name]/..";
 
         protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
                                                                                         ParseTitle(node),
@@ -28,24 +27,15 @@ namespace RealEstatesWatcher.AdsPortals.RealityIdnesCz
                                                                                         Currency.CZK,
                                                                                         ParseLayout(node),
                                                                                         ParseAddress(node),
-                                                                                        ParseWebUrl(node, RootHost),
+                                                                                        ParseWebUrl(node),
                                                                                         ParseFloorArea(node),
                                                                                         imageUrl: ParseImageUrl(node));
 
-        private static string ParseTitle(HtmlNode node)
-        {
-            var title = node.SelectSingleNode(".//h2[@class=\"c-products__title\"]").InnerText;
-
-            title = title.Replace("\n", " ").Trim();
-            title = HttpUtility.HtmlDecode(title);
-            title = title[0].ToString().ToUpper() + title[1..];
-
-            return title;
-        }
+        private static string ParseTitle(HtmlNode node) => node.SelectSingleNode("./p[1]").LastChild.InnerText.Trim();
 
         private static decimal ParsePrice(HtmlNode node)
         {
-            var value = node.SelectSingleNode(".//p[@class=\"c-products__price\"]")?.InnerText;
+            var value = node.SelectSingleNode("./strong[contains(@class,\"text-secondary\")]")?.InnerText;
             if (value == null)
                 return decimal.Zero;
 
@@ -72,20 +62,20 @@ namespace RealEstatesWatcher.AdsPortals.RealityIdnesCz
             return LayoutExtensions.ToLayout(layoutValue);
         }
 
-        private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//p[@class=\"c-products__info\"]").InnerText.Trim();
+        private static string ParseAddress(HtmlNode node) => node.SelectSingleNode("./p[1]").FirstChild.InnerText.Trim();
 
-        private static Uri ParseWebUrl(HtmlNode node, string rootHost)
+        private static Uri ParseWebUrl(HtmlNode node)
         {
-            var relativePath = node.SelectSingleNode(".//a[@class=\"c-products__link\"]").GetAttributeValue("href", string.Empty);
-
-            return new Uri(rootHost + relativePath);
+            var path = node.SelectSingleNode("./a[contains(@class,\"text-underline\")]").GetAttributeValue("href", null);
+            
+            return new Uri(path);
         }
 
         private static decimal ParseFloorArea(HtmlNode node)
         {
             const string floorAreaRegex = @"([0-9]+)\s?m2|([0-9]+)\s?m²";
 
-            var value = HttpUtility.HtmlDecode(ParseTitle(node)).Trim();
+            var value = ParseTitle(node);
 
             var result = Regex.Match(value, floorAreaRegex);
             if (!result.Success)
@@ -100,7 +90,7 @@ namespace RealEstatesWatcher.AdsPortals.RealityIdnesCz
 
         private static Uri? ParseImageUrl(HtmlNode node)
         {
-            var path = node.SelectSingleNode(".//span[@class=\"c-products__img\"]/img")?.GetAttributeValue("data-src", null);
+            var path = node.SelectSingleNode(".//img[1]")?.GetAttributeValue("src", null);
 
             return path is not null
                 ? new Uri(path)

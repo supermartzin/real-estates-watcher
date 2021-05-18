@@ -48,6 +48,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealEstatesWatcher.AdsPorta
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealEstatesWatcher.AdsPortals.Base", "Portals\RealEstatesWatcher.AdsPortals.Base\RealEstatesWatcher.AdsPortals.Base.csproj", "{3AF2DD13-9D39-4C5F-AAAB-D3B994F88169}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealEstatesWatcher.AdsPortals.MMRealityCz", "Portals\RealEstatesWatcher.AdsPortals.MMRealityCz\RealEstatesWatcher.AdsPortals.MMRealityCz.csproj", "{6F123FD7-8F46-4A16-AF7A-E4E461465989}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -118,6 +120,10 @@ Global
 		{3AF2DD13-9D39-4C5F-AAAB-D3B994F88169}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3AF2DD13-9D39-4C5F-AAAB-D3B994F88169}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3AF2DD13-9D39-4C5F-AAAB-D3B994F88169}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F123FD7-8F46-4A16-AF7A-E4E461465989}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F123FD7-8F46-4A16-AF7A-E4E461465989}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F123FD7-8F46-4A16-AF7A-E4E461465989}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F123FD7-8F46-4A16-AF7A-E4E461465989}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -137,6 +143,7 @@ Global
 		{A8BC8493-5583-4597-AC18-F2E277BB7019} = {D11D1C74-A620-4DB5-A319-576B7BBCECA1}
 		{9BC6B638-84C0-4AC2-B85A-9713C1E0EAB9} = {D11D1C74-A620-4DB5-A319-576B7BBCECA1}
 		{3AF2DD13-9D39-4C5F-AAAB-D3B994F88169} = {D11D1C74-A620-4DB5-A319-576B7BBCECA1}
+		{6F123FD7-8F46-4A16-AF7A-E4E461465989} = {D11D1C74-A620-4DB5-A319-576B7BBCECA1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D2618839-27DA-461E-81D0-0989C4827D9F}
