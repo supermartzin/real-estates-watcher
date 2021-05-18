@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Linq;
-using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
@@ -16,14 +15,13 @@ using RealEstatesWatcher.AdsPortals.RemaxCz;
 using RealEstatesWatcher.AdsPortals.SrealityCz;
 using RealEstatesWatcher.AdPostsHandlers.Email;
 using RealEstatesWatcher.AdsPortals.BezrealitkyCz;
-using RealEstatesWatcher.AdsPortals.Contracts;
+using RealEstatesWatcher.AdsPortals.CeskeRealityCz;
 using RealEstatesWatcher.AdsPortals.MMRealityCz;
 using RealEstatesWatcher.AdsPortals.RealcityCz;
 using RealEstatesWatcher.AdsPortals.RealityIdnesCz;
 using RealEstatesWatcher.Core;
 using RealEstatesWatcher.Scrapers;
 using RealEstatesWatcher.Scrapers.Contracts;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace RealEstatesWatcher.UI.Console
 {
@@ -36,6 +34,8 @@ namespace RealEstatesWatcher.UI.Console
 
         public static async Task Main(string[] args)
         {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
             ConfigureDependencyInjection();
 
             _logger = _container.GetService<ILogger<ConsoleRunner>>();
@@ -117,6 +117,10 @@ namespace RealEstatesWatcher.UI.Console
                         watcher.RegisterAdsPortal(new BezrealitkyCzAdsPortal(url,
                                                                              _container.GetRequiredService<IWebScraper>(),
                                                                              _container.GetService<ILogger<BezrealitkyCzAdsPortal>>()));
+                        break;
+
+                    case "Ceskereality.cz":
+                        watcher.RegisterAdsPortal(new CeskeRealityCzAdsPortal(url, _container.GetService<ILogger<CeskeRealityCzAdsPortal>>()));
                         break;
 
                     case "FlatZone.cz":

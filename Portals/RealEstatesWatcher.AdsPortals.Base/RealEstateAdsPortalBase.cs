@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
@@ -13,11 +14,21 @@ namespace RealEstatesWatcher.AdsPortals.Base
 {
     public abstract class RealEstateAdsPortalBase : IRealEstateAdsPortal
     {
+        protected static class RegexPatterns
+        {
+            public const string Layout = @"(2\s?\+\s?kk|1\s?\+\s?kk|2\s?\+\s?1|1\s?\+\s?1|3\s?\+\s?1|3\s?\+\s?kk|4\s?\+\s?1|4\s?\+\s?kk|5\s?\+\s?1|5\s?\+\s?kk)";
+            public const string FloorArea = @"([\d,.]+)\s?m2|([\d,.]+)\s?m²";
+            public const string AllNonNumberValues = @"\D+";
+            public const string AllWhitespaceValues = @"\s+";
+        }
+
         protected readonly ILogger<RealEstateAdsPortalBase>? Logger;
         protected readonly IWebScraper? WebScraper;
 
         protected readonly string AdsUrl;
         protected readonly string RootHost;
+
+        protected Encoding PageEncoding { get; set; } = Encoding.UTF8;
 
         public abstract string Name { get; }
 
@@ -58,6 +69,7 @@ namespace RealEstatesWatcher.AdsPortals.Base
 
                 var htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(pageContent);
+                htmlDoc.OptionDefaultStreamEncoding = PageEncoding;
 
                 Logger?.LogDebug($"({Name}): Downloaded page with ads.");
 
@@ -92,11 +104,11 @@ namespace RealEstatesWatcher.AdsPortals.Base
                 var webHtml = new HtmlWeb();
 
                 // get page content
-                var pageContent = await webHtml.LoadFromWebAsync(AdsUrl)
+                var pageContent = await webHtml.LoadFromWebAsync(AdsUrl, PageEncoding)
                                                .ConfigureAwait(false);
 
                 Logger?.LogDebug($"({Name}): Downloaded page with ads.");
-
+                
                 var posts = pageContent.DocumentNode
                                        .SelectNodes(GetPathToAdsElements())
                                        .Select(ParseRealEstateAdPost)
