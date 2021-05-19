@@ -4,6 +4,8 @@ namespace RealEstatesWatcher.AdPostsHandlers.Email
 {
     public class EmailNotifyingAdPostsHandlerSettings
     {
+        public bool Enabled { get; set; }
+
         public string? EmailAddressFrom { get; set; }
 
         public string? SenderName { get; set; }

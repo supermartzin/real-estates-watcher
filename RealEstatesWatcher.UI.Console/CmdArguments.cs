@@ -39,10 +39,12 @@ namespace RealEstatesWatcher.UI.Console
                 "Script for real-time periodic watching of Real estate advertisement portals with notifications on new ads.";
         }
 
-        public async Task ParseAsync(string[] arguments)
+        public async Task<bool> ParseAsync(string[] arguments)
         {
             if (arguments == null)
                 throw new ArgumentNullException(nameof(arguments));
+
+            var parsed = false;
 
             _rootCommand.Handler = CommandHandler.Create<string, string, string>(
                 (portals, handlers, engine) =>
@@ -50,9 +52,13 @@ namespace RealEstatesWatcher.UI.Console
                     PortalsConfigFilePath = portals;
                     HandlersConfigFilePath = handlers;
                     EngineConfigFilePath = engine;
+
+                    parsed = true;
                 });
 
             await _rootCommand.InvokeAsync(arguments).ConfigureAwait(false);
+
+            return parsed;
         }
     }
 }

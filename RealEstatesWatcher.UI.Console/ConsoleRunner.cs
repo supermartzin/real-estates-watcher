@@ -14,6 +14,7 @@ using RealEstatesWatcher.AdsPortals.FlatZoneCz;
 using RealEstatesWatcher.AdsPortals.RemaxCz;
 using RealEstatesWatcher.AdsPortals.SrealityCz;
 using RealEstatesWatcher.AdPostsHandlers.Email;
+using RealEstatesWatcher.AdPostsHandlers.File;
 using RealEstatesWatcher.AdsPortals.BezrealitkyCz;
 using RealEstatesWatcher.AdsPortals.CeskeRealityCz;
 using RealEstatesWatcher.AdsPortals.MMRealityCz;
@@ -43,7 +44,9 @@ namespace RealEstatesWatcher.UI.Console
 
         public static async Task Main(string[] args)
         {
-            await CmdArguments.ParseAsync(args);
+            var parsed = await CmdArguments.ParseAsync(args);
+            if (!parsed)
+                return;
 
             ConfigureDependencyInjection();
 
@@ -167,10 +170,10 @@ namespace RealEstatesWatcher.UI.Console
         {
             _logger?.LogInformation("Registering Ad posts handlers..");
 
-            //watcher.RegisterAdPostsHandler(new EmailNotifyingAdPostsHandler(LoadSettings(), _container.GetService<ILogger<EmailNotifyingAdPostsHandler>>()));
-            watcher.RegisterAdPostsHandler(new FileAdPostsHandler());
+            watcher.RegisterAdPostsHandler(new EmailNotifyingAdPostsHandler(LoadEmailSettings(), _container.GetService<ILogger<EmailNotifyingAdPostsHandler>>()));
+            watcher.RegisterAdPostsHandler(new LocalFileAdPostsHandler(LoadFileSettings()));
 
-            static EmailNotifyingAdPostsHandlerSettings LoadSettings()
+            static EmailNotifyingAdPostsHandlerSettings LoadEmailSettings()
             {
                 var configuration = new ConfigurationBuilder().AddIniFile(CmdArguments.HandlersConfigFilePath)
                                                               .Build()
@@ -178,6 +181,7 @@ namespace RealEstatesWatcher.UI.Console
 
                 return new EmailNotifyingAdPostsHandlerSettings
                 {
+                    Enabled = configuration.GetValue<bool>("enabled"),
                     EmailAddressFrom = configuration["email_address_from"],
                     EmailAddressesTo = configuration["email_addresses_to"].Split(','),
                     SenderName = configuration["sender_name"],
@@ -187,6 +191,21 @@ namespace RealEstatesWatcher.UI.Console
                     Username = configuration["username"],
                     Password = configuration["password"],
                     SkipInitialNotification = configuration.GetValue<bool>("skip_initial_notification")
+                };
+            }
+
+            static LocalFileAdPostsHandlerSettings LoadFileSettings()
+            {
+                var configuration = new ConfigurationBuilder().AddIniFile(CmdArguments.HandlersConfigFilePath)
+                                                              .Build()
+                                                              .GetSection("file");
+
+                return new LocalFileAdPostsHandlerSettings
+                {
+                    Enabled = configuration.GetValue<bool>("enabled"),
+                    MainFilePath = configuration["main_path"],
+                    NewPostsToSeparateFile = configuration.GetValue<bool>("separate_new_posts"),
+                    NewPostsFilePath = configuration["new_posts_path"]
                 };
             }
         }

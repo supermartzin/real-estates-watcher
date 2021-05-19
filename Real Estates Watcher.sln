@@ -18,6 +18,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealEstatesWatcher.AdsPortals.FlatZoneCz", "Portals\RealEstatesWatcher.AdsPortals.FlatZoneCz\RealEstatesWatcher.AdsPortals.FlatZoneCz.csproj", "{AA468675-44EC-4DB5-A0F8-70E5E8C7E041}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{AE7F9527-3C1B-4BF2-8A00-A082877ECA22}"
+	ProjectSection(SolutionItems) = preProject
+		Tools\post-email-template.html = Tools\post-email-template.html
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Node.js web scraper", "Node.js web scraper", "{D7508825-5BDC-4F8F-9D3E-F36456A5BBC8}"
 	ProjectSection(SolutionItems) = preProject
@@ -50,7 +53,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealEstatesWatcher.AdsPorta
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealEstatesWatcher.AdsPortals.MMRealityCz", "Portals\RealEstatesWatcher.AdsPortals.MMRealityCz\RealEstatesWatcher.AdsPortals.MMRealityCz.csproj", "{6F123FD7-8F46-4A16-AF7A-E4E461465989}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealEstatesWatcher.AdsPortals.CeskeRealityCz", "Portals\RealEstatesWatcher.AdsPortals.CeskeRealityCz\RealEstatesWatcher.AdsPortals.CeskeRealityCz.csproj", "{139C70CD-5C25-4EC0-B3A9-CBB3B9F5AD75}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealEstatesWatcher.AdsPortals.CeskeRealityCz", "Portals\RealEstatesWatcher.AdsPortals.CeskeRealityCz\RealEstatesWatcher.AdsPortals.CeskeRealityCz.csproj", "{139C70CD-5C25-4EC0-B3A9-CBB3B9F5AD75}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealEstatesWatcher.AdPostsHandlers.File", "Handlers\RealEstatesWatcher.AdPostsHandlers.File\RealEstatesWatcher.AdPostsHandlers.File.csproj", "{57A4B520-C3EA-4A87-871F-1E3F426317F8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -130,6 +135,10 @@ Global
 		{139C70CD-5C25-4EC0-B3A9-CBB3B9F5AD75}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{139C70CD-5C25-4EC0-B3A9-CBB3B9F5AD75}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{139C70CD-5C25-4EC0-B3A9-CBB3B9F5AD75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57A4B520-C3EA-4A87-871F-1E3F426317F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57A4B520-C3EA-4A87-871F-1E3F426317F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57A4B520-C3EA-4A87-871F-1E3F426317F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57A4B520-C3EA-4A87-871F-1E3F426317F8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -151,6 +160,7 @@ Global
 		{3AF2DD13-9D39-4C5F-AAAB-D3B994F88169} = {D11D1C74-A620-4DB5-A319-576B7BBCECA1}
 		{6F123FD7-8F46-4A16-AF7A-E4E461465989} = {D11D1C74-A620-4DB5-A319-576B7BBCECA1}
 		{139C70CD-5C25-4EC0-B3A9-CBB3B9F5AD75} = {D11D1C74-A620-4DB5-A319-576B7BBCECA1}
+		{57A4B520-C3EA-4A87-871F-1E3F426317F8} = {950562AB-B166-4BDB-88E4-B2496D84D311}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D2618839-27DA-461E-81D0-0989C4827D9F}

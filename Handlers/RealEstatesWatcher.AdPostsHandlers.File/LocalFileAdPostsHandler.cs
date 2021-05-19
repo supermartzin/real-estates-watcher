@@ -2,18 +2,14 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using MimeKit;
-using MailKit.Net.Smtp;
 
 using RealEstatesWatcher.AdPostsHandlers.Contracts;
 using RealEstatesWatcher.Models;
 
-namespace RealEstatesWatcher.AdPostsHandlers.Email
+namespace RealEstatesWatcher.AdPostsHandlers.File
 {
-    public class EmailNotifyingAdPostsHandler : IRealEstateAdPostsHandler
+    public class LocalFileAdPostsHandler : IRealEstateAdPostsHandler
     {
         private static class HtmlTemplates
         {
@@ -31,96 +27,75 @@ namespace RealEstatesWatcher.AdPostsHandlers.Email
             public const string Post = "<div style=\"padding: 10px; background: #ededed; min-height: 200px;\">\r\n    <div style=\"float: left; margin-right: 1em; width: 30%; height: 180px; display: {$img-display};\">\r\n        <img src=\"{$img-link}\" style=\"height: 100%; width: 100%; object-fit: cover;\" />\r\n    </div>\r\n    <a href=\"{$post-link}\">\r\n        <h3 style=\"margin: 0.2em; margin-top: 0;\">{$title}</h3>\r\n    </a>\r\n    <span style=\"font-size: medium; color: grey; display: {$price-display};\">\r\n        <strong>{$price}</strong> {$currency}<br/>\r\n    </span>\r\n    <span style=\"font-size: medium; color: grey; display: {$price-comment-display};\">\r\n        <strong>{$price-comment}</strong><br/>\r\n    </span>\r\n    <span>\r\n        <strong>Server:</strong> {$portal-name}<br/>\r\n        <strong>Adresa:</strong> {$address}<br/>\r\n        <strong>Výmera:</strong> {$floor-area}<br/>\r\n        <strong>Dispozícia:</strong> {$layout}</br>\r\n    </span>\r\n    <p style=\"margin: 0.2em; font-size: small; text-align: justify; display: {$text-display};\">{$text}</p>\r\n</div>";
         }
 
-        private readonly ILogger<EmailNotifyingAdPostsHandler>? _logger;
-        private readonly EmailNotifyingAdPostsHandlerSettings _settings;
-        
+        private readonly LocalFileAdPostsHandlerSettings _settings;
+
         public bool IsEnabled { get; }
 
-        public EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings settings,
-                                            ILogger<EmailNotifyingAdPostsHandler>? logger = default)
+        public LocalFileAdPostsHandler(LocalFileAdPostsHandlerSettings settings)
         {
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
-            _logger = logger;
 
             IsEnabled = settings.Enabled;
         }
-        
+
         public async Task HandleNewRealEstateAdPostAsync(RealEstateAdPost adPost)
         {
-            if (adPost == null)
-                throw new ArgumentNullException(nameof(adPost));
-
-            _logger?.LogDebug($"Received new Real Estate Ad Post: {adPost}");
-
-            await SendEmail("New Real Estate Advert published!", CreateHtmlBody(adPost)).ConfigureAwait(false);
+            await HandleNewRealEstatesAdPostsAsync(new List<RealEstateAdPost> {adPost}).ConfigureAwait(false);
         }
 
         public async Task HandleNewRealEstatesAdPostsAsync(IList<RealEstateAdPost> adPosts)
         {
-            if (adPosts == null)
-                throw new ArgumentNullException(nameof(adPosts));
+            var filePath = _settings.NewPostsToSeparateFile
+                                ? _settings.NewPostsFilePath
+                                : _settings.MainFilePath;
 
-            _logger?.LogDebug($"Received '{adPosts.Count}' new Real Estate Ad Posts.");
+            var htmlPostsElements = string.Join(Environment.NewLine, adPosts);
 
-            await SendEmail("New Real Estate Adverts published!", CreateHtmlBody(adPosts)).ConfigureAwait(false);
+            string pageContent;
+            if (System.IO.File.Exists(filePath))
+            {
+                // read content of existing file
+                var fileContents = await System.IO.File.ReadAllTextAsync(filePath).ConfigureAwait(false);
+                var index = fileContents.IndexOf("<posts/>", StringComparison.Ordinal);
+
+                pageContent = fileContents.Insert(index + 8, htmlPostsElements + Environment.NewLine);
+            }
+            else
+            {
+                // create new content
+                var index = HtmlTemplates.FullPage.IndexOf("<posts/>", StringComparison.Ordinal);
+
+                pageContent = HtmlTemplates.FullPage.Insert(index + 8, htmlPostsElements + Environment.NewLine);
+            }
+
+            try
+            {
+                await System.IO.File.WriteAllTextAsync(filePath, pageContent).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                throw new RealEstateAdPostsHandlerException($"Error saving new Ad posts to file: {ex.Message}", ex);
+            }
         }
 
         public async Task HandleInitialRealEstateAdPostsAsync(IList<RealEstateAdPost> adPosts)
         {
-            if (adPosts == null)
-                throw new ArgumentNullException(nameof(adPosts));
-            if (_settings.SkipInitialNotification)
-            {
-                _logger?.LogDebug($"Skipping initial notification on {adPosts.Count} Real Estate Ad posts");
-                return;
-            }
-            
-            _logger?.LogDebug($"Received initial {adPosts.Count} Real Estate Ad Posts.");
+            var posts = adPosts.Select(CreateHtmlPostElement);
 
-            await SendEmail("Initial Real Estate Adverts list", CreateHtmlBody(adPosts)).ConfigureAwait(false);
-        }
-
-        private async Task SendEmail(string subject, string body)
-        {
-            var message = new MimeMessage
-            {
-                Subject = subject,
-                Body = new BodyBuilder { HtmlBody = body }.ToMessageBody(),
-                From =
-                {
-                    new MailboxAddress(_settings.SenderName, _settings.EmailAddressFrom)
-                }
-            };
-            message.To.AddRange(_settings.EmailAddressesTo.Select(address => new MailboxAddress(address, address)));
+            var index = HtmlTemplates.FullPage.IndexOf("<posts/>", StringComparison.Ordinal);
+            var page = HtmlTemplates.FullPage.Insert(index + 8, string.Join(Environment.NewLine, posts));
 
             try
             {
-                using var client = new SmtpClient();
-
-                await client.ConnectAsync(_settings.SmtpServerHost,
-                                          _settings.SmtpServerPort,
-                                          _settings.UseSecureConnection).ConfigureAwait(false);
-
-                await client.AuthenticateAsync(new NetworkCredential(_settings.Username,
-                                                                                _settings.Password)).ConfigureAwait(false);
-
-                // send email
-                await client.SendAsync(message).ConfigureAwait(false);
-                await client.DisconnectAsync(true).ConfigureAwait(false);
-
-                _logger?.LogInformation("Notification email has been successfully sent.");
+                await System.IO.File.WriteAllTextAsync(_settings.MainFilePath, page).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                throw new RealEstateAdPostsHandlerException($"Error during sending email notification: {ex.Message}", ex);
+                throw new RealEstateAdPostsHandlerException($"Error saving initial Ad posts to file: {ex.Message}", ex);
             }
         }
 
-        private static string CreateHtmlBody(RealEstateAdPost adPost) => HtmlTemplates.FullPage.Replace("<posts/>", CreateSingleHtmlPost(adPost));
-
-        private static string CreateHtmlBody(IEnumerable<RealEstateAdPost> adPosts) => HtmlTemplates.FullPage.Replace("<posts/>", string.Join(Environment.NewLine, adPosts.Select(CreateSingleHtmlPost)));
-
-        private static string CreateSingleHtmlPost(RealEstateAdPost post)
+        private static string CreateHtmlPostElement(RealEstateAdPost post)
         {
             var postHtml = HtmlTemplates.Post
                                         .Replace("{$title}", post.Title)
@@ -137,6 +112,7 @@ namespace RealEstatesWatcher.AdPostsHandlers.Email
             {
                 postHtml = postHtml.Replace("{$layout}", "-");
             }
+
             // floor area
             if (post.FloorArea != decimal.Zero)
             {
@@ -146,6 +122,7 @@ namespace RealEstatesWatcher.AdPostsHandlers.Email
             {
                 postHtml = postHtml.Replace("{$floor-area}", " -");
             }
+
             // image
             if (post.ImageUrl is not null)
             {
@@ -156,6 +133,7 @@ namespace RealEstatesWatcher.AdPostsHandlers.Email
             {
                 postHtml = postHtml.Replace("{$img-display}", "none");
             }
+
             // price
             if (post.Price != decimal.Zero)
             {
@@ -170,6 +148,7 @@ namespace RealEstatesWatcher.AdPostsHandlers.Email
                                    .Replace("{$price-display}", "none")
                                    .Replace("{$price-comment-display}", "block");
             }
+
             // text
             if (!string.IsNullOrEmpty(post.Text))
             {

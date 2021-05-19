@@ -96,6 +96,9 @@ namespace RealEstatesWatcher.Core
                 // notify handlers
                 foreach (var handler in _handlers)
                 {
+                    if (!handler.IsEnabled)
+                        continue;
+
                     await handler.HandleInitialRealEstateAdPostsAsync(posts).ConfigureAwait(false);
                 }
 
@@ -177,6 +180,9 @@ namespace RealEstatesWatcher.Core
         {
             foreach (var handler in _handlers)
             {
+                if (!handler.IsEnabled)
+                    continue;
+                
                 try
                 {
                     await handler.HandleNewRealEstateAdPostAsync(adPost).ConfigureAwait(false);
@@ -192,6 +198,9 @@ namespace RealEstatesWatcher.Core
         {
             foreach (var handler in _handlers)
             {
+                if (!handler.IsEnabled)
+                    continue;
+
                 try
                 {
                     await handler.HandleNewRealEstatesAdPostsAsync(adPosts).ConfigureAwait(false);
