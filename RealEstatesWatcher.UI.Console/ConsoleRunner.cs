@@ -27,14 +27,23 @@ namespace RealEstatesWatcher.UI.Console
 {
     public class ConsoleRunner
     {
-        private static readonly AutoResetEvent WaitHandle = new(false);
+        private static readonly AutoResetEvent WaitHandle;
+        private static readonly CmdArguments CmdArguments;
 
         private static IServiceProvider _container;
         private static ILogger<ConsoleRunner>? _logger;
 
+        static ConsoleRunner()
+        {
+            WaitHandle = new AutoResetEvent(false);
+            CmdArguments = new CmdArguments();
+
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        }
+
         public static async Task Main(string[] args)
         {
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            await CmdArguments.ParseAsync(args);
 
             ConfigureDependencyInjection();
 
@@ -47,19 +56,19 @@ namespace RealEstatesWatcher.UI.Console
                 RegisterAdPostsHandlers(watcher);
 
                 // start watcher
-                await watcher.StartAsync();
+                await watcher.StartAsync().ConfigureAwait(false);
 
                 WaitForExitSignal();
 
                 // stop watcher
-                await watcher.StopAsync();
+                await watcher.StopAsync().ConfigureAwait(false);
             }
             catch (RealEstatesWatchEngineException reweEx)
             {
                 _logger?.LogCritical(reweEx, $"Error starting Real estates Watcher: {reweEx.Message}");
             }
         }
-        
+
         private static void ConfigureDependencyInjection()
         {
             var collection = new ServiceCollection();
@@ -87,7 +96,7 @@ namespace RealEstatesWatcher.UI.Console
 
         private static WatchEngineSettings LoadWatchEngineSettings()
         {
-            var configuration = new ConfigurationBuilder().AddIniFile("./configs/engine.ini")
+            var configuration = new ConfigurationBuilder().AddIniFile(CmdArguments.EngineConfigFilePath)
                                                           .Build()
                                                           .GetSection("settings");
 
@@ -101,7 +110,7 @@ namespace RealEstatesWatcher.UI.Console
         {
             _logger?.LogInformation("Registering Ads portals..");
 
-            var configuration = new ConfigurationBuilder().AddIniFile("./configs/portals.ini").Build();
+            var configuration = new ConfigurationBuilder().AddIniFile(CmdArguments.PortalsConfigFilePath).Build();
 
             foreach (var section in configuration.GetChildren())
             {
@@ -158,12 +167,12 @@ namespace RealEstatesWatcher.UI.Console
         {
             _logger?.LogInformation("Registering Ad posts handlers..");
 
-            watcher.RegisterAdPostsHandler(new EmailNotifyingAdPostsHandler(LoadSettings(), _container.GetService<ILogger<EmailNotifyingAdPostsHandler>>()));
-            //watcher.RegisterAdPostsHandler(new FileAdPostsHandler());
+            //watcher.RegisterAdPostsHandler(new EmailNotifyingAdPostsHandler(LoadSettings(), _container.GetService<ILogger<EmailNotifyingAdPostsHandler>>()));
+            watcher.RegisterAdPostsHandler(new FileAdPostsHandler());
 
             static EmailNotifyingAdPostsHandlerSettings LoadSettings()
             {
-                var configuration = new ConfigurationBuilder().AddIniFile("./configs/handlers.ini")
+                var configuration = new ConfigurationBuilder().AddIniFile(CmdArguments.HandlersConfigFilePath)
                                                               .Build()
                                                               .GetSection("email");
 
