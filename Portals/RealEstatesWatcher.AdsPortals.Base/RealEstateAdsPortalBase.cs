@@ -24,6 +24,7 @@ namespace RealEstatesWatcher.AdsPortals.Base
 
         protected readonly ILogger<RealEstateAdsPortalBase>? Logger;
         protected readonly IWebScraper? WebScraper;
+        protected readonly HtmlWeb? HtmlWeb;
 
         protected readonly string AdsUrl;
         protected readonly string RootHost;
@@ -38,6 +39,7 @@ namespace RealEstatesWatcher.AdsPortals.Base
             AdsUrl = adsUrl ?? throw new ArgumentNullException(nameof(adsUrl));
             RootHost = ParseRootHost(adsUrl);
             Logger = logger;
+            HtmlWeb = new HtmlWeb();
         }
 
         protected RealEstateAdsPortalBase(string adsUrl,
@@ -101,11 +103,9 @@ namespace RealEstatesWatcher.AdsPortals.Base
         {
             try
             {
-                var webHtml = new HtmlWeb();
-
                 // get page content
-                var pageContent = await webHtml.LoadFromWebAsync(AdsUrl, PageEncoding)
-                                               .ConfigureAwait(false);
+                var pageContent = await HtmlWeb!.LoadFromWebAsync(AdsUrl, PageEncoding)
+                                                .ConfigureAwait(false);
 
                 Logger?.LogDebug($"({Name}): Downloaded page with ads.");
                 
