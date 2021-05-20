@@ -22,13 +22,19 @@ namespace RealEstatesWatcher.AdPostsHandlers.Email
 <html>
 <head>
     <meta charset=""utf-8"">
+    <title>Real Estate Advertisements</title>
 </head>
 <body style=""max-width: 800px; margin:10px auto;"">
+    <maintitle/>
     <posts/>
 </body>
 </html>";
 
-            public const string Post = "<div style=\"padding: 10px; background: #ededed; min-height: 200px;\">\r\n    <div style=\"float: left; margin-right: 1em; width: 30%; height: 180px; display: {$img-display};\">\r\n        <img src=\"{$img-link}\" style=\"height: 100%; width: 100%; object-fit: cover;\" />\r\n    </div>\r\n    <a href=\"{$post-link}\">\r\n        <h3 style=\"margin: 0.2em; margin-top: 0;\">{$title}</h3>\r\n    </a>\r\n    <span style=\"font-size: medium; color: grey; display: {$price-display};\">\r\n        <strong>{$price}</strong> {$currency}<br/>\r\n    </span>\r\n    <span style=\"font-size: medium; color: grey; display: {$price-comment-display};\">\r\n        <strong>{$price-comment}</strong><br/>\r\n    </span>\r\n    <span>\r\n        <strong>Server:</strong> {$portal-name}<br/>\r\n        <strong>Adresa:</strong> {$address}<br/>\r\n        <strong>Výmera:</strong> {$floor-area}<br/>\r\n        <strong>Dispozícia:</strong> {$layout}</br>\r\n    </span>\r\n    <p style=\"margin: 0.2em; font-size: small; text-align: justify; display: {$text-display};\">{$text}</p>\r\n</div>";
+            public const string TitleNewPosts = @"<h1>🏦 <span style=""color: #4f4f4f; font-style: italic;"">NEW Real estate offer</span></h1>";
+
+            public const string TitleInitialPosts = @"<h1>🏦 <span style=""color: #4f4f4f; font-style: italic;""> Current Real estate offer</span></h1>";
+
+            public const string Post = "<div style=\"padding: 10px; background: #ededed; min-height: 200px;\">\r\n    <div style=\"float: left; margin-right: 1em; width: 30%; height: 180px; display: {$img-display};\">\r\n        <img src=\"{$img-link}\" style=\"height: 100%; width: 100%; object-fit: cover;\" />\r\n    </div>\r\n    <a href=\"{$post-link}\">\r\n        <h3 style=\"margin: 0.2em; margin-top: 0;\">{$title}</h3>\r\n    </a>\r\n    <span style=\"font-size: medium; color: #4f4f4f; display: {$price-display};\">\r\n        <strong>{$price}</strong> {$currency}<br/>\r\n    </span>\r\n    <span style=\"font-size: medium; color: #4f4f4f; display: {$price-comment-display};\">\r\n        <strong>{$price-comment}</strong><br/>\r\n    </span>\r\n    <span>\r\n        <strong>Server:</strong> {$portal-name}<br/>\r\n        <strong>Adresa:</strong> {$address}<br/>\r\n        <strong>Výmera:</strong> {$floor-area}<br/>\r\n        <strong>Dispozícia:</strong> {$layout}</br>\r\n    </span>\r\n    <p style=\"margin: 0.2em; font-size: small; text-align: justify; display: {$text-display};\">{$text}</p>\r\n</div>";
         }
 
         private readonly ILogger<EmailNotifyingAdPostsHandler>? _logger;
@@ -52,7 +58,7 @@ namespace RealEstatesWatcher.AdPostsHandlers.Email
 
             _logger?.LogDebug($"Received new Real Estate Ad Post: {adPost}");
 
-            await SendEmail("New Real Estate Advert published!", CreateHtmlBody(adPost)).ConfigureAwait(false);
+            await SendEmail("🆕 New Real Estate Advert published!", CreateHtmlBody(adPost, HtmlTemplates.TitleNewPosts)).ConfigureAwait(false);
         }
 
         public async Task HandleNewRealEstatesAdPostsAsync(IList<RealEstateAdPost> adPosts)
@@ -62,7 +68,7 @@ namespace RealEstatesWatcher.AdPostsHandlers.Email
 
             _logger?.LogDebug($"Received '{adPosts.Count}' new Real Estate Ad Posts.");
 
-            await SendEmail("New Real Estate Adverts published!", CreateHtmlBody(adPosts)).ConfigureAwait(false);
+            await SendEmail("🆕 New Real Estate Adverts published!", CreateHtmlBody(adPosts, HtmlTemplates.TitleNewPosts)).ConfigureAwait(false);
         }
 
         public async Task HandleInitialRealEstateAdPostsAsync(IList<RealEstateAdPost> adPosts)
@@ -77,7 +83,7 @@ namespace RealEstatesWatcher.AdPostsHandlers.Email
             
             _logger?.LogDebug($"Received initial {adPosts.Count} Real Estate Ad Posts.");
 
-            await SendEmail("Initial Real Estate Adverts list", CreateHtmlBody(adPosts)).ConfigureAwait(false);
+            await SendEmail("🏦 Current Real Estate Adverts offering", CreateHtmlBody(adPosts, HtmlTemplates.TitleInitialPosts)).ConfigureAwait(false);
         }
 
         private async Task SendEmail(string subject, string body)
@@ -116,9 +122,17 @@ namespace RealEstatesWatcher.AdPostsHandlers.Email
             }
         }
 
-        private static string CreateHtmlBody(RealEstateAdPost adPost) => HtmlTemplates.FullPage.Replace("<posts/>", CreateSingleHtmlPost(adPost));
+        private static string CreateHtmlBody(RealEstateAdPost adPost, string titleHtmlElement)
+        {
+            return HtmlTemplates.FullPage.Replace("<maintitle/>", titleHtmlElement)
+                                         .Replace("<posts/>", CreateSingleHtmlPost(adPost));
+        }
 
-        private static string CreateHtmlBody(IEnumerable<RealEstateAdPost> adPosts) => HtmlTemplates.FullPage.Replace("<posts/>", string.Join(Environment.NewLine, adPosts.Select(CreateSingleHtmlPost)));
+        private static string CreateHtmlBody(IEnumerable<RealEstateAdPost> adPosts, string titleHtmlElement)
+        {
+            return HtmlTemplates.FullPage.Replace("<maintitle/>", titleHtmlElement)
+                                         .Replace("<posts/>", string.Join(Environment.NewLine, adPosts.Select(CreateSingleHtmlPost)));
+        }
 
         private static string CreateSingleHtmlPost(RealEstateAdPost post)
         {

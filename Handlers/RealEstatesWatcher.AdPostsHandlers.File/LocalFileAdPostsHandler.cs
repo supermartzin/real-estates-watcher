@@ -18,13 +18,19 @@ namespace RealEstatesWatcher.AdPostsHandlers.File
 <html>
 <head>
     <meta charset=""utf-8"">
+    <title>Real Estate Advertisements</title>
 </head>
 <body style=""max-width: 800px; margin:10px auto;"">
+    <maintitle/>
     <posts/>
 </body>
 </html>";
 
-            public const string Post = "<div style=\"padding: 10px; background: #ededed; min-height: 200px;\">\r\n    <div style=\"float: left; margin-right: 1em; width: 30%; height: 180px; display: {$img-display};\">\r\n        <img src=\"{$img-link}\" style=\"height: 100%; width: 100%; object-fit: cover;\" />\r\n    </div>\r\n    <a href=\"{$post-link}\">\r\n        <h3 style=\"margin: 0.2em; margin-top: 0;\">{$title}</h3>\r\n    </a>\r\n    <span style=\"font-size: medium; color: grey; display: {$price-display};\">\r\n        <strong>{$price}</strong> {$currency}<br/>\r\n    </span>\r\n    <span style=\"font-size: medium; color: grey; display: {$price-comment-display};\">\r\n        <strong>{$price-comment}</strong><br/>\r\n    </span>\r\n    <span>\r\n        <strong>Server:</strong> {$portal-name}<br/>\r\n        <strong>Adresa:</strong> {$address}<br/>\r\n        <strong>Výmera:</strong> {$floor-area}<br/>\r\n        <strong>Dispozícia:</strong> {$layout}</br>\r\n    </span>\r\n    <p style=\"margin: 0.2em; font-size: small; text-align: justify; display: {$text-display};\">{$text}</p>\r\n</div>";
+            public const string TitleNewPosts = @"<h1>🏦 <span style=""color: #4f4f4f; font-style: italic;"">NEW Real estate offer</span></h1>";
+
+            public const string TitleInitialPosts = @"<h1>🏦 <span style=""color: #4f4f4f; font-style: italic;""> Current Real estate offer</span></h1>";
+
+            public const string Post = "<div style=\"padding: 10px; background: #ededed; min-height: 200px;\">\r\n    <div style=\"float: left; margin-right: 1em; width: 30%; height: 180px; display: {$img-display};\">\r\n        <img src=\"{$img-link}\" style=\"height: 100%; width: 100%; object-fit: cover;\" />\r\n    </div>\r\n    <a href=\"{$post-link}\">\r\n        <h3 style=\"margin: 0.2em; margin-top: 0;\">{$title}</h3>\r\n    </a>\r\n    <span style=\"font-size: medium; color: #4f4f4f; display: {$price-display};\">\r\n        <strong>{$price}</strong> {$currency}<br/>\r\n    </span>\r\n    <span style=\"font-size: medium; color: #4f4f4f; display: {$price-comment-display};\">\r\n        <strong>{$price-comment}</strong><br/>\r\n    </span>\r\n    <span>\r\n        <strong>Server:</strong> {$portal-name}<br/>\r\n        <strong>Adresa:</strong> {$address}<br/>\r\n        <strong>Výmera:</strong> {$floor-area}<br/>\r\n        <strong>Dispozícia:</strong> {$layout}</br>\r\n    </span>\r\n    <p style=\"margin: 0.2em; font-size: small; text-align: justify; display: {$text-display};\">{$text}</p>\r\n</div>";
         }
 
         private readonly LocalFileAdPostsHandlerSettings _settings;
@@ -63,9 +69,10 @@ namespace RealEstatesWatcher.AdPostsHandlers.File
             else
             {
                 // create new content
-                var index = HtmlTemplates.FullPage.IndexOf("<posts/>", StringComparison.Ordinal);
-
-                pageContent = HtmlTemplates.FullPage.Insert(index + 8, htmlPostsElements + Environment.NewLine);
+                pageContent = HtmlTemplates.FullPage.Replace("<maintitle/>", HtmlTemplates.TitleNewPosts);
+                
+                var index = pageContent.IndexOf("<posts/>", StringComparison.Ordinal);
+                pageContent = pageContent.Insert(index + 8, htmlPostsElements + Environment.NewLine);
             }
 
             try
@@ -82,8 +89,11 @@ namespace RealEstatesWatcher.AdPostsHandlers.File
         {
             var posts = adPosts.Select(CreateHtmlPostElement);
 
-            var index = HtmlTemplates.FullPage.IndexOf("<posts/>", StringComparison.Ordinal);
-            var page = HtmlTemplates.FullPage.Insert(index + 8, string.Join(Environment.NewLine, posts));
+            // insert title
+            var page = HtmlTemplates.FullPage.Replace("<maintitle/>", HtmlTemplates.TitleInitialPosts);
+
+            var index = page.IndexOf("<posts/>", StringComparison.Ordinal);
+            page = page.Insert(index + 8, string.Join(Environment.NewLine, posts));
 
             try
             {

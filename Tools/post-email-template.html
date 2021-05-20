@@ -1,15 +1,17 @@
+<!-- Page skelet -->
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Real Estate Ad Post</title>
+    <title>Real Estate Advertisements</title>
 </head>
 <body style="max-width: 800px; margin:10px auto;">
+    <maintitle/>
     <posts/>
 </body>
 </html>
 
-
+<!-- Single post element -->
 <div style="padding: 10px; background: #ededed; min-height: 200px;">
     <div style="float: left; margin-right: 1em; width: 30%; height: 180px; display: {$img-display};">
         <img src="{$img-link}" style="height: 100%; width: 100%; object-fit: cover;" />
@@ -17,10 +19,10 @@
     <a href="{$post-link}">
         <h3 style="margin: 0.2em; margin-top: 0;">{$title}</h3>
     </a>
-    <span style="font-size: medium; color: grey; display: {$price-display};">
+    <span style="font-size: medium; color: #4f4f4f; display: {$price-display};">
         <strong>{$price}</strong> {$currency}<br/>
     </span>
-    <span style="font-size: medium; color: grey; display: {$price-comment-display};">
+    <span style="font-size: medium; color: #4f4f4f; display: {$price-comment-display};">
         <strong>{$price-comment}</strong><br/>
     </span>
     <span>
@@ -31,3 +33,8 @@
     </span>
     <p style="margin: 0.2em; font-size: small; text-align: justify; display: {$text-display};">{$text}</p>
 </div>
+
+<!-- Titles -->
+<h1>🏦 <span style="color: #4f4f4f; font-style: italic;"> Current Real estate offer</span></h1>
+
+<h1>🏦 <span style="color: #4f4f4f; font-style: italic;">NEW Real estate offer</span></h1>
