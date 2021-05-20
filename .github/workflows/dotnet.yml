@@ -1,0 +1,44 @@
+name: Build and publish .NET commandline script
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  publish-for-windows:
+  
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build app
+      run: dotnet build --no-restore --configuration Release
+    - name: Publish app
+      run: dotnet publish -c Release /p:PublishProfile=Properties\PublishProfiles\Windows-profile.pubxml
+      working-directory: /RealEstatesWatcher.UI.Console/
+  
+  publish-for-linux:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build app
+      run: dotnet build --no-restore --configuration Release
+    - name: Publish app
+      run: dotnet publish -c Release /p:PublishProfile=Properties\PublishProfiles\Linux-profile.pubxml
+      working-directory: /RealEstatesWatcher.UI.Console/
