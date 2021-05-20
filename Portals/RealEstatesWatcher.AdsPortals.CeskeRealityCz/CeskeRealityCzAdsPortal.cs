@@ -32,7 +32,8 @@ namespace RealEstatesWatcher.AdsPortals.CeskeRealityCz
                                                                                         ParseAddress(node),
                                                                                         ParseWebUrl(node),
                                                                                         ParseFloorArea(node),
-                                                                                        imageUrl: ParseImageUrl(node));
+                                                                                        imageUrl: ParseImageUrl(node),
+                                                                                        priceComment: ParsePriceComment(node));
         
         private static string ParseTitle(HtmlNode node) => node.SelectSingleNode("./h2/a").InnerText;
 
@@ -47,6 +48,15 @@ namespace RealEstatesWatcher.AdsPortals.CeskeRealityCz
             return decimal.TryParse(value, out var price)
                 ? price
                 : decimal.Zero;
+        }
+
+        private static string? ParsePriceComment(HtmlNode node)
+        {
+            var value = node.SelectSingleNode(".//div[@class=\"cena\"]").InnerText;
+
+            return !Regex.IsMatch(value, @"\d+")
+                ? HttpUtility.HtmlDecode(value)
+                : default;
         }
 
         private static Layout ParseLayout(HtmlNode node)

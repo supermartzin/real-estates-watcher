@@ -5,7 +5,14 @@
     <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>RealEstatesWatcher.UI.Console</RootNamespace>
     <Nullable>enable</Nullable>
-    <Version>0.9.4</Version>
+    <Version>1.0.0</Version>
+    <Authors>Martin Vrábel</Authors>
+    <Product>Real Estate Watcher</Product>
+    <Description>Simple C# script for periodic watching of selected Real estate advertisement portals with notifications on new ads.</Description>
+    <PackageLicenseExpression>GPL-3.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/supermartzin/real-estates-watcher</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/supermartzin/real-estates-watcher</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Filters\RealEstatesWatcher.AdPostsFilters.BasicFilter\RealEstatesWatcher.AdPostsFilters.BasicFilter.csproj" />
     <ProjectReference Include="..\Handlers\RealEstatesWatcher.AdPostsHandlers.Email\RealEstatesWatcher.AdPostsHandlers.Email.csproj" />
     <ProjectReference Include="..\Handlers\RealEstatesWatcher.AdPostsHandlers.File\RealEstatesWatcher.AdPostsHandlers.File.csproj" />
     <ProjectReference Include="..\Portals\RealEstatesWatcher.AdsPortals.BazosCz\RealEstatesWatcher.AdsPortals.BazosCz.csproj" />
@@ -34,6 +42,9 @@
 
   <ItemGroup>
     <None Update="configs\engine.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="configs\filters.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="configs\handlers.ini">

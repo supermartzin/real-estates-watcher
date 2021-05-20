@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Filters\RealEstatesWatcher.AdPostsFilters.Contracts\RealEstatesWatcher.AdPostsFilters.Contracts.csproj" />
     <ProjectReference Include="..\Handlers\RealEstatesWatcher.AdPostsHandlers.Contracts\RealEstatesWatcher.AdPostsHandlers.Contracts.csproj" />
     <ProjectReference Include="..\Portals\RealEstatesWatcher.AdsPortals.Contracts\RealEstatesWatcher.AdsPortals.Contracts.csproj" />
   </ItemGroup>

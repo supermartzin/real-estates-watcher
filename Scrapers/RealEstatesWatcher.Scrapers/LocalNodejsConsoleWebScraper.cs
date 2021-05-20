@@ -69,12 +69,28 @@ namespace RealEstatesWatcher.Scrapers
                 var output = await process.StandardOutput
                                           .ReadToEndAsync()
                                           .ConfigureAwait(false);
+                var errorOutput = await process.StandardError
+                                               .ReadToEndAsync()
+                                               .ConfigureAwait(false);
 
-                // process downloaded page
+                process.StandardOutput.Close();
+                process.StandardError.Close();
+
+                if (!string.IsNullOrEmpty(errorOutput))
+                    throw new WebScraperException($"Error scraping web page: {errorOutput}");
+
+                // extract HTML content from whole output
                 var startIndex = output.IndexOf("<html", StringComparison.Ordinal);
                 var endIndex = output.LastIndexOf("</html>", StringComparison.Ordinal) + 7;
 
+                if (startIndex < 0 || endIndex < 0)
+                    throw new WebScraperException("No web page content has been scraped.");
+
                 return output[startIndex..endIndex];
+            }
+            catch (WebScraperException)
+            {
+                throw;
             }
             catch (Exception ex)
             {

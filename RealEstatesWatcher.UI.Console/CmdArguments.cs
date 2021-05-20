@@ -15,6 +15,8 @@ namespace RealEstatesWatcher.UI.Console
 
         public string EngineConfigFilePath { get; private set; }
 
+        public string? FiltersConfigFilePath { get; private set; }
+
         public CmdArguments()
         {
             _rootCommand = new RootCommand
@@ -28,6 +30,11 @@ namespace RealEstatesWatcher.UI.Console
                 {
                     ArgumentHelpName = "path to file",
                     IsRequired = true
+                },
+                new Option<string?>(new [] {"-filters", "--f"}, "The path to the configuration file of Ad posts filters")
+                {
+                    ArgumentHelpName = "path to file",
+                    IsRequired = false
                 },
                 new Option<string>(new[] {"-engine", "--e"}, "The path to the configuration file of the watcher engine")
                 {
@@ -46,11 +53,12 @@ namespace RealEstatesWatcher.UI.Console
 
             var parsed = false;
 
-            _rootCommand.Handler = CommandHandler.Create<string, string, string>(
-                (portals, handlers, engine) =>
+            _rootCommand.Handler = CommandHandler.Create<string, string, string?, string>(
+                (portals, handlers, filters, engine) =>
                 {
                     PortalsConfigFilePath = portals;
                     HandlersConfigFilePath = handlers;
+                    FiltersConfigFilePath = string.IsNullOrWhiteSpace(filters) ? null : filters;
                     EngineConfigFilePath = engine;
 
                     parsed = true;

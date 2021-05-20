@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog;
 using NLog.Extensions.Logging;
+using RealEstatesWatcher.AdPostsFilters.BasicFilter;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 using RealEstatesWatcher.AdsPortals.BazosCz;
@@ -21,6 +24,7 @@ using RealEstatesWatcher.AdsPortals.MMRealityCz;
 using RealEstatesWatcher.AdsPortals.RealcityCz;
 using RealEstatesWatcher.AdsPortals.RealityIdnesCz;
 using RealEstatesWatcher.Core;
+using RealEstatesWatcher.Models;
 using RealEstatesWatcher.Scrapers;
 using RealEstatesWatcher.Scrapers.Contracts;
 
@@ -57,6 +61,9 @@ namespace RealEstatesWatcher.UI.Console
                 var watcher = _container.GetRequiredService<RealEstatesWatchEngine>();
                 RegisterAdsPortals(watcher);
                 RegisterAdPostsHandlers(watcher);
+                RegisterAdPostsFilters(watcher);
+
+                _logger?.LogInformation("Starting Real estate Watcher engine.");
 
                 // start watcher
                 await watcher.StartAsync().ConfigureAwait(false);
@@ -207,6 +214,47 @@ namespace RealEstatesWatcher.UI.Console
                     NewPostsToSeparateFile = configuration.GetValue<bool>("separate_new_posts"),
                     NewPostsFilePath = configuration["new_posts_path"]
                 };
+            }
+        }
+
+        private static void RegisterAdPostsFilters(RealEstatesWatchEngine watcher)
+        {
+            _logger?.LogInformation("Registering Ad posts filters..");
+
+            if (CmdArguments.FiltersConfigFilePath is null)
+            {
+                _logger?.LogInformation("No filters provided.");
+                return;
+            }
+
+            watcher.RegisterAdPostsFilter(new BasicParametersAdPostsFilter(LoadBasicFilterSettings(), _container.GetService<ILogger<BasicParametersAdPostsFilter>>()));
+
+            static BasicParametersAdPostsFilterSettings LoadBasicFilterSettings()
+            {
+                var configuration = new ConfigurationBuilder().AddIniFile(CmdArguments.FiltersConfigFilePath)
+                                                              .Build()
+                                                              .GetSection("basic");
+
+                return new BasicParametersAdPostsFilterSettings
+                {
+                    MinPrice = configuration.GetValue<decimal?>("price_min"),
+                    MaxPrice = configuration.GetValue<decimal?>("price_max"),
+                    MinFloorArea = configuration.GetValue<decimal?>("floor_area_min"),
+                    MaxFloorArea = configuration.GetValue<decimal?>("floor_area_max"),
+                    Layouts = ParseLayouts(configuration.GetValue<string?>("layouts"))
+                };
+            }
+
+            static ISet<Layout> ParseLayouts(string? layoutsValue)
+            {
+                if (string.IsNullOrWhiteSpace(layoutsValue))
+                    return new HashSet<Layout>();
+
+                var layouts = layoutsValue.Split(",").Select(LayoutExtensions.ToLayout).ToHashSet();
+                if (layouts.Contains(Layout.NotSpecified))
+                    layouts.Remove(Layout.NotSpecified);
+
+                return layouts;
             }
         }
 

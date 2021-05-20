@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using Microsoft.Extensions.Logging;
 
+using RealEstatesWatcher.AdPostsFilters.Contracts;
 using RealEstatesWatcher.AdPostsHandlers.Contracts;
 using RealEstatesWatcher.AdsPortals.Contracts;
 using RealEstatesWatcher.Models;
@@ -17,6 +18,7 @@ namespace RealEstatesWatcher.Core
 
         private readonly ISet<IRealEstateAdsPortal> _adsPortals;
         private readonly ISet<IRealEstateAdPostsHandler> _handlers;
+        private readonly ISet<IRealEstateAdPostsFilter> _filters;
         private readonly ISet<RealEstateAdPost> _posts;
         private readonly WatchEngineSettings _settings;
 
@@ -32,6 +34,7 @@ namespace RealEstatesWatcher.Core
 
             _adsPortals = new HashSet<IRealEstateAdsPortal>();
             _handlers = new HashSet<IRealEstateAdPostsHandler>();
+            _filters = new HashSet<IRealEstateAdPostsFilter>();
             _posts = new HashSet<RealEstateAdPost>();
         }
 
@@ -69,6 +72,23 @@ namespace RealEstatesWatcher.Core
             _logger?.LogInformation($"Ad posts handler of type '{adPostsHandler.GetType().FullName}' successfully registered.");
         }
 
+        public void RegisterAdPostsFilter(IRealEstateAdPostsFilter adPostsFilter)
+        {
+            if (adPostsFilter == null)
+                throw new ArgumentNullException(nameof(adPostsFilter));
+
+            if (_filters.Any(filter => filter.Equals(adPostsFilter)))
+            {
+                _logger?.LogWarning($"Trying to register already registered ads posts filter of type '{adPostsFilter.GetType().FullName}'.");
+                return;
+            }
+
+            // add to registered filters
+            _filters.Add(adPostsFilter);
+
+            _logger?.LogInformation($"Ad posts filter of type '{adPostsFilter.GetType().FullName}' successfully registered.");
+        }
+
         public async Task StartAsync()
         {
             if (IsRunning)
@@ -81,17 +101,24 @@ namespace RealEstatesWatcher.Core
                 throw new RealEstatesWatchEngineException("Invalid check interval: must be at least 1 minute.");
             if (_settings.CheckIntervalMinutes >= int.MaxValue)
                 throw new ArgumentOutOfRangeException(nameof(_settings.CheckIntervalMinutes), "Check interval is not set.");
-
+            
             try
             {
                 // make initial load of posts
                 var posts = await GetCurrentAdsPortalsSnapshot().ConfigureAwait(false);
+
+                _logger?.LogDebug($"Successfully downloaded initial {posts.Count} post(s) from {_adsPortals.Count} portal(s).");
+
+                // run posts through filters
+                posts = _filters.Aggregate(posts, (current, filter) => filter.Filter(current).ToList());
+
+                _logger?.LogDebug($"Filtered {posts.Count} post(s) from all downloaded posts.");
+
+                // add to collection of processed posts
                 foreach (var post in posts)
                 {
                     _posts.Add(post);
                 }
-
-                _logger?.LogDebug($"Successfully downloaded initial {posts.Count} post(s) from {_adsPortals.Count} portal(s).");
 
                 // notify handlers
                 foreach (var handler in _handlers)
@@ -150,12 +177,15 @@ namespace RealEstatesWatcher.Core
 
             // get posts snapshot from portals
             var allPosts = await GetCurrentAdsPortalsSnapshot().ConfigureAwait(false);
+
+            // run posts through filters
+            allPosts = _filters.Aggregate(allPosts, (current, filter) => filter.Filter(current).ToList());
             
             var newPosts = new List<RealEstateAdPost>();
             foreach (var post in allPosts)
             {
                 if (_posts.Contains(post))
-                    continue; //skip
+                    continue; // skip
 
                 // add to collections
                 _posts.Add(post);

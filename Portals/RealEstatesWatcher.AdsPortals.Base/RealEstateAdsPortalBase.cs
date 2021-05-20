@@ -66,8 +66,6 @@ namespace RealEstatesWatcher.AdsPortals.Base
                 // get page content
                 var pageContent = await WebScraper!.GetFullWebPageContentAsync(AdsUrl)
                                                    .ConfigureAwait(false);
-                if (pageContent == null)
-                    throw new RealEstateAdsPortalException("Page content has not been correctly downloaded.");
 
                 var htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(pageContent);
