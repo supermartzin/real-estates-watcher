@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  publish-for-windows:
+  Publish for Windows:
   
     runs-on: windows-latest
     
@@ -23,9 +23,8 @@ jobs:
       run: dotnet build --no-restore --configuration Release
     - name: Publish app
       run: dotnet publish ./RealEstatesWatcher.UI.Console/RealEstatesWatcher.UI.Console.csproj -c Release /p:PublishProfile="Properties/PublishProfiles/Windows-profile.pubxml"
-      working-directory: ./RealEstatesWatcher.UI.Console
   
-  publish-for-linux:
+  Publish for Linux:
 
     runs-on: ubuntu-latest
 
@@ -41,4 +40,3 @@ jobs:
       run: dotnet build --no-restore --configuration Release
     - name: Publish app
       run: dotnet publish ./RealEstatesWatcher.UI.Console/RealEstatesWatcher.UI.Console.csproj -c Release /p:PublishProfile="Properties/PublishProfiles/Linux-profile.pubxml"
-      working-directory: ./RealEstatesWatcher.UI.Console
