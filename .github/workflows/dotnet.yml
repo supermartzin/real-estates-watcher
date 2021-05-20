@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  Publish for Windows:
+  publish-for-windows:
   
     runs-on: windows-latest
     
@@ -24,7 +24,7 @@ jobs:
     - name: Publish app
       run: dotnet publish ./RealEstatesWatcher.UI.Console/RealEstatesWatcher.UI.Console.csproj -c Release /p:PublishProfile="Properties/PublishProfiles/Windows-profile.pubxml"
   
-  Publish for Linux:
+  publish-for-linux:
 
     runs-on: ubuntu-latest
 
