@@ -1,4 +1,4 @@
-name: Build and publish .NET commandline script
+name: Build and publish
 
 on:
   push:
@@ -22,8 +22,8 @@ jobs:
     - name: Build app
       run: dotnet build --no-restore --configuration Release
     - name: Publish app
-      run: dotnet publish -c Release /p:PublishProfile=Properties\PublishProfiles\Windows-profile.pubxml
-      working-directory: /RealEstatesWatcher.UI.Console/
+      run: dotnet publish -c Release /p:PublishProfile="roperties/PublishProfiles/Windows-profile.pubxml"
+      working-directory: ./RealEstatesWatcher.UI.Console
   
   publish-for-linux:
 
@@ -40,5 +40,5 @@ jobs:
     - name: Build app
       run: dotnet build --no-restore --configuration Release
     - name: Publish app
-      run: dotnet publish -c Release /p:PublishProfile=Properties\PublishProfiles\Linux-profile.pubxml
-      working-directory: /RealEstatesWatcher.UI.Console/
+      run: dotnet publish -c Release /p:PublishProfile="Properties/PublishProfiles/Linux-profile.pubxml"
+      working-directory: ./RealEstatesWatcher.UI.Console
