@@ -7,6 +7,20 @@
 
 **Supported OS:** Windows, macOS, Linux
 
+### 🌐 Currently supported Ads portals:
+
+ - [Bazoš.cz](https://www.bazos.cz/)
+ - [Bezrealitky.cz](https://www.bezrealitky.cz)
+ - [České Reality.cz](https://www.ceskereality.cz/)
+ - [Flatzone.cz](https://www.flatzone.cz/)
+ - [M&M Reality.cz](https://www.mmreality.cz/)
+ - [Realcity.cz](https://www.realcity.cz/)
+ - [Reality.iDNES.cz](https://reality.idnes.cz/)
+ - [RE/MAX.cz](https://www.remax-czech.cz/)
+ - [Sreality.cz](https://www.sreality.cz/)
+
+___
+
 ## 🚀 How to run the application
 
 Run the app by executing the following command
