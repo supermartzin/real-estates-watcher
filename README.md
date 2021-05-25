@@ -49,7 +49,7 @@ Perform following steps and commands either from the [**root folder**](https://g
  
  4. **Copy Web scraper files** from [Tools/scraper folder](https://github.com/supermartzin/real-estates-watcher/tree/main/Tools/scraper) to **~/publish/scraper** directory.
  
- 5. Make sure you have a **/config** folder in the publish directory with all the configuration files or copy them manually from [**RealEstatesWatcher.UI.Console/configs/** folder](https://github.com/supermartzin/real-estates-watcher/tree/main/RealEstatesWatcher.UI.Console/configs)
+ 5. Make sure you have a **/configs** folder in the publish directory with all the configuration files or copy them manually from [**RealEstatesWatcher.UI.Console/configs/** folder](https://github.com/supermartzin/real-estates-watcher/tree/main/RealEstatesWatcher.UI.Console/configs)
     * `handlers.ini`
     * `portals.ini`
     * `filters.ini`
