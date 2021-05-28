@@ -19,7 +19,7 @@ namespace RealEstatesWatcher.AdsPortals.BravisCz
         {
         }
 
-        protected override string GetPathToAdsElements() => "//ul[@class=\"itemslist\"]/li";
+        protected override string GetPathToAdsElements() => "//ul[@class=\"itemslist\"]/li[not(@class)]";
 
         protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
                                                                                         ParseTitle(node),

@@ -19,6 +19,7 @@ using RealEstatesWatcher.AdsPortals.SrealityCz;
 using RealEstatesWatcher.AdPostsHandlers.Email;
 using RealEstatesWatcher.AdPostsHandlers.File;
 using RealEstatesWatcher.AdsPortals.BezrealitkyCz;
+using RealEstatesWatcher.AdsPortals.BidliCz;
 using RealEstatesWatcher.AdsPortals.BravisCz;
 using RealEstatesWatcher.AdsPortals.CeskeRealityCz;
 using RealEstatesWatcher.AdsPortals.MMRealityCz;
@@ -137,6 +138,10 @@ namespace RealEstatesWatcher.UI.Console
                         watcher.RegisterAdsPortal(new BezrealitkyCzAdsPortal(url,
                                                                              _container.GetRequiredService<IWebScraper>(),
                                                                              _container.GetService<ILogger<BezrealitkyCzAdsPortal>>()));
+                        break;
+
+                    case "Bidli.cz":
+                        watcher.RegisterAdsPortal(new BidliCzAdsPortal(url, _container.GetService<ILogger<BidliCzAdsPortal>>()));
                         break;
 
                     case "Bravis.cz":
