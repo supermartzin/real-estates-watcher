@@ -39,7 +39,14 @@ namespace RealEstatesWatcher.AdsPortals.Base
             AdsUrl = adsUrl ?? throw new ArgumentNullException(nameof(adsUrl));
             RootHost = ParseRootHost(adsUrl);
             Logger = logger;
-            HtmlWeb = new HtmlWeb();
+            HtmlWeb = new HtmlWeb
+            {
+                PreRequest = request =>
+                {
+                    request.Timeout = 30000;
+                    return true;
+                }
+            };
         }
 
         protected RealEstateAdsPortalBase(string adsUrl,
