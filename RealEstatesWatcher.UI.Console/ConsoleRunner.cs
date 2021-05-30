@@ -89,6 +89,12 @@ namespace RealEstatesWatcher.UI.Console
             collection.AddLogging(builder =>
             {
                 builder.AddNLog();
+                builder.AddSentry(options =>
+                {
+                    options.Dsn = "https://8a560ec7c9c241c6bc9f00e116bace08@o504575.ingest.sentry.io/5792424";
+                    options.MinimumEventLevel = LogLevel.Warning;
+                    options.InitializeSdk = true;
+                });
 
                 // set Minimum log level based on variable in NLog.config --> default == INFO
                 var minLevelVariable = LogManager.Configuration?.Variables["minLogLevel"]?.OriginalText;
