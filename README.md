@@ -11,6 +11,7 @@
 
  - [Bazoš.cz](https://www.bazos.cz/)
  - [Bezrealitky.cz](https://www.bezrealitky.cz)
+ - [Bidli.cz](https://www.bidli.cz/)
  - [Bravis.cz](https://www.bravis.cz/)
  - [České Reality.cz](https://www.ceskereality.cz/)
  - [Flatzone.cz](https://www.flatzone.cz/)
