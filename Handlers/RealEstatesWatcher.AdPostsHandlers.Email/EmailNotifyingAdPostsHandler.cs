@@ -188,7 +188,7 @@ namespace RealEstatesWatcher.AdPostsHandlers.Email
             if (!string.IsNullOrEmpty(post.Text))
             {
                 postHtml = postHtml.Replace("{$text}", post.Text)
-                                   .Replace("{$text-display}", "flex");
+                                   .Replace("{$text-display}", "table");
             }
             else
             {
