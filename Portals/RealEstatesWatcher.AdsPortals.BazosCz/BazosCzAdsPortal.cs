@@ -19,7 +19,7 @@ namespace RealEstatesWatcher.AdsPortals.BazosCz
         {
         }
         
-        protected override string GetPathToAdsElements() => "//span[@class=\"vypis\"]//tr[1]";
+        protected override string GetPathToAdsElements() => @"//div[@class=""maincontent""]/div[contains(@class,""inzeraty inzeratyflex"")]";
         
         protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
                                                                              ParseTitle(node),
@@ -33,22 +33,22 @@ namespace RealEstatesWatcher.AdsPortals.BazosCz
                                                                              imageUrl: ParseImageUrl(node),
                                                                              publishTime: ParsePublishDate(node));
 
-        private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//span[@class=\"nadpis\"]").FirstChild.InnerText;
+        private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(@".//span[@class=""nadpis""]").InnerText;
 
-        private static string ParseText(HtmlNode node) => node.SelectSingleNode(".//div[@class=\"popis\"]").InnerText;
+        private static string ParseText(HtmlNode node) => node.SelectSingleNode(@".//div[@class=""popis""]").InnerText;
 
-        private static string ParseAddress(HtmlNode node) => node.SelectSingleNode("./td[3]").InnerHtml.Replace("<br>", " ");
+        private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(@"./div[@class=""inzeratylok""]").InnerHtml.Replace("<br>", " ");
 
         private static Uri ParseWebUrl(HtmlNode node, string rootHost)
         {
-            var relativePath = node.SelectSingleNode(".//span[@class=\"nadpis\"]").FirstChild.GetAttributeValue("href", string.Empty);
+            var relativePath = node.SelectSingleNode(@".//span[@class=""nadpis""]").FirstChild.GetAttributeValue("href", string.Empty);
 
             return new Uri(rootHost + relativePath);
         }
 
         private static Uri? ParseImageUrl(HtmlNode node)
         {
-            var path = node.SelectSingleNode(".//img[@class=\"obrazek\"]")?.GetAttributeValue("src", null);
+            var path = node.SelectSingleNode(@".//img[@class=""obrazek""]")?.GetAttributeValue("src", null);
 
             return path is not null
                 ? new Uri(path)
@@ -58,10 +58,10 @@ namespace RealEstatesWatcher.AdsPortals.BazosCz
         private static DateTime? ParsePublishDate(HtmlNode node)
         {
             const string dateTimeFormat = "d.M.yyyy";
-            const string dateTimeParseRegex = "\\[([0-9.\\s]+)\\]";
+            const string dateTimeParseRegex = @"\[([0-9.\s]+)\]";
 
-            var value = node.SelectSingleNode(".//span[@class=\"velikost10\"]")?.InnerText;
-            if (value == null)
+            var value = node.SelectSingleNode(@".//span[@class=""velikost10""]")?.InnerText;
+            if (value is null)
                 return default;
 
             var result = Regex.Match(value, dateTimeParseRegex);
@@ -77,8 +77,8 @@ namespace RealEstatesWatcher.AdsPortals.BazosCz
 
         private static decimal ParsePrice(HtmlNode node)
         {
-            var value = node.SelectSingleNode(".//span[@class=\"cena\"]")?.InnerText;
-            if (value == null)
+            var value = node.SelectSingleNode(@"./div[@class=""inzeratycena""]")?.InnerText;
+            if (value is null)
                 return decimal.Zero;
 
             value = Regex.Replace(value, RegexPatterns.AllNonNumberValues, "");

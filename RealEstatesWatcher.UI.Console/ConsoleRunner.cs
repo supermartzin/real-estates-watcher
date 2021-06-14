@@ -9,15 +9,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog;
 using NLog.Extensions.Logging;
-using RealEstatesWatcher.AdPostsFilters.BasicFilter;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 using RealEstatesWatcher.AdsPortals.BazosCz;
 using RealEstatesWatcher.AdsPortals.FlatZoneCz;
 using RealEstatesWatcher.AdsPortals.RemaxCz;
 using RealEstatesWatcher.AdsPortals.SrealityCz;
-using RealEstatesWatcher.AdPostsHandlers.Email;
-using RealEstatesWatcher.AdPostsHandlers.File;
 using RealEstatesWatcher.AdsPortals.BezrealitkyCz;
 using RealEstatesWatcher.AdsPortals.BidliCz;
 using RealEstatesWatcher.AdsPortals.BravisCz;
@@ -29,6 +26,9 @@ using RealEstatesWatcher.Core;
 using RealEstatesWatcher.Models;
 using RealEstatesWatcher.Scrapers;
 using RealEstatesWatcher.Scrapers.Contracts;
+using RealEstatesWatcher.AdPostsHandlers.Email;
+using RealEstatesWatcher.AdPostsHandlers.File;
+using RealEstatesWatcher.AdPostsFilters.BasicFilter;
 
 namespace RealEstatesWatcher.UI.Console
 {

@@ -10,7 +10,7 @@ const puppeteer = require("puppeteer");
 
         await page.goto(process.argv[2], {
             waitUntil: "networkidle0",
-            timeout: 15000
+            timeout: 20000
         }).then(async () => {
             const data = await page.content();
             await browser.close();
