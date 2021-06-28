@@ -1,5 +1,6 @@
 # Real Estate Watcher 🔍
 🏦 Simple C# command-line application for periodic watching of selected Real estate advertisement portals and sending notifications on new ads. 🏗
+Supports watching adverts for **sells** as well as **leases**.
 
 [![Build and publish .NET commandline script](https://github.com/supermartzin/real-estates-watcher/actions/workflows/dotnet.yml/badge.svg?branch=main)](https://github.com/supermartzin/real-estates-watcher/actions/workflows/dotnet.yml)
 
