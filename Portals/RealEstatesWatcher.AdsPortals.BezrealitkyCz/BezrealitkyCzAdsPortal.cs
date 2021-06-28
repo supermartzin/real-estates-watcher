@@ -30,6 +30,7 @@ namespace RealEstatesWatcher.AdsPortals.BezrealitkyCz
                                                                                         ParseLayout(node),
                                                                                         ParseAddress(node),
                                                                                         ParseWebUrl(node),
+                                                                                        ParseAdditionalFees(node),
                                                                                         ParseFloorArea(node),
                                                                                         imageUrl: ParseImageUrl(node, RootHost));
 
@@ -40,6 +41,25 @@ namespace RealEstatesWatcher.AdsPortals.BezrealitkyCz
             var value = node.SelectSingleNode(".//strong[@class=\"product__value\"]")?.InnerText;
             if (value == null)
                 return decimal.Zero;
+
+            if (value.Contains('+'))
+                value = value.Split('+')[0];    // get first value as primary
+
+            value = Regex.Replace(value, RegexPatterns.AllNonNumberValues, "");
+
+            return decimal.TryParse(value, out var price)
+                ? price
+                : decimal.Zero;
+        }
+
+        private static decimal ParseAdditionalFees(HtmlNode node)
+        {
+            var value = node.SelectSingleNode(".//strong[@class=\"product__value\"]")?.InnerText;
+            if (value == null)
+                return decimal.Zero;
+
+            if (value.Contains('+'))
+                value = value.Split('+')[1];    // get second value as additional
 
             value = Regex.Replace(value, RegexPatterns.AllNonNumberValues, "");
 

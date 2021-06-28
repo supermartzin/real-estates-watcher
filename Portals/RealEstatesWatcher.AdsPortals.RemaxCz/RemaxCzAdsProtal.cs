@@ -18,46 +18,38 @@ namespace RealEstatesWatcher.AdsPortals.RemaxCz
                                 ILogger<RemaxCzAdsProtal>? logger = default) : base(adsUrl, logger)
         {
         }
-        
+
         protected override string GetPathToAdsElements() => "//a[@class=\"pl-items__link\"]";
 
-        protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node)
-        {
-            var price = ParsePrice(node);
-            var priceCurrency = Currency.CZK;
-            var priceComment = string.Empty;
-            if (price == decimal.Zero)
-            {
-                priceCurrency = Currency.Other;
-                priceComment = ParsePriceComment(node);
-            }
+        protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
+                                                                                        ParseTitle(node),
+                                                                                        string.Empty,
+                                                                                        ParsePrice(node),
+                                                                                        ParsePrice(node) is not decimal.Zero ? Currency.CZK : Currency.Other,
+                                                                                        ParseLayout(node),
+                                                                                        ParseAddress(node),
+                                                                                        ParseWebUrl(node, RootHost),
+                                                                                        decimal.Zero,
+                                                                                        ParseFloorArea(node),
+                                                                                        ParsePriceComment(node),
+                                                                                        ParseImageUrl(node));
 
-            return new RealEstateAdPost(Name,
-                                        ParseTitle(node),
-                                        string.Empty,
-                                        price,
-                                        priceCurrency,
-                                        ParseLayout(node),
-                                        ParseAddress(node),
-                                        ParseWebUrl(node, RootHost),
-                                        ParseFloorArea(node),
-                                        priceComment,
-                                        ParseImageUrl(node));
-        }
-        
         private static decimal ParsePrice(HtmlNode node)
         {
-            var value = node.SelectSingleNode(".//div[contains(@class,\"item-price\")]//span[@data-advert-price]")?
-                            .GetAttributeValue("data-advert-price", null);
+            var value = node.SelectSingleNode(".//div[contains(@class,\"item-price\")]/strong")?.FirstChild?.InnerText;
             if (value == null)
                 return decimal.Zero;
+
+            value = Regex.Replace(value, RegexPatterns.AllNonNumberValues, "");
 
             return decimal.TryParse(value, out var price)
                 ? price
                 : decimal.Zero;
         }
 
-        private static string? ParsePriceComment(HtmlNode node) => node.SelectSingleNode(".//div[contains(@class,\"item-price\")]/strong")?.InnerText;
+        private static string? ParsePriceComment(HtmlNode node) => ParsePrice(node) is decimal.Zero
+            ? node.SelectSingleNode(".//div[contains(@class,\"item-price\")]/strong")?.InnerText?.Trim()
+            : default;
 
         private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//h2/strong").InnerText;
 

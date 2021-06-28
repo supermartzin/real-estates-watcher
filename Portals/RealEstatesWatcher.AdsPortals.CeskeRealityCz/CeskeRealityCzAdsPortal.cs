@@ -31,6 +31,7 @@ namespace RealEstatesWatcher.AdsPortals.CeskeRealityCz
                                                                                         ParseLayout(node),
                                                                                         ParseAddress(node),
                                                                                         ParseWebUrl(node),
+                                                                                        decimal.Zero,
                                                                                         ParseFloorArea(node),
                                                                                         imageUrl: ParseImageUrl(node),
                                                                                         priceComment: ParsePriceComment(node));

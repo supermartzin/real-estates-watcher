@@ -80,7 +80,6 @@ namespace RealEstatesWatcher.AdsPortals.FlatZoneCz
                                                                                         Layout.NotSpecified,
                                                                                         ParseAddress(node),
                                                                                         ParseWebUrl(node),
-                                                                                        decimal.Zero,
                                                                                         imageUrl: ParseImageUrl(node));
         
         private static string ParseTitle(HtmlNode node)

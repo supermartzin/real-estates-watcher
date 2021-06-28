@@ -29,6 +29,7 @@ namespace RealEstatesWatcher.AdsPortals.BravisCz
                                                                                         ParseLayout(node),
                                                                                         ParseAddress(node),
                                                                                         ParseWebUrl(node, RootHost),
+                                                                                        ParseAdditionalFees(node),
                                                                                         ParseFloorArea(node),
                                                                                         ParsePriceComment(node),
                                                                                         ParseImageUrl(node, RootHost));
@@ -46,6 +47,31 @@ namespace RealEstatesWatcher.AdsPortals.BravisCz
             return decimal.TryParse(value, out var price)
                 ? price
                 : decimal.Zero;
+        }
+
+        private static decimal ParseAdditionalFees(HtmlNode node)
+        {
+            var value = node.SelectSingleNode(".//strong[@class='price']/small")?.InnerText;
+            if (value == null)
+                return decimal.Zero;
+
+            var subValues = value.Split('+');
+            var totalFees = decimal.Zero;
+            foreach (var subValue in subValues)
+            {
+                var feeValue = subValue;
+
+                var index = subValue.IndexOf(",-", StringComparison.InvariantCulture);
+                if (index > -1)
+                    feeValue = subValue[..index];
+
+                feeValue = Regex.Replace(feeValue, RegexPatterns.AllNonNumberValues, "");
+
+                if (decimal.TryParse(feeValue, out var fee))
+                    totalFees += fee;
+            }
+
+            return totalFees;
         }
 
         private static Layout ParseLayout(HtmlNode node)

@@ -31,6 +31,7 @@ namespace RealEstatesWatcher.AdsPortals.SrealityCz
                                                                                         ParseLayout(node),
                                                                                         ParseAddress(node),
                                                                                         ParseWebUrl(node, RootHost),
+                                                                                        decimal.Zero,
                                                                                         ParseFloorArea(node),
                                                                                         imageUrl: ParseImageUrl(node),
                                                                                         priceComment: ParsePriceComment(node));
@@ -61,7 +62,6 @@ namespace RealEstatesWatcher.AdsPortals.SrealityCz
             if (value == null)
                 return decimal.Zero;
 
-            value = HttpUtility.HtmlDecode(value);
             value = Regex.Replace(value, RegexPatterns.AllNonNumberValues, "");
 
             return decimal.TryParse(value, out var price)
@@ -89,7 +89,7 @@ namespace RealEstatesWatcher.AdsPortals.SrealityCz
             var value = node.SelectSingleNode(".//span[contains(@class,\"norm-price\")]")?.InnerText;
             if (value == null)
                 return null;
-            
+
             value = HttpUtility.HtmlDecode(value);
             var result = Regex.Match(value, @"\d");
 
@@ -99,7 +99,7 @@ namespace RealEstatesWatcher.AdsPortals.SrealityCz
         private static decimal ParseFloorArea(HtmlNode node)
         {
             var value = ParseTitle(node);
-            
+
             var result = Regex.Match(value, RegexPatterns.FloorArea);
             if (!result.Success)
                 return decimal.Zero;

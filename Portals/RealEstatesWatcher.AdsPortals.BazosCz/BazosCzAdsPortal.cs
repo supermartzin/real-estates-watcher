@@ -29,9 +29,11 @@ namespace RealEstatesWatcher.AdsPortals.BazosCz
                                                                              ParseLayout(node),
                                                                              ParseAddress(node),
                                                                              ParseWebUrl(node, RootHost),
+                                                                             decimal.Zero,
                                                                              ParseFloorArea(node),
                                                                              imageUrl: ParseImageUrl(node),
-                                                                             publishTime: ParsePublishDate(node));
+                                                                             publishTime: ParsePublishDate(node),
+                                                                             priceComment: ParsePriceComment(node));
 
         private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(@".//span[@class=""nadpis""]").InnerText;
 
@@ -108,6 +110,10 @@ namespace RealEstatesWatcher.AdsPortals.BazosCz
                 ? floorArea
                 : decimal.Zero;
         }
+
+        private static string? ParsePriceComment(HtmlNode node) => ParsePrice(node) is decimal.Zero
+            ? node.SelectSingleNode(@"./div[@class=""inzeratycena""]")?.InnerText?.Trim()
+            : null;
 
         private static Layout ParseLayout(HtmlNode node)
         {

@@ -104,7 +104,7 @@ namespace RealEstatesWatcher.UI.Console
 
             // add scraper
             collection.AddSingleton<IWebScraper>(new LocalNodejsConsoleWebScraper("./scraper/index.js"));
-            
+
             // add engine
             collection.AddSingleton(LoadWatchEngineSettings());
             collection.AddSingleton<RealEstatesWatchEngine>();

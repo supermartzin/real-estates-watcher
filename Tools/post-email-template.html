@@ -20,7 +20,8 @@
         <h3 style="margin: 0.2em; margin-top: 0;">{$title}</h3>
     </a>
     <span style="font-size: medium; color: #4f4f4f; display: {$price-display};">
-        <strong>{$price}</strong> {$currency}<br/>
+        <strong>{$price}</strong> {$currency}
+        <span style="display: {$additional-fees-display};"> + {$additional-fees} {$currency}</span><br/>
     </span>
     <span style="font-size: medium; color: #4f4f4f; display: {$price-comment-display};">
         <strong>{$price-comment}</strong><br/>

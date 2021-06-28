@@ -5,7 +5,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>RealEstatesWatcher.UI.Console</RootNamespace>
     <Nullable>enable</Nullable>
-    <Version>1.2.0</Version>
+    <Version>1.3.0</Version>
     <Authors>Martin Vrábel</Authors>
     <Product>Real Estate Watcher</Product>
     <Description>Simple C# script for periodic watching of selected Real estate advertisement portals with notifications on new ads.</Description>
@@ -13,14 +13,15 @@
     <PackageProjectUrl>https://github.com/supermartzin/real-estates-watcher</PackageProjectUrl>
     <RepositoryUrl>https://github.com/supermartzin/real-estates-watcher</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <AssemblyVersion>1.3.0.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
-    <PackageReference Include="NLog.Extensions.Logging" Version="1.7.2" />
-    <PackageReference Include="Sentry.Extensions.Logging" Version="3.5.0" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="1.7.3" />
+    <PackageReference Include="Sentry.Extensions.Logging" Version="3.6.0" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21216.1" />
   </ItemGroup>
 

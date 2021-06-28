@@ -12,6 +12,8 @@ namespace RealEstatesWatcher.Models
 
         public decimal Price { get; }
 
+        public decimal AdditionalFees { get; }
+
         public string? PriceComment { get; }
 
         public Currency Currency { get; }
@@ -36,6 +38,7 @@ namespace RealEstatesWatcher.Models
                                 Layout layout,
                                 string address,
                                 Uri webUrl,
+                                decimal additionalFees = decimal.Zero,
                                 decimal floorArea = decimal.Zero,
                                 string? priceComment = default,
                                 Uri? imageUrl = default,
@@ -50,6 +53,7 @@ namespace RealEstatesWatcher.Models
             Layout = layout;
             Price = price >= decimal.Zero ? price : throw new ArgumentOutOfRangeException(nameof(price));
 
+            AdditionalFees = additionalFees;
             FloorArea = floorArea;
             PriceComment = priceComment;
             ImageUrl = imageUrl;
@@ -62,13 +66,13 @@ namespace RealEstatesWatcher.Models
                                                                .Equals(other.WebUrl
                                                                             .GetLeftPart(UriPartial.Path));
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj is null)
                 return false;
             if (ReferenceEquals(this, obj))
                 return true;
-            
+           
             return obj.GetType() == GetType() && Equals((RealEstateAdPost) obj);
         }
 

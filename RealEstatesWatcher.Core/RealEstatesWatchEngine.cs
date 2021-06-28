@@ -101,7 +101,7 @@ namespace RealEstatesWatcher.Core
                 throw new RealEstatesWatchEngineException("Invalid check interval: must be at least 1 minute.");
             if (_settings.CheckIntervalMinutes >= int.MaxValue)
                 throw new ArgumentOutOfRangeException(nameof(_settings.CheckIntervalMinutes), "Check interval is not set.");
-            
+
             try
             {
                 // make initial load of posts
@@ -180,7 +180,7 @@ namespace RealEstatesWatcher.Core
 
             // run posts through filters
             allPosts = _filters.Aggregate(allPosts, (current, filter) => filter.Filter(current).ToList());
-            
+
             var newPosts = new List<RealEstateAdPost>();
             foreach (var post in allPosts)
             {
@@ -212,7 +212,7 @@ namespace RealEstatesWatcher.Core
             {
                 if (!handler.IsEnabled)
                     continue;
-                
+
                 try
                 {
                     await handler.HandleNewRealEstateAdPostAsync(adPost).ConfigureAwait(false);

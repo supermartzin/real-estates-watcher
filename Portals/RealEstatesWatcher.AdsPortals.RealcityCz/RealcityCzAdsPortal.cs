@@ -29,6 +29,7 @@ namespace RealEstatesWatcher.AdsPortals.RealcityCz
                                                                                         ParseLayout(node),
                                                                                         ParseAddress(node),
                                                                                         ParseWebUrl(node, RootHost),
+                                                                                        decimal.Zero,
                                                                                         ParseFloorArea(node),
                                                                                         imageUrl: ParseImageUrl(node));
 
@@ -95,7 +96,7 @@ namespace RealEstatesWatcher.AdsPortals.RealcityCz
         private static Uri? ParseImageUrl(HtmlNode node)
         {
             var path = node.SelectSingleNode(".//div[contains(@class,\"image\")]//img")?.GetAttributeValue("src", null);
-            
+
             return path is not null
                 ? new Uri($"https://{path[2..]}")   // skip leading '//' characters
                 : default;
