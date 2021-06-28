@@ -65,7 +65,7 @@ namespace RealEstatesWatcher.AdsPortals.Base
         protected abstract RealEstateAdPost ParseRealEstateAdPost(HtmlNode node);
 
         private static string ParseRootHost(string url) => $"https://{new Uri(url).Host}";
-        
+
         private async Task<IList<RealEstateAdPost>> GetAdsWithWebScraperAsync()
         {
             try
@@ -82,11 +82,11 @@ namespace RealEstatesWatcher.AdsPortals.Base
 
                 // parse posts
                 var posts = htmlDoc.DocumentNode
-                                   .SelectNodes(GetPathToAdsElements())
+                                   .SelectNodes(GetPathToAdsElements())?
                                    .Select(ParseRealEstateAdPost)
-                                   .ToList();
+                                   .ToList() ?? new List<RealEstateAdPost>();
 
-                Logger?.LogDebug($"({Name}): Successfully parsed {posts.Count} ads from page.");
+                Logger?.LogDebug($"({Name}): Parsed {posts.Count} ads from page.");
 
                 return posts;
             }
@@ -113,13 +113,13 @@ namespace RealEstatesWatcher.AdsPortals.Base
                                                 .ConfigureAwait(false);
 
                 Logger?.LogDebug($"({Name}): Downloaded page with ads.");
-                
-                var posts = pageContent.DocumentNode
-                                       .SelectNodes(GetPathToAdsElements())
-                                       .Select(ParseRealEstateAdPost)
-                                       .ToList();
 
-                Logger?.LogDebug($"({Name}): Successfully parsed {posts.Count} ads from page.");
+                var posts = pageContent.DocumentNode
+                                       .SelectNodes(GetPathToAdsElements())?
+                                       .Select(ParseRealEstateAdPost)
+                                       .ToList() ?? new List<RealEstateAdPost>();
+
+                Logger?.LogDebug($"({Name}): Parsed {posts.Count} ads from page.");
 
                 return posts;
             }

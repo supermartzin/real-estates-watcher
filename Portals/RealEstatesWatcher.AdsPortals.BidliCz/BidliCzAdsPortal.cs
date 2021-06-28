@@ -41,6 +41,7 @@ namespace RealEstatesWatcher.AdsPortals.BidliCz
                                         ParseLayout(node),
                                         ParseAddress(node),
                                         ParseWebUrl(node, RootHost),
+                                        decimal.Zero,
                                         ParseFloorArea(node),
                                         priceComment,
                                         ParseImageUrl(node, RootHost));

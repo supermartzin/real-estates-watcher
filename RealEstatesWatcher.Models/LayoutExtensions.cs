@@ -18,7 +18,7 @@
             _                   => "Not Specified"
         };
 
-        public static Layout ToLayout(string layoutValue) => layoutValue switch
+        public static Layout ToLayout(string layoutValue) => layoutValue.ToLowerInvariant() switch
         {
             "1+1"  => Layout.OnePlusOne,
             "1+kk" => Layout.OnePlusKk,

@@ -29,6 +29,7 @@ namespace RealEstatesWatcher.AdsPortals.RealityIdnesCz
                                                                                         ParseLayout(node),
                                                                                         ParseAddress(node),
                                                                                         ParseWebUrl(node, RootHost),
+                                                                                        decimal.Zero,
                                                                                         ParseFloorArea(node),
                                                                                         imageUrl: ParseImageUrl(node));
 
