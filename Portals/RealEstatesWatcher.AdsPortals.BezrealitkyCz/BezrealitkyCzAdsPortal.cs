@@ -58,8 +58,11 @@ namespace RealEstatesWatcher.AdsPortals.BezrealitkyCz
             if (value == null)
                 return decimal.Zero;
 
-            if (value.Contains('+'))
-                value = value.Split('+')[1];    // get second value as additional
+            if (!value.Contains('+'))
+                return decimal.Zero;
+
+            // get second value as additional
+            value = value.Split('+')[1];
 
             value = Regex.Replace(value, RegexPatterns.AllNonNumberValues, "");
 
