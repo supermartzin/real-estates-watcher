@@ -5,7 +5,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>RealEstatesWatcher.UI.Console</RootNamespace>
     <Nullable>enable</Nullable>
-    <Version>1.3.0</Version>
+    <Version>1.3.1</Version>
     <Authors>Martin Vrábel</Authors>
     <Product>Real Estate Watcher</Product>
     <Description>Simple C# script for periodic watching of selected Real estate advertisement portals with notifications on new ads.</Description>
@@ -13,7 +13,7 @@
     <PackageProjectUrl>https://github.com/supermartzin/real-estates-watcher</PackageProjectUrl>
     <RepositoryUrl>https://github.com/supermartzin/real-estates-watcher</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <AssemblyVersion>1.3.0.0</AssemblyVersion>
+    <AssemblyVersion>1.3.1.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

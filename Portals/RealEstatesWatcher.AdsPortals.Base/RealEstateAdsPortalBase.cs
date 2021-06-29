@@ -16,7 +16,7 @@ namespace RealEstatesWatcher.AdsPortals.Base
     {
         protected static class RegexPatterns
         {
-            public const string Layout = @"(2\s?\+\s?kk|1\s?\+\s?kk|2\s?\+\s?1|1\s?\+\s?1|3\s?\+\s?1|3\s?\+\s?kk|4\s?\+\s?1|4\s?\+\s?kk|5\s?\+\s?1|5\s?\+\s?kk)";
+            public const string Layout = @"(2\s?\+?\s?kk|1\s?\+?\s?kk|2\s?\+\s?1|1\s?\+\s?1|3\s?\+\s?1|3\s?\+?\s?kk|4\s?\+\s?1|4\s?\+?\s?kk|5\s?\+\s?1|5\s?\+?\s?kk)";
             public const string FloorArea = @"([\d,.]+)\s?m2|([\d,.]+)\s?m²";
             public const string AllNonNumberValues = @"\D+";
             public const string AllWhitespaceValues = @"\s+";
