@@ -1,0 +1,42 @@
+name: Build and publish .NET 8
+
+on:
+  push:
+    branches: [ net8-upgrade ]
+  pull_request:
+    branches: [ net8-upgrade ]
+
+jobs:
+  publish-for-windows:
+  
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 8.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build app
+      run: dotnet build --no-restore --configuration Release
+    - name: Publish app
+      run: dotnet publish ./RealEstatesWatcher.UI.Console/RealEstatesWatcher.UI.Console.csproj -c Release /p:PublishProfile="Properties/PublishProfiles/Windows-profile.pubxml"
+  
+  publish-for-linux:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 8.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build app
+      run: dotnet build --no-restore --configuration Release
+    - name: Publish app
+      run: dotnet publish ./RealEstatesWatcher.UI.Console/RealEstatesWatcher.UI.Console.csproj -c Release /p:PublishProfile="Properties/PublishProfiles/Linux-profile.pubxml"
