@@ -103,7 +103,7 @@ namespace RealEstatesWatcher.AdsPortals.BazosCz
                     return decimal.Zero;
             }
 
-            var floorAreaValue = result.Groups.Where(group => group.Success).ToArray()[1].Value;
+            var floorAreaValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
             floorAreaValue = floorAreaValue.Replace(".", ",");
 
             return decimal.TryParse(floorAreaValue, NumberStyles.AllowDecimalPoint, new NumberFormatInfo{ NumberDecimalSeparator = ","}, out var floorArea)
@@ -128,7 +128,7 @@ namespace RealEstatesWatcher.AdsPortals.BazosCz
                     return Layout.NotSpecified;
             }
 
-            var layoutValue = result.Groups.Where(group => group.Success).ToArray()[1].Value;
+            var layoutValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
             layoutValue = Regex.Replace(layoutValue, RegexPatterns.AllWhitespaceValues, "");
 
             return LayoutExtensions.ToLayout(layoutValue);

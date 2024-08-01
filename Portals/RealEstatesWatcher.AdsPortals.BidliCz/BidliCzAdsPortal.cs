@@ -79,7 +79,7 @@ namespace RealEstatesWatcher.AdsPortals.BidliCz
             if (!result.Success)
                 return Layout.NotSpecified;
 
-            var layoutValue = result.Groups.Where(group => group.Success).ToArray()[1].Value;
+            var layoutValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
             layoutValue = Regex.Replace(layoutValue, RegexPatterns.AllWhitespaceValues, "");
 
             return LayoutExtensions.ToLayout(layoutValue);
@@ -91,7 +91,7 @@ namespace RealEstatesWatcher.AdsPortals.BidliCz
         {
             var relativePath = node.GetAttributeValue("href", string.Empty);
 
-            return new Uri(rootHost + "/" + relativePath);
+            return new Uri(rootHost + UrlPathSeparator + relativePath);
         }
 
         private static decimal ParseFloorArea(HtmlNode node)
@@ -102,7 +102,7 @@ namespace RealEstatesWatcher.AdsPortals.BidliCz
             if (!result.Success)
                 return decimal.Zero;
 
-            var floorAreaValue = result.Groups.Where(group => group.Success).ToArray()[1].Value;
+            var floorAreaValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
 
             return decimal.TryParse(floorAreaValue, out var floorArea)
                 ? floorArea
@@ -121,9 +121,9 @@ namespace RealEstatesWatcher.AdsPortals.BidliCz
             if (!result.Success)
                 return default;
 
-            var relativePath = result.Groups.Where(group => group.Success).ToArray()[1].Value;
+            var relativePath = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
 
-            return new Uri(rootHost + "/" + relativePath);
+            return new Uri(rootHost + UrlPathSeparator + relativePath);
         }
     }
 }

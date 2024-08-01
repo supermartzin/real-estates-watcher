@@ -22,6 +22,8 @@ namespace RealEstatesWatcher.AdsPortals.Base
             public const string AllWhitespaceValues = @"\s+";
         }
 
+        protected static readonly char UrlPathSeparator = '/';
+
         protected readonly ILogger<RealEstateAdsPortalBase>? Logger;
         protected readonly IWebScraper? WebScraper;
         protected readonly HtmlWeb? HtmlWeb;

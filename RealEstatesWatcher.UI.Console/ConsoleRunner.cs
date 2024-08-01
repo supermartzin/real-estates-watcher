@@ -97,7 +97,7 @@ namespace RealEstatesWatcher.UI.Console
                 });
 
                 // set Minimum log level based on variable in NLog.config --> default == INFO
-                var minLevelVariable = LogManager.Configuration?.Variables["minLogLevel"]?.OriginalText;
+                var minLevelVariable = LogManager.Configuration?.Variables["minLogLevel"].ToString();
                 if (minLevelVariable is not null && Enum.TryParse(minLevelVariable, true, out LogLevel minLevel))
                     builder.SetMinimumLevel(minLevel);
             });
