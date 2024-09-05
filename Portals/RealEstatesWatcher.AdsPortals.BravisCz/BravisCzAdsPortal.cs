@@ -82,7 +82,7 @@ namespace RealEstatesWatcher.AdsPortals.BravisCz
             if (!result.Success)
                 return Layout.NotSpecified;
 
-            var layoutValue = result.Groups.Where(group => group.Success).ToArray()[1].Value;
+            var layoutValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
             layoutValue = Regex.Replace(layoutValue, RegexPatterns.AllWhitespaceValues, "");
 
             return LayoutExtensions.ToLayout(layoutValue);
@@ -94,7 +94,7 @@ namespace RealEstatesWatcher.AdsPortals.BravisCz
         {
             var relativePath = node.SelectSingleNode(".//a[@class=\"main\"]").GetAttributeValue("href", null);
 
-            return new Uri(rootHost +  "/" + relativePath);
+            return new Uri(rootHost +  UrlPathSeparator + relativePath);
         }
 
         private static decimal ParseFloorArea(HtmlNode node)
@@ -105,7 +105,7 @@ namespace RealEstatesWatcher.AdsPortals.BravisCz
             if (!result.Success)
                 return decimal.Zero;
 
-            var floorAreaValue = result.Groups.Where(group => group.Success).ToArray()[1].Value;
+            var floorAreaValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
 
             return decimal.TryParse(floorAreaValue, NumberStyles.Number, new NumberFormatInfo { NumberDecimalSeparator = "," }, out var floorArea)
                 ? floorArea

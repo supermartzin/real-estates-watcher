@@ -58,7 +58,7 @@ namespace RealEstatesWatcher.AdsPortals.RealcityCz
             if (!result.Success)
                 return Layout.NotSpecified;
 
-            var layoutValue = result.Groups.Where(group => group.Success).ToArray()[1].Value;
+            var layoutValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
             layoutValue = Regex.Replace(layoutValue, RegexPatterns.AllWhitespaceValues, "");
 
             return LayoutExtensions.ToLayout(layoutValue);
@@ -86,7 +86,7 @@ namespace RealEstatesWatcher.AdsPortals.RealcityCz
                     return decimal.Zero;
             }
 
-            var floorAreaValue = result.Groups.Where(group => group.Success).ToArray()[1].Value;
+            var floorAreaValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
 
             return decimal.TryParse(floorAreaValue, out var floorArea)
                 ? floorArea
