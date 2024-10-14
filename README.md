@@ -4,7 +4,7 @@ Supports watching adverts for **sells** as well as **leases**.
 
 [![Build and publish .NET commandline script](https://github.com/supermartzin/real-estates-watcher/actions/workflows/dotnet.yml/badge.svg?branch=main)](https://github.com/supermartzin/real-estates-watcher/actions/workflows/dotnet.yml)
 
-**Frameworks:** .NET 5 & .NET Standard 2.1, Node.js (for web scraping script)
+**Frameworks:** .NET 8, Node.js (for web scraping script)
 
 **Supported OS:** Windows, macOS, Linux
 
@@ -71,15 +71,23 @@ Perform following steps and commands either from the [**root folder**](https://g
 **engine.ini** - configuration of the watching engine (*required* cmd argument `--e` or `-engine`)
 
     [settings]
-    check_interval_minutes=10     # <number> | required | periodic checking interval, minimum 1 minute
+    check_interval_minutes=            # <number> | required | periodic checking interval, minimum 1 minute
+    enable_multiple_portal_instances=  # <bool>   | optional | enable/disable multiple instances of the same portal (in case of watching multiple URLs of the same portal)
     
-**portals.ini** - configuration of all Ad portals to watch (*required* cmd argument `--p` or `-portals`)
+    
+**portals.\*** - configuration of all Ad portals to watch (*required* cmd argument `--p` or `-portals`)
 
-    [<portal-name>]               # <string> | required | name of the portal name
-    url=                          # <string> | required | url to a followed page with Ad posts
-   
-* Each portal needs to have a separate section in the file with the URL.
-* If you don't want to watch specific portal, just comment its section or remove it completely from the config file.
+❗**CHANGE**❗(since **v1.4**)
+* Newline separated file with all URLs that you want to be watched.
+* If you don't want to watch specific portal, just comment whole line with (`// https://bazos.cz/...`) or remove it completely from the config file.
+
+<pre>
+https://reality.idnes.cz/s/prodej/domy/cena-do-7000000/...<b>↩</b>
+https://reality.idnes.cz/s/prodej/pozemky/...<b>↩</b>
+https://www.sreality.cz/hledani/prodej/domy/...<b>↩</b>
+https://reality.bazos.cz/prodam/dum/...<b>↩</b>
+https://reality.bazos.cz/prodam/chata/...<b>↩</b>
+</pre>
 
 **handlers.ini** - configuration of the classes handling the received Ad posts (*required* cmd argument `--h` or `-handlers`)
 
