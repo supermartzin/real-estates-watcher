@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace RealEstatesWatcher.AdPostsHandlers.Email
+﻿namespace RealEstatesWatcher.AdPostsHandlers.Email
 {
     public class EmailNotifyingAdPostsHandlerSettings
     {

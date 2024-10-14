@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace RealEstatesWatcher.AdsPortals.Contracts
+﻿namespace RealEstatesWatcher.AdsPortals.Contracts
 {
     public class RealEstateAdsPortalException : Exception
     {

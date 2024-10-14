@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace RealEstatesWatcher.AdPostsHandlers.Contracts
+﻿namespace RealEstatesWatcher.AdPostsHandlers.Contracts
 {
     public class RealEstateAdPostsHandlerException : Exception
     {

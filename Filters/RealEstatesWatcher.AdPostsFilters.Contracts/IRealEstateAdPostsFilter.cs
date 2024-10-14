@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-using RealEstatesWatcher.Models;
+﻿using RealEstatesWatcher.Models;
 
 namespace RealEstatesWatcher.AdPostsFilters.Contracts
 {

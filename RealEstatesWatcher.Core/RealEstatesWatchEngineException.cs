@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace RealEstatesWatcher.Core
+﻿namespace RealEstatesWatcher.Core
 {
     public class RealEstatesWatchEngineException : Exception
     {

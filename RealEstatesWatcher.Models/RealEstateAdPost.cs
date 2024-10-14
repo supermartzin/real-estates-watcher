@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace RealEstatesWatcher.Models
+﻿namespace RealEstatesWatcher.Models
 {
     public class RealEstateAdPost
     {

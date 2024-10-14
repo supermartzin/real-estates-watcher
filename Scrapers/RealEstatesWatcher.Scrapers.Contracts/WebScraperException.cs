@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace RealEstatesWatcher.Scrapers.Contracts
+﻿namespace RealEstatesWatcher.Scrapers.Contracts
 {
     public class WebScraperException : Exception
     {
