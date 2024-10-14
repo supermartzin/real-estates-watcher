@@ -3,12 +3,11 @@ using System.Threading.Tasks;
 
 using RealEstatesWatcher.Models;
 
-namespace RealEstatesWatcher.AdsPortals.Contracts
-{
-    public interface IRealEstateAdsPortal
-    {
-        string Name { get; }
+namespace RealEstatesWatcher.AdsPortals.Contracts;
 
-        Task<IList<RealEstateAdPost>> GetLatestRealEstateAdsAsync();
-    }
+public interface IRealEstateAdsPortal
+{
+    string Name { get; }
+
+    Task<IList<RealEstateAdPost>> GetLatestRealEstateAdsAsync();
 }

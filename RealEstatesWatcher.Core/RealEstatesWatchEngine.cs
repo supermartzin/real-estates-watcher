@@ -40,10 +40,9 @@ namespace RealEstatesWatcher.Core
 
         public void RegisterAdsPortal(IRealEstateAdsPortal adsPortal)
         {
-            if (adsPortal == null)
-                throw new ArgumentNullException(nameof(adsPortal));
+            ArgumentNullException.ThrowIfNull(adsPortal);
 
-            if (_adsPortals.Any(portal => portal.Name == adsPortal.Name))
+            if (!_settings.EnableMultiplePortalInstances && _adsPortals.Any(portal => portal.Name == adsPortal.Name))
             {
                 _logger?.LogWarning($"Trying to register already registered ads portal named '{adsPortal.Name}'.");
                 return;
@@ -57,8 +56,7 @@ namespace RealEstatesWatcher.Core
 
         public void RegisterAdPostsHandler(IRealEstateAdPostsHandler adPostsHandler)
         {
-            if (adPostsHandler == null)
-                throw new ArgumentNullException(nameof(adPostsHandler));
+            ArgumentNullException.ThrowIfNull(adPostsHandler);
 
             if (_handlers.Any(handler => handler.Equals(adPostsHandler)))
             {
@@ -74,8 +72,7 @@ namespace RealEstatesWatcher.Core
 
         public void RegisterAdPostsFilter(IRealEstateAdPostsFilter adPostsFilter)
         {
-            if (adPostsFilter == null)
-                throw new ArgumentNullException(nameof(adPostsFilter));
+            ArgumentNullException.ThrowIfNull(adPostsFilter);
 
             if (_filters.Any(filter => filter.Equals(adPostsFilter)))
             {
@@ -93,9 +90,9 @@ namespace RealEstatesWatcher.Core
         {
             if (IsRunning)
                 throw new RealEstatesWatchEngineException("Watcher is already running.");
-            if (_adsPortals.Count == 0)
+            if (_adsPortals.Count is 0)
                 throw new RealEstatesWatchEngineException("No Ads portals registered for watching.");
-            if (_handlers.Count == 0)
+            if (_handlers.Count is 0)
                 throw new RealEstatesWatchEngineException("No handlers registered for processing Ad posts.");
             if (_settings.CheckIntervalMinutes < 1)
                 throw new RealEstatesWatchEngineException("Invalid check interval: must be at least 1 minute.");
@@ -171,7 +168,7 @@ namespace RealEstatesWatcher.Core
             return Task.CompletedTask;
         }
 
-        private async void Timer_OnElapsed(object sender, ElapsedEventArgs e)
+        private async void Timer_OnElapsed(object? sender, ElapsedEventArgs e)
         {
             _logger?.LogDebug("Periodic check started.");
 

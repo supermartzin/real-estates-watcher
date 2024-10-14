@@ -116,7 +116,8 @@ public class ConsoleRunner
 
         return new WatchEngineSettings
         {
-            CheckIntervalMinutes = configuration.GetValue<int>("check_interval_minutes")
+            CheckIntervalMinutes = configuration.GetValue<int>("check_interval_minutes"),
+            EnableMultiplePortalInstances = configuration.GetValue<bool>("enable_multiple_portal_instances")
         };
     }
 
@@ -124,63 +125,72 @@ public class ConsoleRunner
     {
         _logger?.LogInformation("Registering Ads portals..");
 
-        var configuration = new ConfigurationBuilder().AddIniFile(CmdArguments.PortalsConfigFilePath).Build();
+        if (!File.Exists(CmdArguments.PortalsConfigFilePath))
+            throw new ArgumentOutOfRangeException($"Configuration file for Ads portals not found at '{CmdArguments.PortalsConfigFilePath}'!");
 
-        foreach (var section in configuration.GetChildren())
+        var urls = File.ReadAllLines(CmdArguments.PortalsConfigFilePath);
+
+        foreach (var url in urls)
         {
-            var url = section["url"];
-
-            switch (section.Key)
+            if (url.Contains("bazos.cz"))
             {
-                case "Bazos.cz":
-                    watcher.RegisterAdsPortal(new BazosCzAdsPortal(url, _container.GetService<ILogger<BazosCzAdsPortal>>()));
-                    break;
-
-                case "Bezrealitky.cz":
-                    watcher.RegisterAdsPortal(new BezrealitkyCzAdsPortal(url,
-                        _container.GetRequiredService<IWebScraper>(),
-                        _container.GetService<ILogger<BezrealitkyCzAdsPortal>>()));
-                    break;
-
-                case "Bidli.cz":
-                    watcher.RegisterAdsPortal(new BidliCzAdsPortal(url, _container.GetService<ILogger<BidliCzAdsPortal>>()));
-                    break;
-
-                case "Bravis.cz":
-                    watcher.RegisterAdsPortal(new BravisCzAdsPortal(url, _container.GetService<ILogger<BravisCzAdsPortal>>()));
-                    break;
-
-                case "Ceskereality.cz":
-                    watcher.RegisterAdsPortal(new CeskeRealityCzAdsPortal(url, _container.GetService<ILogger<CeskeRealityCzAdsPortal>>()));
-                    break;
-
-                case "FlatZone.cz":
-                    watcher.RegisterAdsPortal(new FlatZoneCzAdsPortal(url,
-                        _container.GetRequiredService<IWebScraper>(),
-                        _container.GetService<ILogger<FlatZoneCzAdsPortal>>()));
-                    break;
-
-                case "MMReality.cz":
-                    watcher.RegisterAdsPortal(new MMRealityCzAdsPortal(url, _container.GetService<ILogger<MMRealityCzAdsPortal>>()));
-                    break;
-
-                case "Realcity.cz":
-                    watcher.RegisterAdsPortal(new RealcityCzAdsPortal(url, _container.GetService<ILogger<RealcityCzAdsPortal>>()));
-                    break;
-
-                case "Reality.idnes.cz":
-                    watcher.RegisterAdsPortal(new RealityIdnesCzAdsPortal(url, _container.GetService<ILogger<RealityIdnesCzAdsPortal>>()));
-                    break;
-
-                case "Remax.cz":
-                    watcher.RegisterAdsPortal(new RemaxCzAdsProtal(url, _container.GetService<ILogger<RemaxCzAdsProtal>>()));
-                    break;
-
-                case "Sreality.cz":
-                    watcher.RegisterAdsPortal(new SrealityCzAdsPortal(url,
-                        _container.GetRequiredService<IWebScraper>(),
-                        _container.GetService<ILogger<SrealityCzAdsPortal>>()));
-                    break;
+                watcher.RegisterAdsPortal(new BazosCzAdsPortal(url, _container.GetService<ILogger<BazosCzAdsPortal>>()));
+                continue;
+            }
+            if (url.Contains("bezrealitky.cz"))
+            {
+                watcher.RegisterAdsPortal(new BezrealitkyCzAdsPortal(url,
+                    _container.GetRequiredService<IWebScraper>(),
+                    _container.GetService<ILogger<BezrealitkyCzAdsPortal>>()));
+                continue;
+            }
+            if (url.Contains("bidli.cz"))
+            {
+                watcher.RegisterAdsPortal(new BidliCzAdsPortal(url, _container.GetService<ILogger<BidliCzAdsPortal>>()));
+                continue;
+            }
+            if (url.Contains("bravis.cz"))
+            {
+                watcher.RegisterAdsPortal(new BravisCzAdsPortal(url, _container.GetService<ILogger<BravisCzAdsPortal>>()));
+                continue;
+            }
+            if (url.Contains("ceskereality.cz"))
+            {
+                watcher.RegisterAdsPortal(new CeskeRealityCzAdsPortal(url, _container.GetService<ILogger<CeskeRealityCzAdsPortal>>()));
+                continue;
+            }
+            if (url.Contains("flatzone.cz"))
+            {
+                watcher.RegisterAdsPortal(new FlatZoneCzAdsPortal(url,
+                    _container.GetRequiredService<IWebScraper>(),
+                    _container.GetService<ILogger<FlatZoneCzAdsPortal>>()));
+                continue;
+            }
+            if (url.Contains("mmreality.cz"))
+            {
+                watcher.RegisterAdsPortal(new MMRealityCzAdsPortal(url, _container.GetService<ILogger<MMRealityCzAdsPortal>>()));
+                continue;
+            }
+            if (url.Contains("realcity.cz"))
+            {
+                watcher.RegisterAdsPortal(new RealcityCzAdsPortal(url, _container.GetService<ILogger<RealcityCzAdsPortal>>()));
+                continue;
+            }
+            if (url.Contains("reality.idnes.cz"))
+            {
+                watcher.RegisterAdsPortal(new RealityIdnesCzAdsPortal(url, _container.GetService<ILogger<RealityIdnesCzAdsPortal>>()));
+                continue;
+            }
+            if (url.Contains("remax.cz"))
+            {
+                watcher.RegisterAdsPortal(new RemaxCzAdsProtal(url, _container.GetService<ILogger<RemaxCzAdsProtal>>()));
+                continue;
+            }
+            if (url.Contains("sreality.cz"))
+            {
+                watcher.RegisterAdsPortal(new SrealityCzAdsPortal(url,
+                    _container.GetRequiredService<IWebScraper>(),
+                    _container.GetService<ILogger<SrealityCzAdsPortal>>()));
             }
         }
     }
@@ -202,7 +212,7 @@ public class ConsoleRunner
             {
                 Enabled = configuration.GetValue<bool>("enabled"),
                 EmailAddressFrom = configuration["email_address_from"],
-                EmailAddressesTo = configuration["email_addresses_to"].Split(','),
+                EmailAddressesTo = configuration["email_addresses_to"]?.Split(',') ?? [],
                 SenderName = configuration["sender_name"],
                 SmtpServerHost = configuration["smtp_server_host"],
                 SmtpServerPort = configuration.GetValue<int>("smtp_server_port"),
@@ -233,7 +243,7 @@ public class ConsoleRunner
     {
         _logger?.LogInformation("Registering Ad posts filters..");
 
-        if (CmdArguments.FiltersConfigFilePath is null)
+        if (string.IsNullOrEmpty(CmdArguments.FiltersConfigFilePath))
         {
             _logger?.LogInformation("No filters provided.");
             return;

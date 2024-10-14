@@ -1,7 +1,8 @@
-﻿namespace RealEstatesWatcher.Core
+﻿namespace RealEstatesWatcher.Core;
+
+public record WatchEngineSettings
 {
-    public class WatchEngineSettings
-    {
-        public int CheckIntervalMinutes { get; set; }
-    }
+    public int CheckIntervalMinutes { get; set; }
+
+    public bool EnableMultiplePortalInstances { get; set; }
 }

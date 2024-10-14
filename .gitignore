@@ -352,3 +352,5 @@ MigrationBackup/
 # Custom ignores
 handlers-prod.ini
 /.idea
+RealEstatesWatcher.UI.Console/configs/portals-prod-old.ini
+RealEstatesWatcher.UI.Console/configs/portals-prod.ini

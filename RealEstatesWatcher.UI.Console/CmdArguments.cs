@@ -17,29 +17,29 @@ public class CmdArguments
 
     public CmdArguments()
     {
-        _rootCommand = new RootCommand
-        {
-            new Option<string>(new[] {"-portals", "--p"}, "The path to the configuration file of supported Ads portals")
+        _rootCommand =
+        [
+            new Option<string>(["-portals", "--p"], "The path to the configuration file of supported Ads portals")
             {
                 ArgumentHelpName = "path to file",
                 IsRequired = true
             },
-            new Option<string>(new[] {"-handlers", "--h"}, "The path to the configuration file of Ad posts Handlers")
+            new Option<string>(["-handlers", "--h"], "The path to the configuration file of Ad posts Handlers")
             {
                 ArgumentHelpName = "path to file",
                 IsRequired = true
             },
-            new Option<string?>(new [] {"-filters", "--f"}, "The path to the configuration file of Ad posts filters")
+            new Option<string?>(["-filters", "--f"], "The path to the configuration file of Ad posts filters")
             {
                 ArgumentHelpName = "path to file",
                 IsRequired = false
             },
-            new Option<string>(new[] {"-engine", "--e"}, "The path to the configuration file of the watcher engine")
+            new Option<string>(["-engine", "--e"], "The path to the configuration file of the watcher engine")
             {
                 ArgumentHelpName = "path to file",
                 IsRequired = true
             }
-        };
+        ];
         _rootCommand.Description =
             "Script for real-time periodic watching of Real estate advertisement portals with notifications on new ads.";
     }
