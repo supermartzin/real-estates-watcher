@@ -137,6 +137,12 @@ public class ConsoleRunner
 
         foreach (var url in urls)
         {
+            if (url.StartsWith("//"))
+            {
+                // comment
+                continue; 
+            }
+
             if (url.Contains("bazos.cz"))
             {
                 watcher.RegisterAdsPortal(new BazosCzAdsPortal(url, _container.GetService<ILogger<BazosCzAdsPortal>>()));
