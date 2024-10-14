@@ -350,7 +350,6 @@ MigrationBackup/
 .ionide/
 
 # Custom ignores
-handlers-prod.ini
+*-prod.ini
+*-prod-old.ini
 /.idea
-RealEstatesWatcher.UI.Console/configs/portals-prod-old.ini
-RealEstatesWatcher.UI.Console/configs/portals-prod.ini
