@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.Extensions.Logging;
 using System.Timers;
-using Microsoft.Extensions.Logging;
+using Timer = System.Timers.Timer;
 
 using RealEstatesWatcher.AdPostsFilters.Contracts;
 using RealEstatesWatcher.AdPostsHandlers.Contracts;
