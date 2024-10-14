@@ -89,6 +89,11 @@ public class ConsoleRunner
                 options.Dsn = "https://8a560ec7c9c241c6bc9f00e116bace08@o504575.ingest.sentry.io/5792424";
                 options.MinimumEventLevel = LogLevel.Warning;
                 options.InitializeSdk = true;
+                
+                options.AutoSessionTracking = true;
+                options.TracesSampleRate = 1.0;
+                options.ProfilesSampleRate = 1.0;
+                options.AddIntegration(new ProfilingIntegration());
             });
 
             // set Minimum log level based on variable in NLog.config --> default == INFO
