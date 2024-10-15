@@ -1,8 +1,8 @@
-const puppeteer = require("puppeteer");
+import { launch } from "puppeteer";
 
 (async function () {
     try {
-        const browser = await puppeteer.launch({
+        const browser = await launch({
             ignoreDefaultArgs: ['--disable-extensions'],
             headless: true
         });
