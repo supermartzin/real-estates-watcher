@@ -93,8 +93,10 @@ https://reality.bazos.cz/prodam/chata/...<b>↩</b>
 
     [email]         
     enabled=                      # <bool>    | required | enable/disable this handler
-    email_address_from=           # <string>  | required | email address for outgoing notifications
-    email_addresses_to=           # <strings> | required | list of email addresses where to send notifications (separated by comma)
+    from=                         # <string>  | required | email address for outgoing notifications
+    to=                           # <strings> | required | list of email addresses where to send notifications (separated by comma)
+    cc=                           # <strings> | optional | list of email CC addresses where to send notifications (separated by comma)
+    bcc=                          # <strings> | optional | list of email BCC addresses where to send notifications (separated by comma)
     sender_name=                  # <string>  | required | name of the sending entity for the email_address_from
     username=                     # <string>  | required | login username of sending email account
     password=                     # <string>  | required | login password of sending email account
