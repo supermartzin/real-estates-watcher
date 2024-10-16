@@ -7,7 +7,8 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>1.3.1</Version>
+    <Version>1.4.0</Version>
+    <AssemblyVersion>1.4.0.0</AssemblyVersion>
     <Authors>Martin Vrábel</Authors>
     <Product>Real Estate Watcher</Product>
     <Description>Simple C# script for periodic watching of selected Real estate advertisement portals with notifications on new ads.</Description>
@@ -15,7 +16,6 @@
     <PackageProjectUrl>https://github.com/supermartzin/real-estates-watcher</PackageProjectUrl>
     <RepositoryUrl>https://github.com/supermartzin/real-estates-watcher</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <AssemblyVersion>1.3.1.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

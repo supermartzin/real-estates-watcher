@@ -82,7 +82,7 @@ namespace RealEstatesWatcher.AdsPortals.Base
                 var posts = htmlDoc.DocumentNode
                                    .SelectNodes(GetPathToAdsElements())?
                                    .Select(ParseRealEstateAdPost)
-                                   .ToList() ?? new List<RealEstateAdPost>();
+                                   .ToList() ?? [];
 
                 Logger?.LogDebug($"({Name}): Parsed {posts.Count} ads from page.");
 
@@ -115,7 +115,7 @@ namespace RealEstatesWatcher.AdsPortals.Base
                 var posts = pageContent.DocumentNode
                                        .SelectNodes(GetPathToAdsElements())?
                                        .Select(ParseRealEstateAdPost)
-                                       .ToList() ?? new List<RealEstateAdPost>();
+                                       .ToList() ?? [];
 
                 Logger?.LogDebug($"({Name}): Parsed {posts.Count} ads from page.");
 

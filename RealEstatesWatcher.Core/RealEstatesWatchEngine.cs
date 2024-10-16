@@ -176,7 +176,7 @@ public class RealEstatesWatchEngine(WatchEngineSettings settings,
                 break;
         }
 
-        logger?.LogDebug("Periodic check finished.");
+        logger?.LogDebug("Periodic check finished - found {Count} new ads.", newPosts.Count);
     }
 
     private async Task NotifyHandlers(RealEstateAdPost adPost)
