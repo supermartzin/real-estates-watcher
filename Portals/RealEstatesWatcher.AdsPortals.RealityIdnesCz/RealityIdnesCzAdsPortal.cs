@@ -75,7 +75,7 @@ namespace RealEstatesWatcher.AdsPortals.RealityIdnesCz
         {
             var relativePath = node.SelectSingleNode(".//a[@class=\"c-products__link\"]").GetAttributeValue("href", string.Empty);
 
-            return new Uri(rootHost + relativePath);
+            return new Uri(relativePath ?? rootHost);
         }
 
         private static decimal ParseFloorArea(HtmlNode node)
