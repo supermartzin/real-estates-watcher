@@ -6,100 +6,107 @@ using Microsoft.Extensions.Logging;
 using RealEstatesWatcher.AdsPortals.Base;
 using RealEstatesWatcher.Models;
 
-namespace RealEstatesWatcher.AdsPortals.RealityIdnesCz
+namespace RealEstatesWatcher.AdsPortals.RealityIdnesCz;
+
+public partial class RealityIdnesCzAdsPortal(string adsUrl,
+                                             ILogger<RealityIdnesCzAdsPortal>? logger = default) : RealEstateAdsPortalBase(adsUrl, logger)
 {
-    public class RealityIdnesCzAdsPortal : RealEstateAdsPortalBase
+    [GeneratedRegex(RegexPatterns.AllNonNumberValues)]
+    private static partial Regex AllNonNumberValuesRegex();
+
+    [GeneratedRegex(RegexPatterns.Layout)]
+    private static partial Regex LayoutRegex();
+
+    [GeneratedRegex(RegexPatterns.AllWhitespaceValues)]
+    private static partial Regex AllWhitespaceCharactersRegex();
+
+    [GeneratedRegex(RegexPatterns.FloorArea)]
+    private static partial Regex FloorAreaRegex();
+
+    public override string Name => "Reality.idnes.cz";
+
+    protected override string GetPathToAdsElements() => "//div[@class=\"c-products__item\"]";
+
+    protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
+                                                                                    ParseTitle(node),
+                                                                                    string.Empty,
+                                                                                    ParsePrice(node),
+                                                                                    Currency.CZK,
+                                                                                    ParseLayout(node),
+                                                                                    ParseAddress(node),
+                                                                                    ParseWebUrl(node, RootHost),
+                                                                                    decimal.Zero,
+                                                                                    ParseFloorArea(node),
+                                                                                    imageUrl: ParseImageUrl(node));
+
+    private static string ParseTitle(HtmlNode node)
     {
-        public override string Name => "Reality.idnes.cz";
+        var title = node.SelectSingleNode(".//h2[@class=\"c-products__title\"]").InnerText;
 
-        public RealityIdnesCzAdsPortal(string adsUrl,
-                                       ILogger<RealityIdnesCzAdsPortal>? logger = default) : base(adsUrl, logger)
-        {
-        }
-        
-        protected override string GetPathToAdsElements() => "//div[@class=\"c-products__item\"]";
+        title = title.Replace("\n", " ").Trim();
+        title = HttpUtility.HtmlDecode(title);
+        title = title[0].ToString().ToUpper() + title[1..];
 
-        protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
-                                                                                        ParseTitle(node),
-                                                                                        string.Empty,
-                                                                                        ParsePrice(node),
-                                                                                        Currency.CZK,
-                                                                                        ParseLayout(node),
-                                                                                        ParseAddress(node),
-                                                                                        ParseWebUrl(node, RootHost),
-                                                                                        decimal.Zero,
-                                                                                        ParseFloorArea(node),
-                                                                                        imageUrl: ParseImageUrl(node));
+        return title;
+    }
 
-        private static string ParseTitle(HtmlNode node)
-        {
-            var title = node.SelectSingleNode(".//h2[@class=\"c-products__title\"]").InnerText;
+    private static decimal ParsePrice(HtmlNode node)
+    {
+        var value = node.SelectSingleNode(".//p[@class=\"c-products__price\"]/strong")?.InnerText;
+        if (value is null)
+            return decimal.Zero;
 
-            title = title.Replace("\n", " ").Trim();
-            title = HttpUtility.HtmlDecode(title);
-            title = title[0].ToString().ToUpper() + title[1..];
+        value = AllNonNumberValuesRegex().Replace(value, "");
 
-            return title;
-        }
+        return decimal.TryParse(value, out var price)
+            ? price
+            : decimal.Zero;
+    }
 
-        private static decimal ParsePrice(HtmlNode node)
-        {
-            var value = node.SelectSingleNode(".//p[@class=\"c-products__price\"]")?.InnerText;
-            if (value == null)
-                return decimal.Zero;
+    private static Layout ParseLayout(HtmlNode node)
+    {
+        var value = ParseTitle(node);
 
-            value = Regex.Replace(value, RegexPatterns.AllNonNumberValues, "");
+        var result = LayoutRegex().Match(value);
+        if (!result.Success)
+            return Layout.NotSpecified;
 
-            return decimal.TryParse(value, out var price)
-                ? price
-                : decimal.Zero;
-        }
+        var layoutValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
+        layoutValue = AllWhitespaceCharactersRegex().Replace(layoutValue, "");
 
-        private static Layout ParseLayout(HtmlNode node)
-        {
-            var value = ParseTitle(node);
+        return LayoutExtensions.ToLayout(layoutValue);
+    }
 
-            var result = Regex.Match(value, RegexPatterns.Layout);
-            if (!result.Success)
-                return Layout.NotSpecified;
+    private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//p[@class=\"c-products__info\"]").InnerText.Trim();
 
-            var layoutValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
-            layoutValue = Regex.Replace(layoutValue, RegexPatterns.AllWhitespaceValues, "");
+    private static Uri ParseWebUrl(HtmlNode node, string rootHost)
+    {
+        var relativePath = node.SelectSingleNode(".//a[@class=\"c-products__link\"]").GetAttributeValue("href", string.Empty);
 
-            return LayoutExtensions.ToLayout(layoutValue);
-        }
+        return new Uri(relativePath ?? rootHost);
+    }
 
-        private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//p[@class=\"c-products__info\"]").InnerText.Trim();
+    private static decimal ParseFloorArea(HtmlNode node)
+    {
+        var value = HttpUtility.HtmlDecode(ParseTitle(node)).Trim();
 
-        private static Uri ParseWebUrl(HtmlNode node, string rootHost)
-        {
-            var relativePath = node.SelectSingleNode(".//a[@class=\"c-products__link\"]").GetAttributeValue("href", string.Empty);
+        var result = FloorAreaRegex().Match(value);
+        if (!result.Success)
+            return decimal.Zero;
 
-            return new Uri(relativePath ?? rootHost);
-        }
+        var floorAreaValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
 
-        private static decimal ParseFloorArea(HtmlNode node)
-        {
-            var value = HttpUtility.HtmlDecode(ParseTitle(node)).Trim();
+        return decimal.TryParse(floorAreaValue, out var floorArea)
+            ? floorArea
+            : decimal.Zero;
+    }
 
-            var result = Regex.Match(value, RegexPatterns.FloorArea);
-            if (!result.Success)
-                return decimal.Zero;
+    private static Uri? ParseImageUrl(HtmlNode node)
+    {
+        var path = node.SelectSingleNode(".//span[@class=\"c-products__img\"]/img")?.GetAttributeValue("data-src", null);
 
-            var floorAreaValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
-
-            return decimal.TryParse(floorAreaValue, out var floorArea)
-                ? floorArea
-                : decimal.Zero;
-        }
-
-        private static Uri? ParseImageUrl(HtmlNode node)
-        {
-            var path = node.SelectSingleNode(".//span[@class=\"c-products__img\"]/img")?.GetAttributeValue("data-src", null);
-
-            return path is not null
-                ? new Uri(path)
-                : default;
-        }
+        return path is not null
+            ? new Uri(path)
+            : default;
     }
 }
