@@ -3,6 +3,9 @@
     "RealEstatesWatcher.UI.Console": {
       "commandName": "Project",
       "commandLineArgs": "--h ./configs/handlers.ini --p ./configs/portals.ini --e ./configs/engine.ini --f ./configs/filters.ini"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
     }
   }
 }
