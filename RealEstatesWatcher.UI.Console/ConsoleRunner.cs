@@ -52,6 +52,7 @@ public class ConsoleRunner
         ConfigureDependencyInjection();
 
         _logger = _container.GetService<ILogger<ConsoleRunner>>();
+        _logger?.LogInformation("------------------------------------------------");
 
         try
         {
