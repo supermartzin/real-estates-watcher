@@ -52,6 +52,7 @@ public class ConsoleRunner
         ConfigureDependencyInjection();
 
         _logger = _container.GetService<ILogger<ConsoleRunner>>();
+        _logger?.LogInformation("------------------------------------------------");
 
         try
         {
@@ -222,8 +223,10 @@ public class ConsoleRunner
             return new EmailNotifyingAdPostsHandlerSettings
             {
                 Enabled = configuration.GetValue<bool>("enabled"),
-                EmailAddressFrom = configuration["email_address_from"],
-                EmailAddressesTo = configuration["email_addresses_to"]?.Split(',') ?? [],
+                FromAddress = configuration["from"],
+                ToAddresses = string.IsNullOrEmpty(configuration["to"]) ? [] : configuration["to"]?.Split(',') ?? [],
+                CcAddresses = string.IsNullOrEmpty(configuration["cc"]) ? [] : configuration["cc"]?.Split(',') ?? [],
+                BccAddresses = string.IsNullOrEmpty(configuration["bcc"]) ? [] : configuration["bcc"]?.Split(',') ?? [],
                 SenderName = configuration["sender_name"],
                 SmtpServerHost = configuration["smtp_server_host"],
                 SmtpServerPort = configuration.GetValue<int>("smtp_server_port"),

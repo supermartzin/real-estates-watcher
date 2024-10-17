@@ -148,6 +148,7 @@ public class RealEstatesWatchEngine(WatchEngineSettings settings,
         IsRunning = false;
 
         logger?.LogInformation("Real estates Watcher has been stopped.");
+        logger?.LogInformation("------------------------------------------------");
 
         return Task.CompletedTask;
     }
