@@ -32,7 +32,9 @@ Run the app by executing the following command
     
 ##### * Description of all command-line options can be obtained by running the `--help` option
 
-## 🙌 How to build, publish, deploy and prepare the application
+## 🛠️ How to build, publish, deploy and prepare the application
+
+### 🫳 Manually
 
 Perform following steps and commands either from the [**root folder**](https://github.com/supermartzin/real-estates-watcher) (where the solution file is placed) or from the UI Console project in [**RealEstatesWatcher.UI.Console** folder](https://github.com/supermartzin/real-estates-watcher/tree/main/RealEstatesWatcher.UI.Console) in order to prepare the application from execution:
 
@@ -65,6 +67,14 @@ Perform following steps and commands either from the [**root folder**](https://g
       `npm install`
       
       ##### * It's important to do this on the target platform as the dependencies are platform-specific
+
+### 🐋 Using Docker (recommended)
+
+There is a `Dockerfile` in the [**root**](https://github.com/supermartzin/real-estates-watcher) of the repository that you can use to automatic build and setup Docker image and run the app in containerized environment.
+Simply use basic build and run commands:
+
+    docker build -t real-estates-watcher:latest .
+    docker run -itd real-estates-watcher:latest
 
 ## 📝 Configuration files description
 
