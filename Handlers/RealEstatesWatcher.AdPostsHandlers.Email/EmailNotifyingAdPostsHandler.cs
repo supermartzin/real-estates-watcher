@@ -84,8 +84,10 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
             }
         };
         message.To.AddRange(_settings.ToAddresses.Select(address => new MailboxAddress(address, address)));
-        message.Cc.AddRange(_settings.CcAddresses.Select(address => new MailboxAddress(address, address)));
-        message.Bcc.AddRange(_settings.BccAddresses.Select(address => new MailboxAddress(address, address)));
+        if (_settings.CcAddresses.Any())
+            message.Cc.AddRange(_settings.CcAddresses.Select(address => new MailboxAddress(address, address)));
+        if (_settings.BccAddresses.Any())
+            message.Bcc.AddRange(_settings.BccAddresses.Select(address => new MailboxAddress(address, address)));
 
         try
         {
