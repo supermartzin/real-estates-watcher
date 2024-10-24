@@ -102,7 +102,9 @@ public class BazosCzAdsPortal : RealEstateAdsPortalBase
         }
 
         var floorAreaValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
-        floorAreaValue = floorAreaValue.Replace(".", ",");
+        floorAreaValue = floorAreaValue.Replace(".", ",")
+                                       .Replace(" ", string.Empty)
+                                       .Trim(',');
 
         return decimal.TryParse(floorAreaValue, NumberStyles.AllowDecimalPoint, new NumberFormatInfo{ NumberDecimalSeparator = ","}, out var floorArea)
             ? floorArea

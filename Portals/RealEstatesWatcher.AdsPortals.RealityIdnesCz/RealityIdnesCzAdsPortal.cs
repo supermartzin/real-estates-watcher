@@ -14,6 +14,9 @@ public partial class RealityIdnesCzAdsPortal(string adsUrl,
     [GeneratedRegex(RegexPatterns.AllNonNumberValues)]
     private static partial Regex AllNonNumberValuesRegex();
 
+    [GeneratedRegex(RegexPatterns.AtLeastOneDigitValue)]
+    private static partial Regex AtLeastOneDigitValueRegex();
+
     [GeneratedRegex(RegexPatterns.Layout)]
     private static partial Regex LayoutRegex();
 
@@ -37,7 +40,8 @@ public partial class RealityIdnesCzAdsPortal(string adsUrl,
                                                                                     ParseWebUrl(node, RootHost),
                                                                                     decimal.Zero,
                                                                                     ParseFloorArea(node),
-                                                                                    imageUrl: ParseImageUrl(node));
+                                                                                    ParsePriceComment(node),
+                                                                                    ParseImageUrl(node));
 
     private static string ParseTitle(HtmlNode node)
     {
@@ -58,9 +62,18 @@ public partial class RealityIdnesCzAdsPortal(string adsUrl,
 
         value = AllNonNumberValuesRegex().Replace(value, "");
 
-        return decimal.TryParse(value, out var price)
+        return decimal.TryParse(value.Trim(), out var price)
             ? price
             : decimal.Zero;
+    }
+
+    private static string? ParsePriceComment(HtmlNode node)
+    {
+        var value = node.SelectSingleNode(".//p[@class=\"c-products__price\"]/strong")?.InnerText;
+        if (value is null)
+            return null;
+
+        return AtLeastOneDigitValueRegex().IsMatch(value) ? null : value;
     }
 
     private static Layout ParseLayout(HtmlNode node)
@@ -88,13 +101,16 @@ public partial class RealityIdnesCzAdsPortal(string adsUrl,
 
     private static decimal ParseFloorArea(HtmlNode node)
     {
-        var value = HttpUtility.HtmlDecode(ParseTitle(node)).Trim();
+        var value = HttpUtility.HtmlDecode(ParseTitle(node)).Replace(NonBreakingSpace, string.Empty);
 
         var result = FloorAreaRegex().Match(value);
         if (!result.Success)
             return decimal.Zero;
 
-        var floorAreaValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
+        var floorAreaValue = result.Groups
+            .Skip<Group>(1)
+            .First(group => group.Success)
+            .Value;
 
         return decimal.TryParse(floorAreaValue, out var floorArea)
             ? floorArea
