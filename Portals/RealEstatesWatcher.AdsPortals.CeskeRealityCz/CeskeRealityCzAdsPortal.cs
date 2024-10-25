@@ -7,102 +7,101 @@ using Microsoft.Extensions.Logging;
 using RealEstatesWatcher.AdsPortals.Base;
 using RealEstatesWatcher.Models;
 
-namespace RealEstatesWatcher.AdsPortals.CeskeRealityCz
+namespace RealEstatesWatcher.AdsPortals.CeskeRealityCz;
+
+public class CeskeRealityCzAdsPortal : RealEstateAdsPortalBase
 {
-    public class CeskeRealityCzAdsPortal : RealEstateAdsPortalBase
+    public CeskeRealityCzAdsPortal(string watchedUrl,
+                                   ILogger<CeskeRealityCzAdsPortal>? logger = default) : base(watchedUrl, logger)
     {
-        public CeskeRealityCzAdsPortal(string adsUrl,
-                                       ILogger<CeskeRealityCzAdsPortal>? logger = default) : base(adsUrl, logger)
-        {
-            PageEncoding = Encoding.GetEncoding("windows-1250");
-        }
+        PageEncoding = Encoding.GetEncoding("windows-1250");
+    }
 
-        public override string Name => "České reality.cz";
+    public override string Name => "České reality.cz";
 
-        protected override string GetPathToAdsElements() => "//div[@id=\"div_nemovitost_obal\"]/div[contains(@class,\"div_nemovitost\")]";
+    protected override string GetPathToAdsElements() => "//div[@id=\"div_nemovitost_obal\"]/div[contains(@class,\"div_nemovitost\")]";
 
-        protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
-                                                                                        ParseTitle(node),
-                                                                                        ParseText(node),
-                                                                                        ParsePrice(node),
-                                                                                        Currency.CZK,
-                                                                                        ParseLayout(node),
-                                                                                        ParseAddress(node),
-                                                                                        ParseWebUrl(node),
-                                                                                        decimal.Zero,
-                                                                                        ParseFloorArea(node),
-                                                                                        imageUrl: ParseImageUrl(node),
-                                                                                        priceComment: ParsePriceComment(node));
+    protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
+        ParseTitle(node),
+        ParseText(node),
+        ParsePrice(node),
+        Currency.CZK,
+        ParseLayout(node),
+        ParseAddress(node),
+        ParseWebUrl(node),
+        decimal.Zero,
+        ParseFloorArea(node),
+        imageUrl: ParseImageUrl(node),
+        priceComment: ParsePriceComment(node));
         
-        private static string ParseTitle(HtmlNode node) => node.SelectSingleNode("./h2/a").InnerText;
+    private static string ParseTitle(HtmlNode node) => node.SelectSingleNode("./h2/a").InnerText;
 
-        private static string ParseText(HtmlNode node) => HttpUtility.HtmlDecode(node.SelectSingleNode(".//div[@class=\"nemovitost-popis\"]/p").InnerText);
+    private static string ParseText(HtmlNode node) => HttpUtility.HtmlDecode(node.SelectSingleNode(".//div[@class=\"nemovitost-popis\"]/p").InnerText);
 
-        private static decimal ParsePrice(HtmlNode node)
+    private static decimal ParsePrice(HtmlNode node)
+    {
+        var value = node.SelectSingleNode(".//div[@class=\"cena\"]").InnerText;
+
+        value = RegexMatchers.AllNonNumberValues().Replace(value, string.Empty);
+
+        return decimal.TryParse(value, out var price)
+            ? price
+            : decimal.Zero;
+    }
+
+    private static string? ParsePriceComment(HtmlNode node)
+    {
+        var value = node.SelectSingleNode(".//div[@class=\"cena\"]").InnerText;
+
+        return !Regex.IsMatch(value, @"\d+")
+            ? HttpUtility.HtmlDecode(value)
+            : default;
+    }
+
+    private static Layout ParseLayout(HtmlNode node)
+    {
+        var value = ParseTitle(node);
+
+        var result = RegexMatchers.Layout().Match(value);
+        if (!result.Success)
         {
-            var value = node.SelectSingleNode(".//div[@class=\"cena\"]").InnerText;
-
-            value = Regex.Replace(value, RegexPatterns.AllNonNumberValues, "");
-
-            return decimal.TryParse(value, out var price)
-                ? price
-                : decimal.Zero;
-        }
-
-        private static string? ParsePriceComment(HtmlNode node)
-        {
-            var value = node.SelectSingleNode(".//div[@class=\"cena\"]").InnerText;
-
-            return !Regex.IsMatch(value, @"\d+")
-                ? HttpUtility.HtmlDecode(value)
-                : default;
-        }
-
-        private static Layout ParseLayout(HtmlNode node)
-        {
-            var value = ParseTitle(node);
-
-            var result = Regex.Match(value, RegexPatterns.Layout);
+            value = ParseText(node);
+            result = RegexMatchers.Layout().Match(value);
             if (!result.Success)
-            {
-                value = ParseText(node);
-                result = Regex.Match(value, RegexPatterns.Layout);
-                if (!result.Success)
-                    return Layout.NotSpecified;
-            }
-
-            var layoutValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
-            layoutValue = Regex.Replace(layoutValue, RegexPatterns.AllWhitespaceValues, "");
-
-            return LayoutExtensions.ToLayout(layoutValue);
+                return Layout.NotSpecified;
         }
 
-        private static string ParseAddress(HtmlNode node) => node.SelectSingleNode("./h2/a").LastChild.InnerText[2..];
+        var layoutValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
+        layoutValue = RegexMatchers.AllWhitespaceCharacters().Replace(layoutValue, string.Empty);
 
-        private static Uri ParseWebUrl(HtmlNode node) => new(node.SelectSingleNode("./h2/a").GetAttributeValue("href", null));
+        return LayoutExtensions.ToLayout(layoutValue);
+    }
 
-        private static decimal ParseFloorArea(HtmlNode node)
-        {
-            var value = ParseTitle(node);
+    private static string ParseAddress(HtmlNode node) => node.SelectSingleNode("./h2/a").LastChild.InnerText[2..];
 
-            var result = Regex.Match(value, RegexPatterns.FloorArea);
-            if (!result.Success)
-                return decimal.Zero;
+    private static Uri ParseWebUrl(HtmlNode node) => new(node.SelectSingleNode("./h2/a").GetAttributeValue("href", null));
 
-            var floorAreaValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
+    private static decimal ParseFloorArea(HtmlNode node)
+    {
+        var value = ParseTitle(node);
 
-            return decimal.TryParse(floorAreaValue, out var floorArea)
-                ? floorArea
-                : decimal.Zero;
-        }
+        var result = RegexMatchers.FloorArea().Match(value);
+        if (!result.Success)
+            return decimal.Zero;
 
-        private static Uri? ParseImageUrl(HtmlNode node)
-        {
-            var path = node.SelectSingleNode(".//a/img")?.GetAttributeValue("src", null);
+        var floorAreaValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
 
-            return path is not null
-                ? new Uri($"https://{path[2..]}")   // skip leading '//' characters
-                : default;
-        }
+        return decimal.TryParse(floorAreaValue, out var floorArea)
+            ? floorArea
+            : decimal.Zero;
+    }
+
+    private static Uri? ParseImageUrl(HtmlNode node)
+    {
+        var path = node.SelectSingleNode(".//a/img")?.GetAttributeValue("src", null);
+
+        return path is not null
+            ? new Uri($"https://{path[2..]}")   // skip leading '//' characters
+            : default;
     }
 }

@@ -35,7 +35,7 @@ public class RealEstatesWatchEngine(WatchEngineSettings settings,
         // add to watched portals
         _adsPortals.Add(adsPortal);
 
-        logger?.LogInformation("Ads portal '{PortalName}' successfully registered.", adsPortal.Name);
+        logger?.LogInformation("Ads portal '{PortalName}' successfully registered.{NewLine}[URL = {PortalUrl}]", adsPortal.Name, Environment.NewLine, adsPortal.WatchedUrl);
     }
 
     public void RegisterAdPostsHandler(IRealEstateAdPostsHandler adPostsHandler)

@@ -12,8 +12,8 @@ public class BazosCzAdsPortal : RealEstateAdsPortalBase
 {
     public override string Name => "Bazoš.cz";
 
-    public BazosCzAdsPortal(string adsUrl,
-        ILogger<BazosCzAdsPortal>? logger = default) : base(adsUrl, logger)
+    public BazosCzAdsPortal(string watchedUrl,
+        ILogger<BazosCzAdsPortal>? logger = default) : base(watchedUrl, logger)
     {
     }
         
@@ -81,7 +81,7 @@ public class BazosCzAdsPortal : RealEstateAdsPortalBase
         if (value is null)
             return decimal.Zero;
 
-        value = Regex.Replace(value, RegexPatterns.AllNonNumberValues, "");
+        value = RegexMatchers.AllNonNumberValues().Replace(value, string.Empty);
             
         return decimal.TryParse(value, out var price)
             ? price
@@ -92,11 +92,11 @@ public class BazosCzAdsPortal : RealEstateAdsPortalBase
     {
         var value = ParseTitle(node);
 
-        var result = Regex.Match(value, RegexPatterns.FloorArea);
+        var result = RegexMatchers.FloorArea().Match(value);
         if (!result.Success)
         {
             value = ParseText(node);
-            result = Regex.Match(value, RegexPatterns.FloorArea);
+            result = RegexMatchers.FloorArea().Match(value);
             if (!result.Success)
                 return decimal.Zero;
         }
@@ -119,17 +119,17 @@ public class BazosCzAdsPortal : RealEstateAdsPortalBase
     {
         var value = ParseTitle(node);
 
-        var result = Regex.Match(value, RegexPatterns.Layout);
+        var result = RegexMatchers.Layout().Match(value);
         if (!result.Success)
         {
             value = ParseText(node);
-            result = Regex.Match(value, RegexPatterns.Layout);
+            result = RegexMatchers.Layout().Match(value);
             if (!result.Success)
                 return Layout.NotSpecified;
         }
 
         var layoutValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
-        layoutValue = Regex.Replace(layoutValue, RegexPatterns.AllWhitespaceValues, "");
+        layoutValue = RegexMatchers.AllWhitespaceCharacters().Replace(layoutValue, string.Empty);
 
         return LayoutExtensions.ToLayout(layoutValue);
     }

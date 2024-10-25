@@ -6,5 +6,7 @@ public interface IRealEstateAdsPortal
 {
     string Name { get; }
 
+    string WatchedUrl { get; }
+
     Task<IList<RealEstateAdPost>> GetLatestRealEstateAdsAsync();
 }

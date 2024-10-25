@@ -6,119 +6,114 @@ using Microsoft.Extensions.Logging;
 using RealEstatesWatcher.AdsPortals.Base;
 using RealEstatesWatcher.Models;
 
-namespace RealEstatesWatcher.AdsPortals.BravisCz
+namespace RealEstatesWatcher.AdsPortals.BravisCz;
+
+public class BravisCzAdsPortal(string watchedUrl,
+                               ILogger<BravisCzAdsPortal>? logger = default) : RealEstateAdsPortalBase(watchedUrl, logger)
 {
-    public class BravisCzAdsPortal : RealEstateAdsPortalBase
-    {
-        public override string Name => "Bravis.cz";
+    public override string Name => "Bravis.cz";
 
-        public BravisCzAdsPortal(string adsUrl,
-                                 ILogger<BravisCzAdsPortal>? logger = default) : base(adsUrl, logger)
-        {
-        }
+    protected override string GetPathToAdsElements() => "//ul[@class=\"itemslist\"]/li[not(@class)]";
 
-        protected override string GetPathToAdsElements() => "//ul[@class=\"itemslist\"]/li[not(@class)]";
-
-        protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
-                                                                                        ParseTitle(node),
-                                                                                        string.Empty,
-                                                                                        ParsePrice(node),
-                                                                                        Currency.CZK,
-                                                                                        ParseLayout(node),
-                                                                                        ParseAddress(node),
-                                                                                        ParseWebUrl(node, RootHost),
-                                                                                        ParseAdditionalFees(node),
-                                                                                        ParseFloorArea(node),
-                                                                                        ParsePriceComment(node),
-                                                                                        ParseImageUrl(node, RootHost));
+    protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
+        ParseTitle(node),
+        string.Empty,
+        ParsePrice(node),
+        Currency.CZK,
+        ParseLayout(node),
+        ParseAddress(node),
+        ParseWebUrl(node, RootHost),
+        ParseAdditionalFees(node),
+        ParseFloorArea(node),
+        ParsePriceComment(node),
+        ParseImageUrl(node, RootHost));
         
-        private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//h1").InnerText.Trim();
+    private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//h1").InnerText.Trim();
 
-        private static decimal ParsePrice(HtmlNode node)
+    private static decimal ParsePrice(HtmlNode node)
+    {
+        var value = node.SelectSingleNode(".//strong[@class='price']")?.FirstChild?.InnerText;
+        if (value == null)
+            return decimal.Zero;
+
+        value = RegexMatchers.AllNonNumberValues().Replace(value, string.Empty);
+
+        return decimal.TryParse(value, out var price)
+            ? price
+            : decimal.Zero;
+    }
+
+    private static decimal ParseAdditionalFees(HtmlNode node)
+    {
+        var value = node.SelectSingleNode(".//strong[@class='price']/small")?.InnerText;
+        if (value == null)
+            return decimal.Zero;
+
+        var subValues = value.Split('+');
+        var totalFees = decimal.Zero;
+        foreach (var subValue in subValues)
         {
-            var value = node.SelectSingleNode(".//strong[@class='price']")?.FirstChild?.InnerText;
-            if (value == null)
-                return decimal.Zero;
+            var feeValue = subValue;
 
-            value = Regex.Replace(value, RegexPatterns.AllNonNumberValues, "");
+            var index = subValue.IndexOf(",-", StringComparison.InvariantCulture);
+            if (index > -1)
+                feeValue = subValue[..index];
 
-            return decimal.TryParse(value, out var price)
-                ? price
-                : decimal.Zero;
+            feeValue = RegexMatchers.AllNonNumberValues().Replace(feeValue, string.Empty);
+
+            if (decimal.TryParse(feeValue, out var fee))
+                totalFees += fee;
         }
 
-        private static decimal ParseAdditionalFees(HtmlNode node)
-        {
-            var value = node.SelectSingleNode(".//strong[@class='price']/small")?.InnerText;
-            if (value == null)
-                return decimal.Zero;
+        return totalFees;
+    }
 
-            var subValues = value.Split('+');
-            var totalFees = decimal.Zero;
-            foreach (var subValue in subValues)
-            {
-                var feeValue = subValue;
+    private static Layout ParseLayout(HtmlNode node)
+    {
+        var value = node.SelectSingleNode(".//ul[@class='params']/li[contains(text(),\"Typ\")]").InnerText;
 
-                var index = subValue.IndexOf(",-", StringComparison.InvariantCulture);
-                if (index > -1)
-                    feeValue = subValue[..index];
+        var result = RegexMatchers.Layout().Match(value);
+        if (!result.Success)
+            return Layout.NotSpecified;
 
-                feeValue = Regex.Replace(feeValue, RegexPatterns.AllNonNumberValues, "");
+        var layoutValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
+        layoutValue = RegexMatchers.AllWhitespaceCharacters().Replace(layoutValue, string.Empty);
 
-                if (decimal.TryParse(feeValue, out var fee))
-                    totalFees += fee;
-            }
+        return LayoutExtensions.ToLayout(layoutValue);
+    }
 
-            return totalFees;
-        }
+    private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//em[@class=\"location\"]").InnerText;
 
-        private static Layout ParseLayout(HtmlNode node)
-        {
-            var value = node.SelectSingleNode(".//ul[@class='params']/li[contains(text(),\"Typ\")]").InnerText;
+    private static Uri ParseWebUrl(HtmlNode node, string rootHost)
+    {
+        var relativePath = node.SelectSingleNode(".//a[@class=\"main\"]").GetAttributeValue("href", null);
 
-            var result = Regex.Match(value, RegexPatterns.Layout);
-            if (!result.Success)
-                return Layout.NotSpecified;
+        return new Uri(rootHost +  UrlPathSeparator + relativePath);
+    }
 
-            var layoutValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
-            layoutValue = Regex.Replace(layoutValue, RegexPatterns.AllWhitespaceValues, "");
+    private static decimal ParseFloorArea(HtmlNode node)
+    {
+        var value = node.SelectSingleNode(".//ul[@class='params']/li[contains(text(),\"Plocha\")]").InnerText;
 
-            return LayoutExtensions.ToLayout(layoutValue);
-        }
+        var result = RegexMatchers.FloorArea().Match(value);
+        if (!result.Success)
+            return decimal.Zero;
 
-        private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//em[@class=\"location\"]").InnerText;
+        var floorAreaValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
 
-        private static Uri ParseWebUrl(HtmlNode node, string rootHost)
-        {
-            var relativePath = node.SelectSingleNode(".//a[@class=\"main\"]").GetAttributeValue("href", null);
+        return decimal.TryParse(floorAreaValue, NumberStyles.Number, new NumberFormatInfo { NumberDecimalSeparator = "," }, out var floorArea)
+            ? floorArea
+            : decimal.Zero;
+    }
 
-            return new Uri(rootHost +  UrlPathSeparator + relativePath);
-        }
+    private static string? ParsePriceComment(HtmlNode node) => node.SelectSingleNode(".//string[@class='price']/small")?.InnerText?.Trim('(', ')');
 
-        private static decimal ParseFloorArea(HtmlNode node)
-        {
-            var value = node.SelectSingleNode(".//ul[@class='params']/li[contains(text(),\"Plocha\")]").InnerText;
+    private static Uri? ParseImageUrl(HtmlNode node, string rootHost)
+    {
+        var relativePath = node.SelectSingleNode(".//a[@class=\"img\"]/img")?.GetAttributeValue("src", null);
 
-            var result = Regex.Match(value, RegexPatterns.FloorArea);
-            if (!result.Success)
-                return decimal.Zero;
-
-            var floorAreaValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
-
-            return decimal.TryParse(floorAreaValue, NumberStyles.Number, new NumberFormatInfo { NumberDecimalSeparator = "," }, out var floorArea)
-                ? floorArea
-                : decimal.Zero;
-        }
-
-        private static string? ParsePriceComment(HtmlNode node) => node.SelectSingleNode(".//string[@class='price']/small")?.InnerText?.Trim('(', ')');
-
-        private static Uri? ParseImageUrl(HtmlNode node, string rootHost)
-        {
-            var relativePath = node.SelectSingleNode(".//a[@class=\"img\"]/img")?.GetAttributeValue("src", null);
-
-            return relativePath is not null
-                ? new Uri(rootHost + relativePath)
-                : default;
-        }
+        return relativePath is not null
+            ? new Uri(rootHost + relativePath)
+            : default;
     }
 }

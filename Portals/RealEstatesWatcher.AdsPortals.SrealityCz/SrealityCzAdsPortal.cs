@@ -9,9 +9,9 @@ using RealEstatesWatcher.Models;
 
 namespace RealEstatesWatcher.AdsPortals.SrealityCz;
 
-public class SrealityCzAdsPortal(string adsUrl,
+public class SrealityCzAdsPortal(string watchedUrl,
                                  IWebScraper webScraper, 
-                                 ILogger<SrealityCzAdsPortal>? logger = default) : RealEstateAdsPortalBase(adsUrl, webScraper, logger)
+                                 ILogger<SrealityCzAdsPortal>? logger = default) : RealEstateAdsPortalBase(watchedUrl, webScraper, logger)
 {
     public override string Name => "Sreality.cz";
 
@@ -56,7 +56,7 @@ public class SrealityCzAdsPortal(string adsUrl,
         if (value == null)
             return decimal.Zero;
 
-        value = Regex.Replace(value, RegexPatterns.AllNonNumberValues, "");
+        value = RegexMatchers.AllNonNumberValues().Replace(value, string.Empty);
 
         return decimal.TryParse(value, out var price)
             ? price
@@ -68,12 +68,12 @@ public class SrealityCzAdsPortal(string adsUrl,
         var value = node.SelectSingleNode("./div//a[@class=\"title\"]").InnerText.Trim();
         value = HttpUtility.HtmlDecode(value);
 
-        var result = Regex.Match(value, RegexPatterns.Layout);
+        var result = RegexMatchers.Layout().Match(value);
         if (!result.Success)
             return Layout.NotSpecified;
 
         var layoutValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
-        layoutValue = Regex.Replace(layoutValue, RegexPatterns.AllWhitespaceValues, "");
+        layoutValue = RegexMatchers.Layout().Replace(layoutValue, string.Empty);
 
         return LayoutExtensions.ToLayout(layoutValue);
     }
@@ -94,7 +94,7 @@ public class SrealityCzAdsPortal(string adsUrl,
     {
         var value = ParseTitle(node);
 
-        var result = Regex.Match(value, RegexPatterns.FloorArea);
+        var result = RegexMatchers.FloorArea().Match(value);
         if (!result.Success)
             return decimal.Zero;
 

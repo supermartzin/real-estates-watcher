@@ -8,24 +8,9 @@ using RealEstatesWatcher.Models;
 
 namespace RealEstatesWatcher.AdsPortals.RealityIdnesCz;
 
-public partial class RealityIdnesCzAdsPortal(string adsUrl,
-                                             ILogger<RealityIdnesCzAdsPortal>? logger = default) : RealEstateAdsPortalBase(adsUrl, logger)
+public class RealityIdnesCzAdsPortal(string watchedUrl,
+                                     ILogger<RealityIdnesCzAdsPortal>? logger = default) : RealEstateAdsPortalBase(watchedUrl, logger)
 {
-    [GeneratedRegex(RegexPatterns.AllNonNumberValues)]
-    private static partial Regex AllNonNumberValuesRegex();
-
-    [GeneratedRegex(RegexPatterns.AtLeastOneDigitValue)]
-    private static partial Regex AtLeastOneDigitValueRegex();
-
-    [GeneratedRegex(RegexPatterns.Layout)]
-    private static partial Regex LayoutRegex();
-
-    [GeneratedRegex(RegexPatterns.AllWhitespaceValues)]
-    private static partial Regex AllWhitespaceCharactersRegex();
-
-    [GeneratedRegex(RegexPatterns.FloorArea)]
-    private static partial Regex FloorAreaRegex();
-
     public override string Name => "Reality.idnes.cz";
 
     protected override string GetPathToAdsElements() => "//div[@class=\"c-products__item\"]";
@@ -60,7 +45,7 @@ public partial class RealityIdnesCzAdsPortal(string adsUrl,
         if (value is null)
             return decimal.Zero;
 
-        value = AllNonNumberValuesRegex().Replace(value, "");
+        value = RegexMatchers.AllNonNumberValues().Replace(value, "");
 
         return decimal.TryParse(value.Trim(), out var price)
             ? price
@@ -73,19 +58,19 @@ public partial class RealityIdnesCzAdsPortal(string adsUrl,
         if (value is null)
             return null;
 
-        return AtLeastOneDigitValueRegex().IsMatch(value) ? null : value;
+        return RegexMatchers.AtLeastOneDigitValue().IsMatch(value) ? null : value;
     }
 
     private static Layout ParseLayout(HtmlNode node)
     {
         var value = ParseTitle(node);
 
-        var result = LayoutRegex().Match(value);
+        var result = RegexMatchers.Layout().Match(value);
         if (!result.Success)
             return Layout.NotSpecified;
 
         var layoutValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
-        layoutValue = AllWhitespaceCharactersRegex().Replace(layoutValue, "");
+        layoutValue = RegexMatchers.AllWhitespaceCharacters().Replace(layoutValue, "");
 
         return LayoutExtensions.ToLayout(layoutValue);
     }
@@ -103,7 +88,7 @@ public partial class RealityIdnesCzAdsPortal(string adsUrl,
     {
         var value = HttpUtility.HtmlDecode(ParseTitle(node)).Replace(NonBreakingSpace, string.Empty);
 
-        var result = FloorAreaRegex().Match(value);
+        var result = RegexMatchers.FloorArea().Match(value);
         if (!result.Success)
             return decimal.Zero;
 
