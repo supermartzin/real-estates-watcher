@@ -1,4 +1,4 @@
-# Real Estate Watcher 🔍
+# Real Estates Watcher 🔍
 🏦 Simple C# command-line application for periodic watching of selected Real estate advertisement portals and sending notifications on new ads. 🏗
 Supports watching adverts for **sells** as well as **leases**.
 
