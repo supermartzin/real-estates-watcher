@@ -25,6 +25,7 @@ public class RealcityCzAdsPortal(string watchedUrl,
         ParseWebUrl(node, RootHost),
         decimal.Zero,
         ParseFloorArea(node),
+        priceComment: ParsePriceComment(node),
         imageUrl: ParseImageUrl(node));
 
     private static string ParseTitle(HtmlNode node) => HttpUtility.HtmlDecode(node.SelectSingleNode(".//div[@class=\"title\"]").InnerText);
@@ -43,6 +44,10 @@ public class RealcityCzAdsPortal(string watchedUrl,
             ? price
             : decimal.Zero;
     }
+
+    private static string? ParsePriceComment(HtmlNode node) => ParsePrice(node) is decimal.Zero
+        ? node.SelectSingleNode(".//div[@class=\"price\"]/span")?.InnerText?.Trim()
+        : default;
 
     private static Layout ParseLayout(HtmlNode node)
     {
