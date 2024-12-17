@@ -89,7 +89,7 @@ public abstract partial class RealEstateAdsPortalBase : IRealEstateAdsPortal
             htmlDoc.LoadHtml(pageContent);
             htmlDoc.OptionDefaultStreamEncoding = PageEncoding;
 
-            Logger?.LogDebug($"({Name}): Downloaded page with ads.");
+            Logger?.LogDebug("({Name}): Downloaded page with ads.", Name);
 
             // parse posts
             var posts = htmlDoc.DocumentNode
@@ -97,7 +97,7 @@ public abstract partial class RealEstateAdsPortalBase : IRealEstateAdsPortal
                 .Select(ParseRealEstateAdPost)
                 .ToList() ?? [];
 
-            Logger?.LogDebug($"({Name}): Parsed {posts.Count} ads from page.");
+            Logger?.LogDebug("({Name}): Parsed {PostsCount} ads from page.", Name, posts.Count);
 
             return posts;
         }
@@ -123,14 +123,14 @@ public abstract partial class RealEstateAdsPortalBase : IRealEstateAdsPortal
             var pageContent = await HtmlWeb!.LoadFromWebAsync(WatchedUrl, PageEncoding)
                 .ConfigureAwait(false);
 
-            Logger?.LogDebug($"({Name}): Downloaded page with ads.");
+            Logger?.LogDebug("({Name}): Downloaded page with ads.", Name);
 
             var posts = pageContent.DocumentNode
                 .SelectNodes(GetPathToAdsElements())?
                 .Select(ParseRealEstateAdPost)
                 .ToList() ?? [];
 
-            Logger?.LogDebug($"({Name}): Parsed {posts.Count} ads from page.");
+            Logger?.LogDebug("({Name}): Parsed {PostsCount} ads from page.", Name, posts.Count);
 
             return posts;
         }
