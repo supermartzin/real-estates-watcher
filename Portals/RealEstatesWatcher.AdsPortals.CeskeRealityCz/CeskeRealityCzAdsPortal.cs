@@ -1,6 +1,4 @@
-﻿using System.Text;
-using System.Text.RegularExpressions;
-using System.Web;
+﻿using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 
@@ -9,17 +7,19 @@ using RealEstatesWatcher.Models;
 
 namespace RealEstatesWatcher.AdsPortals.CeskeRealityCz;
 
-public class CeskeRealityCzAdsPortal : RealEstateAdsPortalBase
+public partial class CeskeRealityCzAdsPortal : RealEstateAdsPortalBase
 {
+    [GeneratedRegex(@"m²(.*)")]
+    private static partial Regex AddressRegex();
+
     public CeskeRealityCzAdsPortal(string watchedUrl,
-                                   ILogger<CeskeRealityCzAdsPortal>? logger = default) : base(watchedUrl, logger)
+                                   ILogger<CeskeRealityCzAdsPortal>? logger = null) : base(watchedUrl, logger)
     {
-        PageEncoding = Encoding.GetEncoding("windows-1250");
     }
 
     public override string Name => "České reality.cz";
 
-    protected override string GetPathToAdsElements() => "//div[@id=\"div_nemovitost_obal\"]/div[contains(@class,\"div_nemovitost\")]";
+    protected override string GetPathToAdsElements() => "//div[@class=\"g-estates\"]/article";
 
     protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
         ParseTitle(node),
@@ -28,34 +28,24 @@ public class CeskeRealityCzAdsPortal : RealEstateAdsPortalBase
         Currency.CZK,
         ParseLayout(node),
         ParseAddress(node),
-        ParseWebUrl(node),
+        ParseWebUrl(node, RootHost),
         decimal.Zero,
         ParseFloorArea(node),
-        imageUrl: ParseImageUrl(node),
-        priceComment: ParsePriceComment(node));
+        imageUrl: ParseImageUrl(node));
         
-    private static string ParseTitle(HtmlNode node) => node.SelectSingleNode("./h2/a").InnerText;
+    private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//h2[@class=\"i-estate__header-title\"]").InnerText;
 
-    private static string ParseText(HtmlNode node) => HttpUtility.HtmlDecode(node.SelectSingleNode(".//div[@class=\"nemovitost-popis\"]/p").InnerText);
+    private static string ParseText(HtmlNode node) => node.SelectSingleNode(".//p[@class=\"i-estate__description-text\"]").InnerText;
 
     private static decimal ParsePrice(HtmlNode node)
     {
-        var value = node.SelectSingleNode(".//div[@class=\"cena\"]").InnerText;
+        var value = node.SelectSingleNode(".//h3[@class=\"i-estate__footer-price-value\"]").InnerText;
 
         value = RegexMatchers.AllNonNumberValues().Replace(value, string.Empty);
 
         return decimal.TryParse(value, out var price)
             ? price
             : decimal.Zero;
-    }
-
-    private static string? ParsePriceComment(HtmlNode node)
-    {
-        var value = node.SelectSingleNode(".//div[@class=\"cena\"]").InnerText;
-
-        return !Regex.IsMatch(value, @"\d+")
-            ? HttpUtility.HtmlDecode(value)
-            : default;
     }
 
     private static Layout ParseLayout(HtmlNode node)
@@ -77,9 +67,24 @@ public class CeskeRealityCzAdsPortal : RealEstateAdsPortalBase
         return LayoutExtensions.ToLayout(layoutValue);
     }
 
-    private static string ParseAddress(HtmlNode node) => node.SelectSingleNode("./h2/a").LastChild.InnerText[2..];
+    private static string ParseAddress(HtmlNode node)
+    {
+        var title = ParseTitle(node);
 
-    private static Uri ParseWebUrl(HtmlNode node) => new(node.SelectSingleNode("./h2/a").GetAttributeValue("href", null));
+        var result = AddressRegex().Match(title);
+        return result.Success 
+            ? result.Groups.Skip<Group>(1).First(group => group.Success).Value.Trim()
+            : string.Empty;
+    }
+
+    private static Uri ParseWebUrl(HtmlNode node, string rootUri)
+    {
+        var relativePath = node.SelectSingleNode(".//h2[@class=\"i-estate__header-title\"]/a")?.GetAttributeValue("href", null);
+
+        return relativePath is not null 
+            ? new Uri($"{rootUri}{relativePath}") 
+            : new Uri(rootUri);
+    }
 
     private static decimal ParseFloorArea(HtmlNode node)
     {
@@ -98,10 +103,10 @@ public class CeskeRealityCzAdsPortal : RealEstateAdsPortalBase
 
     private static Uri? ParseImageUrl(HtmlNode node)
     {
-        var path = node.SelectSingleNode(".//a/img")?.GetAttributeValue("src", null);
+        var path = node.SelectSingleNode(".//div[contains(@class, \"img\")]/picture/source[@type=\"image/jpeg\"]")?.GetAttributeValue("srcset", null);
 
         return path is not null
-            ? new Uri($"https://{path[2..]}")   // skip leading '//' characters
-            : default;
+            ? new Uri(path) 
+            : null;
     }
 }
