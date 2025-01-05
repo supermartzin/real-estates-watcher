@@ -29,27 +29,28 @@ namespace RealEstatesWatcher.UI.Console;
 
 public class ConsoleRunner
 {
-    private static readonly AutoResetEvent WaitHandle;
-    private static readonly CmdArguments CmdArguments;
+    private static readonly AutoResetEvent WaitHandle = new(false);
+    private static readonly CmdArguments CmdArguments = new();
 
-    private static IServiceProvider _container;
+    private static IServiceProvider? _container;
     private static ILogger<ConsoleRunner>? _logger;
-
-    static ConsoleRunner()
-    {
-        WaitHandle = new AutoResetEvent(false);
-        CmdArguments = new CmdArguments();
-
-        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-    }
+    
+    protected ConsoleRunner() { }
 
     public static async Task Main(string[] args)
     {
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
         var parsed = await CmdArguments.ParseAsync(args);
         if (!parsed)
             return;
 
         ConfigureDependencyInjection();
+        if (_container is null)
+        {
+            _logger?.LogCritical("Error starting Real estates Watcher: Unable to build all required components.");
+            return;
+        }
 
         _logger = _container.GetService<ILogger<ConsoleRunner>>();
         _logger?.LogInformation("------------------------------------------------");
@@ -57,9 +58,9 @@ public class ConsoleRunner
         try
         {
             var watcher = _container.GetRequiredService<RealEstatesWatchEngine>();
-            RegisterAdsPortals(watcher);
-            RegisterAdPostsHandlers(watcher);
-            RegisterAdPostsFilters(watcher);
+            RegisterAdsPortals(watcher, _container);
+            RegisterAdPostsHandlers(watcher, _container);
+            RegisterAdPostsFilters(watcher, _container);
 
             _logger?.LogInformation("Starting Real estate Watcher engine...");
 
@@ -73,7 +74,7 @@ public class ConsoleRunner
         }
         catch (RealEstatesWatchEngineException reweEx)
         {
-            _logger?.LogCritical(reweEx, $"Error starting Real estates Watcher: {reweEx.Message}");
+            _logger?.LogCritical(reweEx, "Error starting Real estates Watcher: {Message}", reweEx.Message);
         }
     }
 
@@ -127,7 +128,7 @@ public class ConsoleRunner
         };
     }
 
-    private static void RegisterAdsPortals(RealEstatesWatchEngine watcher)
+    private static void RegisterAdsPortals(RealEstatesWatchEngine watcher, IServiceProvider container)
     {
         _logger?.LogInformation("Registering Ads portals..");
 
@@ -146,72 +147,72 @@ public class ConsoleRunner
 
             if (url.Contains("bazos.cz"))
             {
-                watcher.RegisterAdsPortal(new BazosCzAdsPortal(url, _container.GetService<ILogger<BazosCzAdsPortal>>()));
+                watcher.RegisterAdsPortal(new BazosCzAdsPortal(url, container.GetService<ILogger<BazosCzAdsPortal>>()));
                 continue;
             }
             if (url.Contains("bezrealitky.cz"))
             {
                 watcher.RegisterAdsPortal(new BezrealitkyCzAdsPortal(url,
-                    _container.GetRequiredService<IWebScraper>(),
-                    _container.GetService<ILogger<BezrealitkyCzAdsPortal>>()));
+                    container.GetRequiredService<IWebScraper>(),
+                    container.GetService<ILogger<BezrealitkyCzAdsPortal>>()));
                 continue;
             }
             if (url.Contains("bidli.cz"))
             {
-                watcher.RegisterAdsPortal(new BidliCzAdsPortal(url, _container.GetService<ILogger<BidliCzAdsPortal>>()));
+                watcher.RegisterAdsPortal(new BidliCzAdsPortal(url, container.GetService<ILogger<BidliCzAdsPortal>>()));
                 continue;
             }
             if (url.Contains("bravis.cz"))
             {
-                watcher.RegisterAdsPortal(new BravisCzAdsPortal(url, _container.GetService<ILogger<BravisCzAdsPortal>>()));
+                watcher.RegisterAdsPortal(new BravisCzAdsPortal(url, container.GetService<ILogger<BravisCzAdsPortal>>()));
                 continue;
             }
             if (url.Contains("ceskereality.cz"))
             {
-                watcher.RegisterAdsPortal(new CeskeRealityCzAdsPortal(url, _container.GetService<ILogger<CeskeRealityCzAdsPortal>>()));
+                watcher.RegisterAdsPortal(new CeskeRealityCzAdsPortal(url, container.GetService<ILogger<CeskeRealityCzAdsPortal>>()));
                 continue;
             }
             if (url.Contains("flatzone.cz"))
             {
                 watcher.RegisterAdsPortal(new FlatZoneCzAdsPortal(url,
-                    _container.GetRequiredService<IWebScraper>(),
-                    _container.GetService<ILogger<FlatZoneCzAdsPortal>>()));
+                    container.GetRequiredService<IWebScraper>(),
+                    container.GetService<ILogger<FlatZoneCzAdsPortal>>()));
                 continue;
             }
             if (url.Contains("mmreality.cz"))
             {
-                watcher.RegisterAdsPortal(new MMRealityCzAdsPortal(url, _container.GetService<ILogger<MMRealityCzAdsPortal>>()));
+                watcher.RegisterAdsPortal(new MmRealityCzAdsPortal(url, container.GetService<ILogger<MmRealityCzAdsPortal>>()));
                 continue;
             }
             if (url.Contains("realcity.cz"))
             {
-                watcher.RegisterAdsPortal(new RealcityCzAdsPortal(url, _container.GetService<ILogger<RealcityCzAdsPortal>>()));
+                watcher.RegisterAdsPortal(new RealcityCzAdsPortal(url, container.GetService<ILogger<RealcityCzAdsPortal>>()));
                 continue;
             }
             if (url.Contains("reality.idnes.cz"))
             {
-                watcher.RegisterAdsPortal(new RealityIdnesCzAdsPortal(url, _container.GetService<ILogger<RealityIdnesCzAdsPortal>>()));
+                watcher.RegisterAdsPortal(new RealityIdnesCzAdsPortal(url, container.GetService<ILogger<RealityIdnesCzAdsPortal>>()));
                 continue;
             }
             if (url.Contains("remax.cz"))
             {
-                watcher.RegisterAdsPortal(new RemaxCzAdsProtal(url, _container.GetService<ILogger<RemaxCzAdsProtal>>()));
+                watcher.RegisterAdsPortal(new RemaxCzAdsProtal(url, container.GetService<ILogger<RemaxCzAdsProtal>>()));
                 continue;
             }
             if (url.Contains("sreality.cz"))
             {
                 watcher.RegisterAdsPortal(new SrealityCzAdsPortal(url,
-                    _container.GetRequiredService<IWebScraper>(),
-                    _container.GetService<ILogger<SrealityCzAdsPortal>>()));
+                    container.GetRequiredService<IWebScraper>(),
+                    container.GetService<ILogger<SrealityCzAdsPortal>>()));
             }
         }
     }
 
-    private static void RegisterAdPostsHandlers(RealEstatesWatchEngine watcher)
+    private static void RegisterAdPostsHandlers(RealEstatesWatchEngine watcher, IServiceProvider container)
     {
         _logger?.LogInformation("Registering Ad posts handlers..");
 
-        watcher.RegisterAdPostsHandler(new EmailNotifyingAdPostsHandler(LoadEmailSettings(), _container.GetService<ILogger<EmailNotifyingAdPostsHandler>>()));
+        watcher.RegisterAdPostsHandler(new EmailNotifyingAdPostsHandler(LoadEmailSettings(), container.GetService<ILogger<EmailNotifyingAdPostsHandler>>()));
         watcher.RegisterAdPostsHandler(new LocalFileAdPostsHandler(LoadFileSettings()));
 
         static EmailNotifyingAdPostsHandlerSettings LoadEmailSettings()
@@ -253,7 +254,7 @@ public class ConsoleRunner
         }
     }
 
-    private static void RegisterAdPostsFilters(RealEstatesWatchEngine watcher)
+    private static void RegisterAdPostsFilters(RealEstatesWatchEngine watcher, IServiceProvider container)
     {
         _logger?.LogInformation("Registering Ad posts filters..");
 
@@ -263,8 +264,8 @@ public class ConsoleRunner
             return;
         }
 
-        watcher.RegisterAdPostsFilter(new BasicParametersAdPostsFilter(LoadBasicFilterSettings(), _container.GetService<ILogger<BasicParametersAdPostsFilter>>()));
-
+        watcher.RegisterAdPostsFilter(new BasicParametersAdPostsFilter(LoadBasicFilterSettings(), container.GetService<ILogger<BasicParametersAdPostsFilter>>()));
+        
         static BasicParametersAdPostsFilterSettings LoadBasicFilterSettings()
         {
             var configuration = new ConfigurationBuilder().AddIniFile(CmdArguments.FiltersConfigFilePath)
@@ -286,9 +287,11 @@ public class ConsoleRunner
             if (string.IsNullOrWhiteSpace(layoutsValue))
                 return new HashSet<Layout>();
 
-            var layouts = layoutsValue.Split(",").Select(LayoutExtensions.ToLayout).ToHashSet();
-            if (layouts.Contains(Layout.NotSpecified))
-                layouts.Remove(Layout.NotSpecified);
+            var layouts = layoutsValue.Split(",")
+                                      .Select(LayoutExtensions.ToLayout)
+                                      .ToHashSet();
+            
+            layouts.Remove(Layout.NotSpecified);
 
             return layouts;
         }

@@ -9,24 +9,26 @@ using RealEstatesWatcher.Models;
 namespace RealEstatesWatcher.AdsPortals.RealcityCz;
 
 public class RealcityCzAdsPortal(string watchedUrl,
-                                 ILogger<RealEstateAdsPortalBase>? logger = default) : RealEstateAdsPortalBase(watchedUrl, logger)
+                                 ILogger<RealEstateAdsPortalBase>? logger = null) : RealEstateAdsPortalBase(watchedUrl, logger)
 {
     public override string Name => "Realcity.cz";
 
     protected override string GetPathToAdsElements() => "//div[@class=\"media advertise item\"]";
 
-    protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
-        ParseTitle(node),
-        ParseText(node),
-        ParsePrice(node),
-        Currency.CZK,
-        ParseLayout(node),
-        ParseAddress(node),
-        ParseWebUrl(node, RootHost),
-        decimal.Zero,
-        ParseFloorArea(node),
-        priceComment: ParsePriceComment(node),
-        imageUrl: ParseImageUrl(node));
+    protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new()
+    {
+        AdsPortalName = Name,
+        Title = ParseTitle(node),
+        Text = ParseText(node),
+        Price = ParsePrice(node),
+        Currency = Currency.CZK,
+        Layout = ParseLayout(node),
+        Address = ParseAddress(node),
+        WebUrl = ParseWebUrl(node, RootHost),
+        FloorArea = ParseFloorArea(node),
+        PriceComment = ParsePriceComment(node),
+        ImageUrl = ParseImageUrl(node)
+    };
 
     private static string ParseTitle(HtmlNode node) => HttpUtility.HtmlDecode(node.SelectSingleNode(".//div[@class=\"title\"]").InnerText);
 
@@ -47,7 +49,7 @@ public class RealcityCzAdsPortal(string watchedUrl,
 
     private static string? ParsePriceComment(HtmlNode node) => ParsePrice(node) is decimal.Zero
         ? node.SelectSingleNode(".//div[@class=\"price\"]/span")?.InnerText?.Trim()
-        : default;
+        : null;
 
     private static Layout ParseLayout(HtmlNode node)
     {
@@ -98,6 +100,6 @@ public class RealcityCzAdsPortal(string watchedUrl,
 
         return path is not null
             ? new Uri($"https://{path[2..]}")   // skip leading '//' characters
-            : default;
+            : null;
     }
 }

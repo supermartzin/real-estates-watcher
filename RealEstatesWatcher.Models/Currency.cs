@@ -1,11 +1,10 @@
-﻿namespace RealEstatesWatcher.Models
-{
-    public enum Currency
-    {
-        CZK,
-        EUR,
-        USD,
+﻿namespace RealEstatesWatcher.Models;
 
-        Other = -1
-    }
+public enum Currency
+{
+    CZK,
+    EUR,
+    USD,
+
+    Other = -1
 }

@@ -10,13 +10,13 @@ using RealEstatesWatcher.Models;
 namespace RealEstatesWatcher.AdPostsHandlers.Email;
 
 public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings settings,
-                                          ILogger<EmailNotifyingAdPostsHandler>? logger = default) : IRealEstateAdPostsHandler
+                                          ILogger<EmailNotifyingAdPostsHandler>? logger = null) : IRealEstateAdPostsHandler
 {
     private static class HtmlTemplates
     {
         public const string FullPage = """
                                        <!DOCTYPE html>
-                                       <html>
+                                       <html lang="en">
                                        <head>
                                            <meta charset="utf-8">
                                            <title>Real Estate Advertisements</title>
@@ -136,7 +136,7 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
         postHtml = postHtml.Replace("{$layout}", post.Layout is not Layout.NotSpecified ? post.Layout.ToDisplayString() : "-");
 
         // floor area
-        postHtml = post.FloorArea is not decimal.Zero ? postHtml.Replace("{$floor-area}", post.FloorArea + " m²") : postHtml.Replace("{$floor-area}", " -");
+        postHtml = post.FloorArea is not null and not decimal.Zero ? postHtml.Replace("{$floor-area}", post.FloorArea + " m²") : postHtml.Replace("{$floor-area}", " -");
             
         // image
         if (post.ImageUrl is not null)
@@ -165,9 +165,9 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
         }
 
         // additional fees
-        if (post.AdditionalFees is not decimal.Zero)
+        if (post.AdditionalFees is not null and not decimal.Zero)
         {
-            postHtml = postHtml.Replace("{$additional-fees}", post.AdditionalFees.ToString("N", new NumberFormatInfo { NumberGroupSeparator = " " }))
+            postHtml = postHtml.Replace("{$additional-fees}", post.AdditionalFees.Value.ToString("N", new NumberFormatInfo { NumberGroupSeparator = " " }))
                 .Replace("{$additional-fees-display}", "inline-block");
         }
         else

@@ -21,17 +21,19 @@ public partial class CeskeRealityCzAdsPortal : RealEstateAdsPortalBase
 
     protected override string GetPathToAdsElements() => "//div[@class=\"g-estates\"]/article";
 
-    protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
-        ParseTitle(node),
-        ParseText(node),
-        ParsePrice(node),
-        Currency.CZK,
-        ParseLayout(node),
-        ParseAddress(node),
-        ParseWebUrl(node, RootHost),
-        decimal.Zero,
-        ParseFloorArea(node),
-        imageUrl: ParseImageUrl(node));
+    protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new()
+    {
+        AdsPortalName = Name,
+        Title = ParseTitle(node),
+        Text = ParseText(node),
+        Price = ParsePrice(node),
+        Currency = Currency.CZK,
+        Layout = ParseLayout(node),
+        Address = ParseAddress(node),
+        WebUrl = ParseWebUrl(node, RootHost),
+        FloorArea = ParseFloorArea(node),
+        ImageUrl = ParseImageUrl(node)
+    };
         
     private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//h2[@class=\"i-estate__header-title\"]").InnerText;
 

@@ -9,24 +9,26 @@ using RealEstatesWatcher.Models;
 namespace RealEstatesWatcher.AdsPortals.RealityIdnesCz;
 
 public class RealityIdnesCzAdsPortal(string watchedUrl,
-                                     ILogger<RealityIdnesCzAdsPortal>? logger = default) : RealEstateAdsPortalBase(watchedUrl, logger)
+                                     ILogger<RealityIdnesCzAdsPortal>? logger = null) : RealEstateAdsPortalBase(watchedUrl, logger)
 {
     public override string Name => "Reality.idnes.cz";
 
     protected override string GetPathToAdsElements() => "//div[@class=\"c-products__item\"]";
 
-    protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
-                                                                                    ParseTitle(node),
-                                                                                    string.Empty,
-                                                                                    ParsePrice(node),
-                                                                                    Currency.CZK,
-                                                                                    ParseLayout(node),
-                                                                                    ParseAddress(node),
-                                                                                    ParseWebUrl(node, RootHost),
-                                                                                    decimal.Zero,
-                                                                                    ParseFloorArea(node),
-                                                                                    ParsePriceComment(node),
-                                                                                    ParseImageUrl(node));
+    protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new()
+    {
+        AdsPortalName = Name,
+        Title = ParseTitle(node),
+        Text = string.Empty,
+        Price = ParsePrice(node),
+        Currency = Currency.CZK,
+        Layout = ParseLayout(node),
+        Address = ParseAddress(node),
+        WebUrl = ParseWebUrl(node, RootHost),
+        FloorArea = ParseFloorArea(node),
+        PriceComment = ParsePriceComment(node),
+        ImageUrl = ParseImageUrl(node)
+    };
 
     private static string ParseTitle(HtmlNode node)
     {
@@ -108,6 +110,6 @@ public class RealityIdnesCzAdsPortal(string watchedUrl,
 
         return path is not null
             ? new Uri(path)
-            : default;
+            : null;
     }
 }
