@@ -1,49 +1,48 @@
 ﻿namespace RealEstatesWatcher.Models;
 
-public class RealEstateAdPost(string adsPortalName,
-                              string title,
-                              string text,
-                              decimal price,
-                              Currency currency,
-                              Layout layout,
-                              string address,
-                              Uri webUrl,
-                              decimal additionalFees = decimal.Zero,
-                              decimal floorArea = decimal.Zero,
-                              string? priceComment = null,
-                              Uri? imageUrl = null,
-                              DateTime? publishTime = null)
+public sealed class RealEstateAdPost : IEquatable<RealEstateAdPost>
 {
-    public string AdsPortalName { get; } = adsPortalName ?? throw new ArgumentNullException(nameof(adsPortalName));
+    private readonly decimal _price;
 
-    public string Title { get; } = title ?? throw new ArgumentNullException(nameof(title));
+    public required string AdsPortalName { get; init; }
 
-    public string Text { get; } = text ?? throw new ArgumentNullException(nameof(text));
+    public required string Title { get; init; }
 
-    public decimal Price { get; } = price >= decimal.Zero ? price : throw new ArgumentOutOfRangeException(nameof(price));
+    public required string Text { get; init; }
 
-    public decimal AdditionalFees { get; } = additionalFees;
+    public required decimal Price
+    {
+        get => _price;
+        init
+        {
+            ArgumentOutOfRangeException.ThrowIfLessThan(value, decimal.Zero);
 
-    public string? PriceComment { get; } = priceComment;
+            _price = value;
+        }
+    }
 
-    public Currency Currency { get; } = currency;
+    public required string Address { get; init; }
 
-    public Layout Layout { get; } = layout;
+    public required Uri WebUrl { get; init; }
 
-    public string Address { get; } = address ?? throw new ArgumentNullException(nameof(address));
+    public required Currency Currency { get; init; }
 
-    public decimal FloorArea { get; } = floorArea;
+    public required Layout Layout { get; init; }
 
-    public Uri WebUrl { get; } = webUrl ?? throw new ArgumentNullException(nameof(webUrl));
+    public decimal? FloorArea { get; init; } = decimal.Zero;
 
-    public Uri? ImageUrl { get; } = imageUrl;
+    public decimal? AdditionalFees { get; init; } = decimal.Zero;
 
-    public DateTime? PublishTime { get; } = publishTime;
+    public string? PriceComment { get; init; }
+
+    public Uri? ImageUrl { get; init; }
+
+    public DateTime? PublishTime { get; init; }
 
     public override string ToString() => $"[{AdsPortalName}]: {Title} | {Currency} {Price} | {Layout.ToDisplayString()} | URL: {WebUrl.ToString()}";
 
-    protected bool Equals(RealEstateAdPost other) => WebUrl.GetLeftPart(UriPartial.Path)
-        .Equals(other.WebUrl.GetLeftPart(UriPartial.Path));
+    public bool Equals(RealEstateAdPost? other) => WebUrl.GetLeftPart(UriPartial.Path)
+        .Equals(other?.WebUrl.GetLeftPart(UriPartial.Path));
 
     public override bool Equals(object? obj)
     {

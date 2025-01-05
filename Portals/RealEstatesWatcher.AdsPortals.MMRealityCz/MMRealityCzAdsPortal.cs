@@ -7,24 +7,26 @@ using RealEstatesWatcher.Models;
 
 namespace RealEstatesWatcher.AdsPortals.MMRealityCz;
 
-public class MMRealityCzAdsPortal(string watchedUrl,
-                                  ILogger<MMRealityCzAdsPortal>? logger = default) : RealEstateAdsPortalBase(watchedUrl, logger)
+public class MmRealityCzAdsPortal(string watchedUrl,
+                                  ILogger<MmRealityCzAdsPortal>? logger = null) : RealEstateAdsPortalBase(watchedUrl, logger)
 {
     public override string Name => "M&M Reality.cz";
 
     protected override string GetPathToAdsElements() => "//div[contains(@class,\"grid-x\")]//div[contains(@class, \"cell\")]//a[@data-realty-name]/..";
 
-    protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
-        ParseTitle(node),
-        string.Empty,
-        ParsePrice(node),
-        Currency.CZK,
-        ParseLayout(node),
-        ParseAddress(node),
-        ParseWebUrl(node),
-        decimal.Zero,
-        ParseFloorArea(node),
-        imageUrl: ParseImageUrl(node));
+    protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new()
+    {
+        AdsPortalName = Name,
+        Title = ParseTitle(node),
+        Text = string.Empty,
+        Price = ParsePrice(node),
+        Currency = Currency.CZK,
+        Layout = ParseLayout(node),
+        Address = ParseAddress(node),
+        WebUrl = ParseWebUrl(node),
+        FloorArea = ParseFloorArea(node),
+        ImageUrl = ParseImageUrl(node)
+    };
 
     private static string ParseTitle(HtmlNode node) => node.SelectSingleNode("./p[1]").LastChild.InnerText.Trim();
 

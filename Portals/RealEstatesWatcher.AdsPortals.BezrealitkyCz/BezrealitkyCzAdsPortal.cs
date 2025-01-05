@@ -10,23 +10,26 @@ namespace RealEstatesWatcher.AdsPortals.BezrealitkyCz;
 
 public class BezrealitkyCzAdsPortal(string watchedUrl,
                                     IWebScraper webScraper,
-                                    ILogger<BezrealitkyCzAdsPortal>? logger = default) : RealEstateAdsPortalBase(watchedUrl, webScraper, logger)
+                                    ILogger<BezrealitkyCzAdsPortal>? logger = null) : RealEstateAdsPortalBase(watchedUrl, webScraper, logger)
 {
     public override string Name => "Bezrealitky.cz";
 
     protected override string GetPathToAdsElements() => "//article[contains(@class,\"product\")]";
 
-    protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
-        ParseTitle(node),
-        string.Empty,
-        ParsePrice(node),
-        Currency.CZK,
-        ParseLayout(node),
-        ParseAddress(node),
-        ParseWebUrl(node),
-        ParseAdditionalFees(node),
-        ParseFloorArea(node),
-        imageUrl: ParseImageUrl(node, RootHost));
+    protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new()
+    {
+        AdsPortalName = Name,
+        Title = ParseTitle(node),
+        Text = string.Empty,
+        Price = ParsePrice(node),
+        Currency = Currency.CZK,
+        Layout = ParseLayout(node),
+        Address = ParseAddress(node),
+        WebUrl = ParseWebUrl(node),
+        AdditionalFees = ParseAdditionalFees(node),
+        FloorArea = ParseFloorArea(node),
+        ImageUrl = ParseImageUrl(node, RootHost)
+    };
 
     private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//p[@class=\"product__note\"]").InnerText;
 

@@ -13,24 +13,26 @@ public class RemaxCzAdsProtal : RealEstateAdsPortalBase
     public override string Name => "Remax.cz";
 
     public RemaxCzAdsProtal(string watchedUrl,
-        ILogger<RemaxCzAdsProtal>? logger = default) : base(watchedUrl, logger)
+                            ILogger<RemaxCzAdsProtal>? logger = null) : base(watchedUrl, logger)
     {
     }
 
     protected override string GetPathToAdsElements() => "//a[@class=\"pl-items__link\"]";
 
-    protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
-        ParseTitle(node),
-        string.Empty,
-        ParsePrice(node),
-        ParsePrice(node) is not decimal.Zero ? Currency.CZK : Currency.Other,
-        ParseLayout(node),
-        ParseAddress(node),
-        ParseWebUrl(node, RootHost),
-        decimal.Zero,
-        ParseFloorArea(node),
-        ParsePriceComment(node),
-        ParseImageUrl(node));
+    protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new()
+    {
+        AdsPortalName = Name,
+        Title = ParseTitle(node),
+        Text = string.Empty,
+        Price = ParsePrice(node),
+        Currency = ParsePrice(node) is not decimal.Zero ? Currency.CZK : Currency.Other,
+        Layout = ParseLayout(node),
+        Address = ParseAddress(node),
+        WebUrl = ParseWebUrl(node, RootHost),
+        FloorArea = ParseFloorArea(node),
+        PriceComment = ParsePriceComment(node),
+        ImageUrl = ParseImageUrl(node)
+    };
 
     private static decimal ParsePrice(HtmlNode node)
     {
@@ -47,7 +49,7 @@ public class RemaxCzAdsProtal : RealEstateAdsPortalBase
 
     private static string? ParsePriceComment(HtmlNode node) => ParsePrice(node) is decimal.Zero
         ? node.SelectSingleNode(".//div[contains(@class,\"item-price\")]/strong")?.InnerText?.Trim()
-        : default;
+        : null;
 
     private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//h2/strong").InnerText;
 
@@ -78,7 +80,7 @@ public class RemaxCzAdsProtal : RealEstateAdsPortalBase
 
         return path is not null
             ? new Uri(path)
-            : default;
+            : null;
     }
 
     private static decimal ParseFloorArea(HtmlNode node)

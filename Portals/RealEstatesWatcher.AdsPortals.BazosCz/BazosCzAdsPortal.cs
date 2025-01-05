@@ -8,65 +8,69 @@ using RealEstatesWatcher.Models;
 
 namespace RealEstatesWatcher.AdsPortals.BazosCz;
 
-public class BazosCzAdsPortal : RealEstateAdsPortalBase
+public partial class BazosCzAdsPortal : RealEstateAdsPortalBase
 {
+    [GeneratedRegex(@"\[([0-9.\s]+)\]")]
+    private static partial Regex DateTimeParseRegex();
+
     public override string Name => "Bazoš.cz";
 
     public BazosCzAdsPortal(string watchedUrl,
-        ILogger<BazosCzAdsPortal>? logger = default) : base(watchedUrl, logger)
+        ILogger<BazosCzAdsPortal>? logger = null) : base(watchedUrl, logger)
     {
     }
         
     protected override string GetPathToAdsElements() => @"//div[@class=""maincontent""]/div[contains(@class,""inzeraty inzeratyflex"")]";
         
-    protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
-        ParseTitle(node),
-        ParseText(node),
-        ParsePrice(node),
-        Currency.CZK,
-        ParseLayout(node),
-        ParseAddress(node),
-        ParseWebUrl(node, RootHost),
-        decimal.Zero,
-        ParseFloorArea(node),
-        imageUrl: ParseImageUrl(node),
-        publishTime: ParsePublishDate(node),
-        priceComment: ParsePriceComment(node));
+    protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new()
+    {
+        AdsPortalName = Name,
+        Title = ParseTitle(node),
+        Text = ParseText(node),
+        Price = ParsePrice(node),
+        PriceComment = ParsePriceComment(node),
+        Currency = Currency.CZK,
+        Layout = ParseLayout(node),
+        Address = ParseAddress(node),
+        WebUrl = ParseWebUrl(node, RootHost),
+        PublishTime = ParsePublishDate(node),
+        ImageUrl = ParseImageUrl(node),
+        FloorArea = ParseFloorArea(node)
+    };
 
-    private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(@".//*[@class=""nadpis""]").InnerText;
+    private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(""".//*[@class="nadpis"]""").InnerText;
 
-    private static string ParseText(HtmlNode node) => node.SelectSingleNode(@".//div[@class=""popis""]").InnerText;
+    private static string ParseText(HtmlNode node) => node.SelectSingleNode(""".//div[@class="popis"]""").InnerText;
 
-    private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(@"./div[@class=""inzeratylok""]").InnerHtml.Replace("<br>", " ");
+    private static string ParseAddress(HtmlNode node) => node.SelectSingleNode("""./div[@class="inzeratylok"]""").InnerHtml.Replace("<br>", " ");
 
     private static Uri ParseWebUrl(HtmlNode node, string rootHost)
     {
-        var relativePath = node.SelectSingleNode(@".//*[@class=""nadpis""]").FirstChild.GetAttributeValue("href", string.Empty);
+        var relativePath = node.SelectSingleNode(""".//*[@class="nadpis"]""").FirstChild.GetAttributeValue("href", string.Empty);
 
         return new Uri(rootHost + relativePath);
     }
 
     private static Uri? ParseImageUrl(HtmlNode node)
     {
-        var path = node.SelectSingleNode(@".//img[@class=""obrazek""]")?.GetAttributeValue("src", null);
+        var path = node.SelectSingleNode(""".//img[@class="obrazek"]""")?.GetAttributeValue("src", null);
 
         return path is not null
             ? new Uri(path)
-            : default;
+            : null;
     }
 
     private static DateTime? ParsePublishDate(HtmlNode node)
     {
         const string dateTimeFormat = "d.M.yyyy";
-        const string dateTimeParseRegex = @"\[([0-9.\s]+)\]";
 
-        var value = node.SelectSingleNode(@".//span[@class=""velikost10""]")?.InnerText;
+        var value = node.SelectSingleNode(""".//span[@class="velikost10"]""")?.InnerText;
         if (value is null)
-            return default;
+            return null;
 
-        var result = Regex.Match(value, dateTimeParseRegex);
+        var result = DateTimeParseRegex().Match(value);
         if (!result.Success)
-            return default;
+            return null;
 
         var dateTimeValue = result.Groups[1].Value.Replace(" ", "");
 

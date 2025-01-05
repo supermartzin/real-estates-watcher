@@ -11,24 +11,26 @@ namespace RealEstatesWatcher.AdsPortals.SrealityCz;
 
 public class SrealityCzAdsPortal(string watchedUrl,
                                  IWebScraper webScraper, 
-                                 ILogger<SrealityCzAdsPortal>? logger = default) : RealEstateAdsPortalBase(watchedUrl, webScraper, logger)
+                                 ILogger<SrealityCzAdsPortal>? logger = null) : RealEstateAdsPortalBase(watchedUrl, webScraper, logger)
 {
     public override string Name => "Sreality.cz";
 
     protected override string GetPathToAdsElements() => "//div[@class=\"dir-property-list\"]/div[contains(@class,\"property\")]";
 
-    protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
-        ParseTitle(node),
-        string.Empty,
-        ParsePrice(node),
-        Currency.CZK,
-        ParseLayout(node),
-        ParseAddress(node),
-        ParseWebUrl(node, RootHost),
-        decimal.Zero,
-        ParseFloorArea(node),
-        imageUrl: ParseImageUrl(node),
-        priceComment: ParsePriceComment(node));
+    protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new()
+    {
+        AdsPortalName = Name,
+        Title = ParseTitle(node),
+        Text = string.Empty,
+        Price = ParsePrice(node),
+        Currency = Currency.CZK,
+        Layout = ParseLayout(node),
+        Address = ParseAddress(node),
+        WebUrl = ParseWebUrl(node, RootHost),
+        FloorArea = ParseFloorArea(node),
+        ImageUrl = ParseImageUrl(node),
+        PriceComment = ParsePriceComment(node)
+    };
 
     private static string ParseTitle(HtmlNode node) => HttpUtility.HtmlDecode(node.SelectSingleNode("./div//a[@class=\"title\"]").InnerText.Trim());
 
@@ -47,7 +49,7 @@ public class SrealityCzAdsPortal(string watchedUrl,
 
         return path is not null
             ? new Uri(path)
-            : default;
+            : null;
     }
 
     private static decimal ParsePrice(HtmlNode node)

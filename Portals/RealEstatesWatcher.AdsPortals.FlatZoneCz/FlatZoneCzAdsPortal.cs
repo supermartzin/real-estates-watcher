@@ -11,7 +11,7 @@ namespace RealEstatesWatcher.AdsPortals.FlatZoneCz;
 
 public class FlatZoneCzAdsPortal(string watchedUrl,
                                  IWebScraper webScraper,
-                                 ILogger<FlatZoneCzAdsPortal>? logger = default) : RealEstateAdsPortalBase(watchedUrl, webScraper, logger)
+                                 ILogger<FlatZoneCzAdsPortal>? logger = null) : RealEstateAdsPortalBase(watchedUrl, webScraper, logger)
 {
     public override string Name => "FlatZone.cz";
 
@@ -28,7 +28,7 @@ public class FlatZoneCzAdsPortal(string watchedUrl,
             var htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(pageContent);
                 
-            Logger?.LogDebug($"({Name}): Downloaded page with ads.");
+            Logger?.LogDebug("({Name}): Downloaded page with ads.", Name);
                 
             // get HTML elements
             var elements = htmlDoc.DocumentNode.SelectNodes(GetPathToAdsElements());
@@ -43,7 +43,7 @@ public class FlatZoneCzAdsPortal(string watchedUrl,
             // parse posts
             var posts = elements.Select(ParseRealEstateAdPost).ToList();
 
-            Logger?.LogDebug($"({Name}): Successfully parsed {posts.Count} ads from page.");
+            Logger?.LogDebug("({Name}): Successfully parsed {PostsCount} ads from page.", Name, posts.Count);
 
             return posts;
         }
@@ -63,15 +63,18 @@ public class FlatZoneCzAdsPortal(string watchedUrl,
 
     protected override string GetPathToAdsElements() => "//div[contains(@class,\"project-apartment-card\")]";
 
-    protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
-        ParseTitle(node),
-        string.Empty,
-        ParsePrice(node),
-        Currency.CZK,
-        Layout.NotSpecified,
-        ParseAddress(node),
-        ParseWebUrl(node),
-        imageUrl: ParseImageUrl(node));
+    protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new()
+    {
+        AdsPortalName = Name,
+        Title = ParseTitle(node),
+        Text = string.Empty,
+        Price = ParsePrice(node),
+        Currency = Currency.CZK,
+        Layout = Layout.NotSpecified,
+        Address = ParseAddress(node),
+        WebUrl = ParseWebUrl(node),
+        ImageUrl = ParseImageUrl(node)
+    };
         
     private static string ParseTitle(HtmlNode node)
     {
@@ -105,6 +108,6 @@ public class FlatZoneCzAdsPortal(string watchedUrl,
 
         return path is not null
             ? new Uri(path)
-            : default;
+            : null;
     }
 }

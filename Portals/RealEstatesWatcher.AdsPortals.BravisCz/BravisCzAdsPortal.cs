@@ -9,24 +9,27 @@ using RealEstatesWatcher.Models;
 namespace RealEstatesWatcher.AdsPortals.BravisCz;
 
 public class BravisCzAdsPortal(string watchedUrl,
-                               ILogger<BravisCzAdsPortal>? logger = default) : RealEstateAdsPortalBase(watchedUrl, logger)
+                               ILogger<BravisCzAdsPortal>? logger = null) : RealEstateAdsPortalBase(watchedUrl, logger)
 {
     public override string Name => "Bravis.cz";
 
     protected override string GetPathToAdsElements() => "//ul[@class=\"itemslist\"]/li[not(@class)]";
 
-    protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new(Name,
-        ParseTitle(node),
-        string.Empty,
-        ParsePrice(node),
-        Currency.CZK,
-        ParseLayout(node),
-        ParseAddress(node),
-        ParseWebUrl(node, RootHost),
-        ParseAdditionalFees(node),
-        ParseFloorArea(node),
-        ParsePriceComment(node),
-        ParseImageUrl(node, RootHost));
+    protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new()
+    {
+        AdsPortalName = Name,
+        Title = ParseTitle(node),
+        Text = string.Empty,
+        Price = ParsePrice(node),
+        Currency = Currency.CZK,
+        Layout = ParseLayout(node),
+        Address = ParseAddress(node),
+        WebUrl = ParseWebUrl(node, RootHost),
+        AdditionalFees = ParseAdditionalFees(node),
+        FloorArea = ParseFloorArea(node),
+        PriceComment = ParsePriceComment(node),
+        ImageUrl = ParseImageUrl(node, RootHost)
+    };
         
     private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//h1").InnerText.Trim();
 
@@ -114,6 +117,6 @@ public class BravisCzAdsPortal(string watchedUrl,
 
         return relativePath is not null
             ? new Uri(rootHost + relativePath)
-            : default;
+            : null;
     }
 }

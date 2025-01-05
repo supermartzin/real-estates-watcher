@@ -13,7 +13,7 @@ public class BidliCzAdsPortal : RealEstateAdsPortalBase
     public override string Name => "Bidli.cz";
 
     public BidliCzAdsPortal(string watchedUrl,
-                            ILogger<BidliCzAdsPortal>? logger = default) : base(watchedUrl, logger)
+                            ILogger<BidliCzAdsPortal>? logger = null) : base(watchedUrl, logger)
     {
         PageEncoding = Encoding.GetEncoding("iso-8859-2");
     }
@@ -30,19 +30,22 @@ public class BidliCzAdsPortal : RealEstateAdsPortalBase
             priceComment = ParsePriceComment(node);
             currency = Currency.Other;
         }
-         
-        return new RealEstateAdPost(Name,
-            ParseTitle(node),
-            string.Empty,
-            price,
-            currency,
-            ParseLayout(node),
-            ParseAddress(node),
-            ParseWebUrl(node, RootHost),
-            decimal.Zero,
-            ParseFloorArea(node),
-            priceComment,
-            ParseImageUrl(node, RootHost));
+
+        return new RealEstateAdPost
+        {
+            AdsPortalName = Name,
+            Title = ParseTitle(node),
+            Text = string.Empty,
+            Price = price,
+            Currency = currency,
+            Layout = ParseLayout(node),
+            Address = ParseAddress(node),
+            WebUrl = ParseWebUrl(node, RootHost),
+            AdditionalFees = decimal.Zero,
+            FloorArea = ParseFloorArea(node),
+            PriceComment = priceComment,
+            ImageUrl = ParseImageUrl(node, RootHost)
+        };
     }
         
     private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//span[@class=\"kategorie\"]").InnerText;
@@ -64,8 +67,8 @@ public class BidliCzAdsPortal : RealEstateAdsPortalBase
     {
         var value = node.SelectSingleNode(".//span[@class=\"cena\"]").InnerText;
 
-        return Regex.IsMatch(value, @"\d")
-            ? default
+        return RegexMatchers.AtLeastOneDigitValue().IsMatch(value)
+            ? null
             : value.Trim();
     }
 
