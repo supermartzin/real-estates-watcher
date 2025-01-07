@@ -11,7 +11,9 @@ permissions:
 
 jobs:
   publish-for-windows:
-  
+    permissions:
+      contents: read
+      
     runs-on: windows-latest
     
     steps:
@@ -28,6 +30,8 @@ jobs:
       run: dotnet publish ./RealEstatesWatcher.UI.Console/RealEstatesWatcher.UI.Console.csproj -c Release /p:PublishProfile="Properties/PublishProfiles/Windows-profile.pubxml"
   
   publish-for-linux:
+    permissions:
+      contents: read
 
     runs-on: ubuntu-latest
 
