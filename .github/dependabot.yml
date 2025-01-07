@@ -41,7 +41,7 @@ updates:
       interval: "weekly"
     ignore:
       - dependency-name: "*"
-      # Ignore major updates for Node
-      update-types: 
-        - "version-update:semver-major"
+        # Ignore major updates for Node
+        update-types: 
+          - "version-update:semver-major"
 
