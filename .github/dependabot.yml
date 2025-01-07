@@ -33,3 +33,9 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+
+  # Enable version updates for .NET SDKs
+  - package-ecosystem: "dotnet-sdk"
+    directory: "/"
+    schedule:
+      interval: "weekly"
