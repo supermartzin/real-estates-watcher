@@ -8,8 +8,11 @@ using RealEstatesWatcher.Models;
 
 namespace RealEstatesWatcher.AdsPortals.BidliCz;
 
-public class BidliCzAdsPortal : RealEstateAdsPortalBase
+public partial class BidliCzAdsPortal : RealEstateAdsPortalBase
 {
+    [GeneratedRegex(@":url\((.*?)\)")]
+    private static partial Regex UrlRegex();
+
     public override string Name => "Bidli.cz";
 
     public BidliCzAdsPortal(string watchedUrl,
@@ -112,15 +115,13 @@ public class BidliCzAdsPortal : RealEstateAdsPortalBase
 
     private static Uri? ParseImageUrl(HtmlNode node, string rootHost)
     {
-        const string urlRegexPattern = @":url\((.*?)\)";
-
         var styleValue = node.SelectSingleNode(".//span[@class=\"img\"]")?.GetAttributeValue("style", null);
         if (styleValue is null)
-            return default;
+            return null;
 
-        var result = Regex.Match(styleValue, urlRegexPattern);
+        var result = UrlRegex().Match(styleValue);
         if (!result.Success)
-            return default;
+            return null;
 
         var relativePath = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
 
