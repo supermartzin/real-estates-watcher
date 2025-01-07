@@ -264,11 +264,11 @@ public class ConsoleRunner
             return;
         }
 
-        watcher.RegisterAdPostsFilter(new BasicParametersAdPostsFilter(LoadBasicFilterSettings(), container.GetService<ILogger<BasicParametersAdPostsFilter>>()));
+        watcher.RegisterAdPostsFilter(new BasicParametersAdPostsFilter(LoadBasicFilterSettings(CmdArguments.FiltersConfigFilePath), container.GetService<ILogger<BasicParametersAdPostsFilter>>()));
         
-        static BasicParametersAdPostsFilterSettings LoadBasicFilterSettings()
+        static BasicParametersAdPostsFilterSettings LoadBasicFilterSettings(string filtersConfigFilePath)
         {
-            var configuration = new ConfigurationBuilder().AddIniFile(CmdArguments.FiltersConfigFilePath)
+            var configuration = new ConfigurationBuilder().AddIniFile(filtersConfigFilePath)
                 .Build()
                 .GetSection("basic");
 
