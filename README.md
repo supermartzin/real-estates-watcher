@@ -3,6 +3,7 @@
 Supports watching adverts for **sells** as well as **leases**.
 
 [![Build and publish .NET commandline script](https://github.com/supermartzin/real-estates-watcher/actions/workflows/dotnet.yml/badge.svg?branch=main)](https://github.com/supermartzin/real-estates-watcher/actions/workflows/dotnet.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=supermartzin_real-estates-watcher&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=supermartzin_real-estates-watcher)
 
 **Frameworks:** .NET 8, Node.js (for web scraping script)
 
