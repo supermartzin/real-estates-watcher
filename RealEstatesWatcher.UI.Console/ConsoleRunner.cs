@@ -145,66 +145,71 @@ public class ConsoleRunner
                 continue; 
             }
 
-            if (url.Contains("bazos.cz"))
-            {
-                watcher.RegisterAdsPortal(new BazosCzAdsPortal(url, container.GetService<ILogger<BazosCzAdsPortal>>()));
-                continue;
-            }
-            if (url.Contains("bezrealitky.cz"))
-            {
-                watcher.RegisterAdsPortal(new BezrealitkyCzAdsPortal(url,
-                    container.GetRequiredService<IWebScraper>(),
-                    container.GetService<ILogger<BezrealitkyCzAdsPortal>>()));
-                continue;
-            }
-            if (url.Contains("bidli.cz"))
-            {
-                watcher.RegisterAdsPortal(new BidliCzAdsPortal(url, container.GetService<ILogger<BidliCzAdsPortal>>()));
-                continue;
-            }
-            if (url.Contains("bravis.cz"))
-            {
-                watcher.RegisterAdsPortal(new BravisCzAdsPortal(url, container.GetService<ILogger<BravisCzAdsPortal>>()));
-                continue;
-            }
-            if (url.Contains("ceskereality.cz"))
-            {
-                watcher.RegisterAdsPortal(new CeskeRealityCzAdsPortal(url, container.GetService<ILogger<CeskeRealityCzAdsPortal>>()));
-                continue;
-            }
-            if (url.Contains("flatzone.cz"))
-            {
-                watcher.RegisterAdsPortal(new FlatZoneCzAdsPortal(url,
-                    container.GetRequiredService<IWebScraper>(),
-                    container.GetService<ILogger<FlatZoneCzAdsPortal>>()));
-                continue;
-            }
-            if (url.Contains("mmreality.cz"))
-            {
-                watcher.RegisterAdsPortal(new MmRealityCzAdsPortal(url, container.GetService<ILogger<MmRealityCzAdsPortal>>()));
-                continue;
-            }
-            if (url.Contains("realcity.cz"))
-            {
-                watcher.RegisterAdsPortal(new RealcityCzAdsPortal(url, container.GetService<ILogger<RealcityCzAdsPortal>>()));
-                continue;
-            }
-            if (url.Contains("reality.idnes.cz"))
-            {
-                watcher.RegisterAdsPortal(new RealityIdnesCzAdsPortal(url, container.GetService<ILogger<RealityIdnesCzAdsPortal>>()));
-                continue;
-            }
-            if (url.Contains("remax.cz"))
-            {
-                watcher.RegisterAdsPortal(new RemaxCzAdsProtal(url, container.GetService<ILogger<RemaxCzAdsProtal>>()));
-                continue;
-            }
-            if (url.Contains("sreality.cz"))
-            {
-                watcher.RegisterAdsPortal(new SrealityCzAdsPortal(url,
-                    container.GetRequiredService<IWebScraper>(),
-                    container.GetService<ILogger<SrealityCzAdsPortal>>()));
-            }
+            RegisterAdsPortalInstanceByUrl(watcher, container, url);
+        }
+    }
+
+    private static void RegisterAdsPortalInstanceByUrl(RealEstatesWatchEngine watcher, IServiceProvider container, string url)
+    {
+        if (url.Contains("bazos.cz"))
+        {
+            watcher.RegisterAdsPortal(new BazosCzAdsPortal(url, container.GetService<ILogger<BazosCzAdsPortal>>()));
+            return;
+        }
+        if (url.Contains("bezrealitky.cz"))
+        {
+            watcher.RegisterAdsPortal(new BezrealitkyCzAdsPortal(url,
+                container.GetRequiredService<IWebScraper>(),
+                container.GetService<ILogger<BezrealitkyCzAdsPortal>>()));
+            return;
+        }
+        if (url.Contains("bidli.cz"))
+        {
+            watcher.RegisterAdsPortal(new BidliCzAdsPortal(url, container.GetService<ILogger<BidliCzAdsPortal>>()));
+            return;
+        }
+        if (url.Contains("bravis.cz"))
+        {
+            watcher.RegisterAdsPortal(new BravisCzAdsPortal(url, container.GetService<ILogger<BravisCzAdsPortal>>()));
+            return;
+        }
+        if (url.Contains("ceskereality.cz"))
+        {
+            watcher.RegisterAdsPortal(new CeskeRealityCzAdsPortal(url, container.GetService<ILogger<CeskeRealityCzAdsPortal>>()));
+            return;
+        }
+        if (url.Contains("flatzone.cz"))
+        {
+            watcher.RegisterAdsPortal(new FlatZoneCzAdsPortal(url,
+                container.GetRequiredService<IWebScraper>(),
+                container.GetService<ILogger<FlatZoneCzAdsPortal>>()));
+            return;
+        }
+        if (url.Contains("mmreality.cz"))
+        {
+            watcher.RegisterAdsPortal(new MmRealityCzAdsPortal(url, container.GetService<ILogger<MmRealityCzAdsPortal>>()));
+            return;
+        }
+        if (url.Contains("realcity.cz"))
+        {
+            watcher.RegisterAdsPortal(new RealcityCzAdsPortal(url, container.GetService<ILogger<RealcityCzAdsPortal>>()));
+            return;
+        }
+        if (url.Contains("reality.idnes.cz"))
+        {
+            watcher.RegisterAdsPortal(new RealityIdnesCzAdsPortal(url, container.GetService<ILogger<RealityIdnesCzAdsPortal>>()));
+            return;
+        }
+        if (url.Contains("remax.cz"))
+        {
+            watcher.RegisterAdsPortal(new RemaxCzAdsProtal(url, container.GetService<ILogger<RemaxCzAdsProtal>>()));
+            return;
+        }
+        if (url.Contains("sreality.cz"))
+        {
+            watcher.RegisterAdsPortal(new SrealityCzAdsPortal(url,
+                container.GetRequiredService<IWebScraper>(),
+                container.GetService<ILogger<SrealityCzAdsPortal>>()));
         }
     }
 
