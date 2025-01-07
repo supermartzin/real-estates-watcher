@@ -55,7 +55,7 @@ public class SrealityCzAdsPortal(string watchedUrl,
     private static decimal ParsePrice(HtmlNode node)
     {
         var value = node.SelectSingleNode(".//span[contains(@class,\"norm-price\")]")?.InnerText;
-        if (value == null)
+        if (value is null)
             return decimal.Zero;
 
         value = RegexMatchers.AllNonNumberValues().Replace(value, string.Empty);
@@ -83,11 +83,11 @@ public class SrealityCzAdsPortal(string watchedUrl,
     private static string? ParsePriceComment(HtmlNode node)
     {
         var value = node.SelectSingleNode(".//span[contains(@class,\"norm-price\")]")?.InnerText;
-        if (value == null)
+        if (value is null)
             return null;
 
         value = HttpUtility.HtmlDecode(value);
-        var result = Regex.Match(value, @"\d");
+        var result = RegexMatchers.AtLeastOneDigitValue().Match(value);
 
         return !result.Success && value.Length > 0 ? value : null;
     }
