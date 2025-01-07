@@ -21,11 +21,11 @@ updates:
     schedule:
       interval: "weekly"
 
-  # Enable version updates for .NET packages
-  - package-ecosystem: "dotnet-sdk"
+  # Enable version updates for .NET NuGet packages
+  - package-ecosystem: "nuget"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "weekly"    
 
   # Enable version updates for GitHub Actions
   - package-ecosystem: "github-actions"
