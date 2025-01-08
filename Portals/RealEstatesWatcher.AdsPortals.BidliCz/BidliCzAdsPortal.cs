@@ -8,18 +8,15 @@ using RealEstatesWatcher.Models;
 
 namespace RealEstatesWatcher.AdsPortals.BidliCz;
 
-public partial class BidliCzAdsPortal : RealEstateAdsPortalBase
+public partial class BidliCzAdsPortal(string watchedUrl,
+                                      ILogger<BidliCzAdsPortal>? logger = null) : RealEstateAdsPortalBase(watchedUrl, logger)
 {
     [GeneratedRegex(@":url\((.*?)\)")]
     private static partial Regex UrlRegex();
 
     public override string Name => "Bidli.cz";
 
-    public BidliCzAdsPortal(string watchedUrl,
-                            ILogger<BidliCzAdsPortal>? logger = null) : base(watchedUrl, logger)
-    {
-        PageEncoding = Encoding.GetEncoding("iso-8859-2");
-    }
+    protected override Encoding PageEncoding => Encoding.GetEncoding("iso-8859-2");
 
     protected override string GetPathToAdsElements() => "//div[@class=\"items-list\"]/a[@class=\"item\"]";
 

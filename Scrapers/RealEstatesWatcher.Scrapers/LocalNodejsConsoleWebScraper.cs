@@ -1,98 +1,94 @@
 ﻿using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
+
 using RealEstatesWatcher.Scrapers.Contracts;
 
-namespace RealEstatesWatcher.Scrapers
+namespace RealEstatesWatcher.Scrapers;
+
+public class LocalNodejsConsoleWebScraper(string pathToScript) : IWebScraper
 {
-    public class LocalNodejsConsoleWebScraper : IWebScraper
+    private static readonly Encoding DefaultPageEncoding = Encoding.UTF8;
+
+    public async Task<string> GetFullWebPageContentAsync(string url, Encoding? pageEncoding = null, CancellationToken cancellationToken = default)
     {
-        private readonly string _pathToScript;
+        ArgumentException.ThrowIfNullOrEmpty(url);
 
-        public LocalNodejsConsoleWebScraper(string pathToScript)
+        return await GetFullWebPageContentAsync(new Uri(url), pageEncoding, cancellationToken);
+    }
+
+    public async Task<string> GetFullWebPageContentAsync(Uri uri, Encoding? pageEncoding = null, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(uri);
+
+        // decide which console to use
+        string runner;
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            runner = "cmd.exe";
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            runner = "/bin/bash";
+        else throw new WebScraperException("Unknown operating system for running the script.");
+
+        try
         {
-            _pathToScript = pathToScript ?? throw new ArgumentNullException(nameof(pathToScript));
-        }
-
-        public async Task<string> GetFullWebPageContentAsync(string url)
-        {
-            if (url == null)
-                throw new ArgumentNullException(nameof(url));
-
-            return await GetFullWebPageContentAsync(new Uri(url));
-        }
-
-        public async Task<string> GetFullWebPageContentAsync(Uri uri)
-        {
-            if (uri == null)
-                throw new ArgumentNullException(nameof(uri));
-
-            // decide which console to use
-            string runner;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                runner = "cmd.exe";
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                runner = "/bin/bash";
-            else throw new WebScraperException("Unknown operating system for running the script.");
-
-            try
+            // create process
+            var process = new Process
             {
-                // create process
-                var process = new Process
+                StartInfo =
                 {
-                    StartInfo =
-                    {
-                        FileName = runner,
-                        RedirectStandardError = true,
-                        RedirectStandardInput = true,
-                        RedirectStandardOutput = true,
-                        CreateNoWindow = true,
-                        UseShellExecute = false,
-                    }
-                };
-                process.Start();
+                    FileName = runner,
+                    RedirectStandardError = true,
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true,
+                    UseShellExecute = false,
+                }
+            };
+            process.Start();
 
-                // execute external Node.js script
-                await process.StandardInput
-                             .WriteLineAsync($"node {_pathToScript} \"{uri.AbsoluteUri}\"")
-                             .ConfigureAwait(false);
+            // execute external Node.js script
+            await process.StandardInput
+                         .WriteLineAsync($"node {pathToScript} \"{uri.AbsoluteUri}\"")
+                         .ConfigureAwait(false);
 
-                await process.StandardInput
-                             .FlushAsync()
-                             .ConfigureAwait(false);
+            await process.StandardInput
+                         .FlushAsync(cancellationToken)
+                         .ConfigureAwait(false);
 
-                process.StandardInput.Close();
-                process.WaitForExit(10000);
+            process.StandardInput.Close();
+            process.WaitForExit(10000);
 
-                var output = await process.StandardOutput
-                                          .ReadToEndAsync()
-                                          .ConfigureAwait(false);
-                var errorOutput = await process.StandardError
-                                               .ReadToEndAsync()
+            using var outputReader = new StreamReader(process.StandardOutput.BaseStream, pageEncoding ?? DefaultPageEncoding);
+            using var errorReader = new StreamReader(process.StandardError.BaseStream, pageEncoding ?? DefaultPageEncoding);
+
+            var output = await outputReader.ReadToEndAsync(cancellationToken)
+                                           .ConfigureAwait(false);
+            var errorOutput = await errorReader.ReadToEndAsync(cancellationToken)
                                                .ConfigureAwait(false);
 
-                process.StandardOutput.Close();
-                process.StandardError.Close();
+            process.StandardOutput.Close();
+            process.StandardError.Close();
 
-                if (!string.IsNullOrEmpty(errorOutput))
-                    throw new WebScraperException($"Error scraping web page: {errorOutput}");
+            if (!string.IsNullOrEmpty(errorOutput))
+                throw new WebScraperException($"Error scraping web page: {errorOutput}");
 
-                // extract HTML content from whole output
-                var startIndex = output.IndexOf("<html", StringComparison.Ordinal);
-                var endIndex = output.LastIndexOf("</html>", StringComparison.Ordinal) + 7;
+            // extract HTML content from whole output
+            var startIndex = output.IndexOf("<html", StringComparison.Ordinal);
+            var endIndex = output.LastIndexOf("</html>", StringComparison.Ordinal) + 7;
 
-                if (startIndex < 0 || endIndex < 0)
-                    throw new WebScraperException("No web page content has been scraped.");
+            if (startIndex < 0 || endIndex < 0)
+                throw new WebScraperException("No web page content has been scraped.");
 
-                return output[startIndex..endIndex];
-            }
-            catch (WebScraperException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                throw new WebScraperException($"Error scraping web page: {ex.Message}", ex);
-            }
+            return output[startIndex..endIndex];
+        }
+        catch (WebScraperException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new WebScraperException($"Error scraping web page: {ex.Message}", ex);
         }
     }
 }
