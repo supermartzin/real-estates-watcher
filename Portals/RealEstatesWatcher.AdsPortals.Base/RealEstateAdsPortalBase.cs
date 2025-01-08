@@ -38,14 +38,14 @@ public abstract partial class RealEstateAdsPortalBase : IRealEstateAdsPortal
     protected readonly HtmlWeb? HtmlWeb;
     protected readonly string RootHost;
 
-    protected Encoding PageEncoding { get; init; } = Encoding.UTF8;
+    protected virtual Encoding PageEncoding { get; init; } = Encoding.UTF8;
 
     public abstract string Name { get; }
 
     public string WatchedUrl { get; }
 
     protected RealEstateAdsPortalBase(string watchedUrl,
-        ILogger<RealEstateAdsPortalBase>? logger = default)
+        ILogger<RealEstateAdsPortalBase>? logger = null)
     {
         WatchedUrl = watchedUrl ?? throw new ArgumentNullException(nameof(watchedUrl));
         RootHost = ParseRootHost(watchedUrl);
@@ -62,7 +62,7 @@ public abstract partial class RealEstateAdsPortalBase : IRealEstateAdsPortal
 
     protected RealEstateAdsPortalBase(string watchedUrl,
         IWebScraper webScraper,
-        ILogger<RealEstateAdsPortalBase>? logger = default) : this(watchedUrl, logger)
+        ILogger<RealEstateAdsPortalBase>? logger = null) : this(watchedUrl, logger)
     {
         WebScraper = webScraper ?? throw new ArgumentNullException(nameof(webScraper));
     }
@@ -82,7 +82,7 @@ public abstract partial class RealEstateAdsPortalBase : IRealEstateAdsPortal
         try
         {
             // get page content
-            var pageContent = await WebScraper!.GetFullWebPageContentAsync(WatchedUrl)
+            var pageContent = await WebScraper!.GetFullWebPageContentAsync(WatchedUrl, PageEncoding)
                 .ConfigureAwait(false);
 
             var htmlDoc = new HtmlDocument();
