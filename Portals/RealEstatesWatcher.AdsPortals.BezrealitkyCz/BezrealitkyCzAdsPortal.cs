@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using System.Web;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 
@@ -14,7 +15,7 @@ public class BezrealitkyCzAdsPortal(string watchedUrl,
 {
     public override string Name => "Bezrealitky.cz";
 
-    protected override string GetPathToAdsElements() => "//article[contains(@class,\"product\")]";
+    protected override string GetPathToAdsElements() => "(//section[contains(@class,'box')])[last()]/article";
 
     protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new()
     {
@@ -31,16 +32,19 @@ public class BezrealitkyCzAdsPortal(string watchedUrl,
         ImageUrl = ParseImageUrl(node, RootHost)
     };
 
-    private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//p[@class=\"product__note\"]").InnerText;
+    private static string ParseTitle(HtmlNode node)
+    {
+        var label = node.SelectSingleNode(".//span[contains(@class,'propertyCardLabel')]").InnerText;
+        var address = node.SelectSingleNode(".//span[contains(@class,'propertyCardAddress')]").InnerText;
+
+        return $"{label} {address}";
+    }
 
     private static decimal ParsePrice(HtmlNode node)
     {
-        var value = node.SelectSingleNode(".//strong[@class=\"product__value\"]")?.InnerText;
-        if (value == null)
+        var value = node.SelectSingleNode(".//span[contains(@class,'propertyPriceAmount')]")?.InnerText;
+        if (value is null)
             return decimal.Zero;
-
-        if (value.Contains('+'))
-            value = value.Split('+')[0];    // get first value as primary
 
         value = RegexMatchers.AllNonNumberValues().Replace(value, string.Empty);
 
@@ -70,7 +74,11 @@ public class BezrealitkyCzAdsPortal(string watchedUrl,
 
     private static Layout ParseLayout(HtmlNode node)
     {
-        var value = node.SelectSingleNode(".//p[@class=\"product__note\"]").InnerText;
+        var values = node.SelectNodes(".//li[contains(@class,'featuresListItem')]");
+        if (values.Count != 2)
+            return decimal.Zero;
+
+        var value = HttpUtility.HtmlDecode(values[0].InnerText);
 
         var result = RegexMatchers.Layout().Match(value);
         if (!result.Success)
@@ -82,13 +90,17 @@ public class BezrealitkyCzAdsPortal(string watchedUrl,
         return LayoutExtensions.ToLayout(layoutValue);
     }
 
-    private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//a[contains(@class,\"product__link\")]/strong").InnerText;
+    private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//span[contains(@class,'propertyCardAddress')]").InnerText;
 
-    private static Uri ParseWebUrl(HtmlNode node) => new(node.SelectSingleNode(".//a[contains(@class,\"product__link\")]").GetAttributeValue("href", string.Empty));
+    private static Uri ParseWebUrl(HtmlNode node) => new(node.SelectSingleNode(".//h2[contains(@class,'propertyCardHeadline')]//a").GetAttributeValue("href", string.Empty));
 
     private static decimal ParseFloorArea(HtmlNode node)
     {
-        var value = ParseTitle(node);
+        var values = node.SelectNodes(".//li[contains(@class,'featuresListItem')]");
+        if (values.Count != 2)
+            return decimal.Zero;
+        
+        var value = HttpUtility.HtmlDecode(values[^1].InnerText);
 
         var result = RegexMatchers.FloorArea().Match(value);
         if (!result.Success)
@@ -103,9 +115,13 @@ public class BezrealitkyCzAdsPortal(string watchedUrl,
 
     private static Uri? ParseImageUrl(HtmlNode node, string hostUrlPart)
     {
-        var path = node.SelectSingleNode(".//div[@class=\"slick-list\"]//img")?.GetAttributeValue("src", null);
+        var path = node.SelectSingleNode(".//li[contains(@class,'image')]")?
+                       .FirstChild?
+                       .SelectSingleNode(".//img")?
+                       .GetAttributeValue("srcset", null);
+
         if (path is null)
-            return default;
+            return null;
             
         return path.Contains(hostUrlPart)
             ? new Uri(path)
