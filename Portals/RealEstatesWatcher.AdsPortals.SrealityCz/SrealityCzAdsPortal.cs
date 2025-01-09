@@ -15,26 +15,29 @@ public class SrealityCzAdsPortal(string watchedUrl,
 {
     public override string Name => "Sreality.cz";
 
-    protected override string GetPathToAdsElements() => "//div[@class=\"dir-property-list\"]/div[contains(@class,\"property\")]";
+    protected override string GetPathToAdsElements() => "//ul[@data-e2e='estates-list']/li[not(@data-e2e='nativni')]";
 
     protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new()
     {
         AdsPortalName = Name,
         Title = ParseTitle(node),
+        Address = ParseAddress(node),
         Text = string.Empty,
         Price = ParsePrice(node),
         Currency = Currency.CZK,
         Layout = ParseLayout(node),
-        Address = ParseAddress(node),
         WebUrl = ParseWebUrl(node, RootHost),
         FloorArea = ParseFloorArea(node),
-        ImageUrl = ParseImageUrl(node),
-        PriceComment = ParsePriceComment(node)
+        ImageUrl = ParseImageUrl(node)
     };
 
-    private static string ParseTitle(HtmlNode node) => HttpUtility.HtmlDecode(node.SelectSingleNode("./div//a[@class=\"title\"]").InnerText.Trim());
+    private static string ParseTitle(HtmlNode node) => node.SelectNodes(".//p").Count < 1
+        ? string.Empty
+        : HttpUtility.HtmlDecode(node.SelectNodes(".//p")[0].InnerText.Trim());
 
-    private static string ParseAddress(HtmlNode node) => node.SelectSingleNode("./div//span[contains(@class,\"locality\")]").InnerText;
+    private static string ParseAddress(HtmlNode node) => node.SelectNodes(".//p").Count < 2 
+            ? string.Empty
+            : HttpUtility.HtmlDecode(node.SelectNodes(".//p")[1].InnerText.Trim());
 
     private static Uri ParseWebUrl(HtmlNode node, string rootHost)
     {
@@ -45,18 +48,31 @@ public class SrealityCzAdsPortal(string watchedUrl,
 
     private static Uri? ParseImageUrl(HtmlNode node)
     {
-        var path = node.FirstChild?.SelectSingleNode(".//img[@class=\"img\"]")?.GetAttributeValue("src", null);
+        var imageNodes = node.SelectSingleNode(".//ul/li")?.SelectNodes(".//img");
+
+        if (imageNodes is null)
+            return null;
+
+        var path = imageNodes.Count switch
+        {
+            < 1 => null,
+            1 => imageNodes[0].GetAttributeValue("src", null),
+            2 => imageNodes[1].GetAttributeValue("src", null),
+            > 2 => imageNodes[1].GetAttributeValue("src", null),
+        };
 
         return path is not null
-            ? new Uri(path)
+            ? new Uri($"https:{path}")
             : null;
     }
 
     private static decimal ParsePrice(HtmlNode node)
     {
-        var value = node.SelectSingleNode(".//span[contains(@class,\"norm-price\")]")?.InnerText;
-        if (value is null)
+        var descriptionNodes = node.SelectNodes(".//p");
+        if (descriptionNodes.Count < 3)
             return decimal.Zero;
+
+        var value = HttpUtility.HtmlDecode(descriptionNodes[2].InnerText);
 
         value = RegexMatchers.AllNonNumberValues().Replace(value, string.Empty);
 
@@ -67,42 +83,30 @@ public class SrealityCzAdsPortal(string watchedUrl,
 
     private static Layout ParseLayout(HtmlNode node)
     {
-        var value = node.SelectSingleNode("./div//a[@class=\"title\"]").InnerText.Trim();
-        value = HttpUtility.HtmlDecode(value);
+        var result = RegexMatchers.Layout().Match(ParseTitle(node));
 
-        var result = RegexMatchers.Layout().Match(value);
-        if (!result.Success)
-            return Layout.NotSpecified;
-
-        var layoutValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
-        layoutValue = RegexMatchers.Layout().Replace(layoutValue, string.Empty);
-
-        return LayoutExtensions.ToLayout(layoutValue);
-    }
-
-    private static string? ParsePriceComment(HtmlNode node)
-    {
-        var value = node.SelectSingleNode(".//span[contains(@class,\"norm-price\")]")?.InnerText;
-        if (value is null)
-            return null;
-
-        value = HttpUtility.HtmlDecode(value);
-        var result = RegexMatchers.AtLeastOneDigitValue().Match(value);
-
-        return !result.Success && value.Length > 0 ? value : null;
+        return result.Success 
+            ? LayoutExtensions.ToLayout(result.Groups[1].Value)
+            : Layout.NotSpecified;
     }
 
     private static decimal ParseFloorArea(HtmlNode node)
     {
-        var value = ParseTitle(node);
+        var title = ParseTitle(node);
 
-        var result = RegexMatchers.FloorArea().Match(value);
+        // workaround for the case like "Prodej bytu 4+1 111 m²" when it parses to "1111 m²"
+        var layout = RegexMatchers.Layout().Match(title);
+        if (layout.Success)
+            title = title.Replace(layout.Groups[1].Value, string.Empty);
+
+        var result = RegexMatchers.FloorArea().Match(title);
         if (!result.Success)
             return decimal.Zero;
 
-        var floorAreaValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
+        var value = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
 
-        return decimal.TryParse(floorAreaValue, out var floorArea)
+
+        return decimal.TryParse(value, out var floorArea)
             ? floorArea
             : decimal.Zero;
     }
