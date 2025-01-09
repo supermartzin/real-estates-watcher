@@ -158,9 +158,7 @@ public class ConsoleRunner
         }
         if (url.Contains("bezrealitky.cz"))
         {
-            watcher.RegisterAdsPortal(new BezrealitkyCzAdsPortal(url,
-                container.GetRequiredService<IWebScraper>(),
-                container.GetService<ILogger<BezrealitkyCzAdsPortal>>()));
+            watcher.RegisterAdsPortal(new BezrealitkyCzAdsPortal(url, container.GetService<ILogger<BezrealitkyCzAdsPortal>>()));
             return;
         }
         if (url.Contains("bidli.cz"))
