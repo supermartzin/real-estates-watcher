@@ -61,13 +61,19 @@ Perform following steps and commands either from the [**root folder**](https://g
     * `filters.ini`
     * `engine.ini`
 
- 7. **Deploy** the whole **publish directory** to server or run locally.
+ 6. **Deploy** the whole **publish directory** to server or run locally.
  
- 8.  On the target machine, enter `scraper` folder and **install** all required **Node.js dependencies** with command
+ 7.  On the target machine, enter `scraper` folder and **install** all required **Node.js dependencies** with command
  
       `npm install`
       
       ##### * It's important to do this on the target platform as the dependencies are platform-specific
+
+❗**CHANGE**❗(since **v1.4.3**) 👇
+
+ 8.  If an Ad portal requires specific **cookies** to be set during web scraping in order to reach the final ads page (to pass through GDPR consent page, etc.), fill all the cookies to `cookies.json` file as shown in the template. Remember to copy this file to the same **~/publish/scraper** directory as stated above.
+
+     #### * For example *Sreality.cz* Ads portal requires cookies.
 
 ### 🐋 Using Docker (recommended)
 
