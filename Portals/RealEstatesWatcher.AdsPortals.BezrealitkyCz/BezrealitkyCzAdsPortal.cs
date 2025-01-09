@@ -10,8 +10,7 @@ using RealEstatesWatcher.Scrapers.Contracts;
 namespace RealEstatesWatcher.AdsPortals.BezrealitkyCz;
 
 public partial class BezrealitkyCzAdsPortal(string watchedUrl,
-                                            IWebScraper webScraper,
-                                            ILogger<BezrealitkyCzAdsPortal>? logger = null) : RealEstateAdsPortalBase(watchedUrl, webScraper, logger)
+                                            ILogger<BezrealitkyCzAdsPortal>? logger = null) : RealEstateAdsPortalBase(watchedUrl, logger)
 {
     [GeneratedRegex("url=(.+?)&")]
     private static partial Regex ImageUrlRegex();
@@ -84,8 +83,8 @@ public partial class BezrealitkyCzAdsPortal(string watchedUrl,
     private static Layout ParseLayout(HtmlNode node)
     {
         var values = node.SelectNodes(".//li[contains(@class,'featuresListItem')]");
-        if (values.Count != 2)
-            return decimal.Zero;
+        if (values.Count < 1)
+            return Layout.NotSpecified;
 
         var value = HttpUtility.HtmlDecode(values[0].InnerText);
 
