@@ -1,0 +1,13 @@
+[
+  // define your cookies here
+  {
+    "name": "",
+    "value": "",
+    "domain": "",
+    "path": "/",
+    "expires": -1,
+    "sameSite": "None",
+    "httpOnly": false,
+    "secure": true
+  }
+]
