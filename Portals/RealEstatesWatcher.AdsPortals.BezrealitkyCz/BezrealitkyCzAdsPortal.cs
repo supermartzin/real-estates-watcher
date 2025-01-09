@@ -9,10 +9,13 @@ using RealEstatesWatcher.Scrapers.Contracts;
 
 namespace RealEstatesWatcher.AdsPortals.BezrealitkyCz;
 
-public class BezrealitkyCzAdsPortal(string watchedUrl,
-                                    IWebScraper webScraper,
-                                    ILogger<BezrealitkyCzAdsPortal>? logger = null) : RealEstateAdsPortalBase(watchedUrl, webScraper, logger)
+public partial class BezrealitkyCzAdsPortal(string watchedUrl,
+                                            IWebScraper webScraper,
+                                            ILogger<BezrealitkyCzAdsPortal>? logger = null) : RealEstateAdsPortalBase(watchedUrl, webScraper, logger)
 {
+    [GeneratedRegex("url=(.+?)&")]
+    private static partial Regex ImageUrlRegex();
+
     public override string Name => "Bezrealitky.cz";
 
     protected override string GetPathToAdsElements() => "(//section[contains(@class,'box')])[last()]/article";
@@ -21,7 +24,7 @@ public class BezrealitkyCzAdsPortal(string watchedUrl,
     {
         AdsPortalName = Name,
         Title = ParseTitle(node),
-        Text = string.Empty,
+        Text = ParseText(node),
         Price = ParsePrice(node),
         Currency = Currency.CZK,
         Layout = ParseLayout(node),
@@ -29,7 +32,7 @@ public class BezrealitkyCzAdsPortal(string watchedUrl,
         WebUrl = ParseWebUrl(node),
         AdditionalFees = ParseAdditionalFees(node),
         FloorArea = ParseFloorArea(node),
-        ImageUrl = ParseImageUrl(node, RootHost)
+        ImageUrl = ParseImageUrl(node)
     };
 
     private static string ParseTitle(HtmlNode node)
@@ -39,6 +42,12 @@ public class BezrealitkyCzAdsPortal(string watchedUrl,
 
         return $"{label} {address}";
     }
+
+    private static string ParseText(HtmlNode node) => node.SelectSingleNode(".//div[contains(@class,'propertyCardContent')]//p").InnerText;
+
+    private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//span[contains(@class,'propertyCardAddress')]").InnerText;
+
+    private static Uri ParseWebUrl(HtmlNode node) => new(node.SelectSingleNode(".//h2[contains(@class,'propertyCardHeadline')]//a").GetAttributeValue("href", string.Empty));
 
     private static decimal ParsePrice(HtmlNode node)
     {
@@ -90,10 +99,6 @@ public class BezrealitkyCzAdsPortal(string watchedUrl,
         return LayoutExtensions.ToLayout(layoutValue);
     }
 
-    private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//span[contains(@class,'propertyCardAddress')]").InnerText;
-
-    private static Uri ParseWebUrl(HtmlNode node) => new(node.SelectSingleNode(".//h2[contains(@class,'propertyCardHeadline')]//a").GetAttributeValue("href", string.Empty));
-
     private static decimal ParseFloorArea(HtmlNode node)
     {
         var values = node.SelectNodes(".//li[contains(@class,'featuresListItem')]");
@@ -113,18 +118,20 @@ public class BezrealitkyCzAdsPortal(string watchedUrl,
             : decimal.Zero;
     }
 
-    private static Uri? ParseImageUrl(HtmlNode node, string hostUrlPart)
+    private static Uri? ParseImageUrl(HtmlNode node)
     {
-        var path = node.SelectSingleNode(".//li[contains(@class,'image')]")?
-                       .FirstChild?
-                       .SelectSingleNode(".//img")?
-                       .GetAttributeValue("srcset", null);
+        var values = HttpUtility.UrlDecode(node.SelectSingleNode(".//span[contains(@class,'image')]//img")?
+                                               .GetAttributeValue("srcset", null));
 
-        if (path is null)
+        if (values is null)
             return null;
-            
-        return path.Contains(hostUrlPart)
-            ? new Uri(path)
-            : new Uri(hostUrlPart + path);
+
+        var result = ImageUrlRegex().Match(values);
+        if (!result.Success)
+            return null;
+
+        var imageUrl = result.Groups[1].Value;
+
+        return new Uri(imageUrl);
     }
 }
