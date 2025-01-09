@@ -1,4 +1,20 @@
 const puppeteer = require("puppeteer");
+const fs = require('fs');
+
+const pathToCookiesFile = "./cookies.json";
+const defaultFileEncoding = "utf8";
+
+function parseCookies() {
+    try {
+        if (fs.existsSync(pathToCookiesFile)) {
+            let cookiesString = fs.readFileSync(pathToCookiesFile, defaultFileEncoding);
+
+            return JSON.parse(cookiesString);
+        }
+    } catch (err) {
+        return undefined;
+    }
+}
 
 (async function () {
     try {
@@ -6,7 +22,13 @@ const puppeteer = require("puppeteer");
             ignoreDefaultArgs: ['--disable-extensions'],
             headless: true
         });
+    
         const page = await browser.newPage();
+
+        const cookies = parseCookies();
+        if (cookies) {
+            await page.setCookie(...cookies);
+        }
 
         await page.goto(process.argv[2], {
             waitUntil: "networkidle0",

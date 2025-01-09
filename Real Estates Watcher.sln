@@ -24,7 +24,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{AE7F9527
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Node.js web scraper", "Node.js web scraper", "{D7508825-5BDC-4F8F-9D3E-F36456A5BBC8}"
 	ProjectSection(SolutionItems) = preProject
+		Tools\scraper\cookies.json = Tools\scraper\cookies.json
 		Tools\scraper\index.js = Tools\scraper\index.js
+		Tools\scraper\package.json = Tools\scraper\package.json
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealEstatesWatcher.Scrapers", "Scrapers\RealEstatesWatcher.Scrapers\RealEstatesWatcher.Scrapers.csproj", "{E2E32BA6-64F5-4E49-AC6E-4574F3FC5CE0}"
