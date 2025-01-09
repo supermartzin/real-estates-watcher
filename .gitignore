@@ -354,3 +354,4 @@ MigrationBackup/
 *-prod-old.ini
 /.idea
 *.ini
+/.configs
