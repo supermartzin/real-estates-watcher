@@ -6,7 +6,7 @@ using RealEstatesWatcher.Scrapers.Contracts;
 
 namespace RealEstatesWatcher.Scrapers;
 
-public class LocalNodejsConsoleWebScraper(string pathToScript) : IWebScraper
+public class LocalNodejsConsoleWebScraper(string pathToScript, string? pathToCookiesFile = null) : IWebScraper
 {
     private static readonly Encoding DefaultPageEncoding = Encoding.UTF8;
 
@@ -46,9 +46,14 @@ public class LocalNodejsConsoleWebScraper(string pathToScript) : IWebScraper
             };
             process.Start();
 
+            // build command
+            var command = $"node {pathToScript} \"{uri.AbsoluteUri}\"";
+            if (!string.IsNullOrEmpty(pathToCookiesFile))
+                command += $" \"{pathToCookiesFile}\"";
+
             // execute external Node.js script
             await process.StandardInput
-                         .WriteLineAsync($"node {pathToScript} \"{uri.AbsoluteUri}\"")
+                         .WriteLineAsync(command)
                          .ConfigureAwait(false);
 
             await process.StandardInput
