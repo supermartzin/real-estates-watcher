@@ -93,9 +93,10 @@ public abstract partial class RealEstateAdsPortalBase : IRealEstateAdsPortal
 
             // parse posts
             var posts = htmlDoc.DocumentNode
-                .SelectNodes(GetPathToAdsElements())?
-                .Select(ParseRealEstateAdPost)
-                .ToList() ?? [];
+                               .SelectNodes(GetPathToAdsElements())?
+                               .Select(ParseRealEstateAdPost)
+                               .ToList() ?? [];
+
 
             Logger?.LogDebug("({Name}): Parsed {PostsCount} ads from page.", Name, posts.Count);
 

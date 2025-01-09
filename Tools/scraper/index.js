@@ -1,10 +1,9 @@
 const puppeteer = require("puppeteer");
 const fs = require('fs');
 
-const pathToCookiesFile = "./cookies.json";
 const defaultFileEncoding = "utf8";
 
-function parseCookies() {
+function parseCookies(pathToCookiesFile) {
     try {
         if (fs.existsSync(pathToCookiesFile)) {
             let cookiesString = fs.readFileSync(pathToCookiesFile, defaultFileEncoding);
@@ -25,7 +24,7 @@ function parseCookies() {
     
         const page = await browser.newPage();
 
-        const cookies = parseCookies();
+        const cookies = parseCookies(process.argv[3]);
         if (cookies) {
             await page.setCookie(...cookies);
         }

@@ -105,7 +105,7 @@ public class ConsoleRunner
         });
 
         // add scraper
-        collection.AddSingleton<IWebScraper>(new LocalNodejsConsoleWebScraper("./scraper/index.js"));
+        collection.AddSingleton<IWebScraper>(new LocalNodejsConsoleWebScraper("./scraper/index.js", "./scraper/cookies.json"));
 
         // add engine
         collection.AddSingleton(LoadWatchEngineSettings());
