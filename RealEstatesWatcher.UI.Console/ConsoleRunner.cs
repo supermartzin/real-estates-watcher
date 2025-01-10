@@ -185,7 +185,9 @@ public class ConsoleRunner
         }
         if (url.Contains("mmreality.cz"))
         {
-            watcher.RegisterAdsPortal(new MmRealityCzAdsPortal(url, container.GetService<ILogger<MmRealityCzAdsPortal>>()));
+            watcher.RegisterAdsPortal(new MmRealityCzAdsPortal(url,
+                container.GetRequiredService<IWebScraper>(),
+                container.GetService<ILogger<MmRealityCzAdsPortal>>()));
             return;
         }
         if (url.Contains("realcity.cz"))
