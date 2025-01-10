@@ -60,6 +60,7 @@ Perform following steps and commands either from the [**root folder**](https://g
     * `portals.ini`
     * `filters.ini`
     * `engine.ini`
+    * `scraper.ini`
 
  6. **Deploy** the whole **publish directory** to server or run locally.
  
@@ -138,3 +139,12 @@ https://reality.bazos.cz/prodam/chata/...<b>↩</b>
     
  * Leave any of the values empty if you don't want to filter Ad posts by it
  * **Layout** option supported values: `1+1, 1+kk, 2+1, 2+kk, 3+1, 3+kk, 4+1, 4+kk, 5+1, 5+kk`
+
+❗**ADDED**❗(since **v1.4.6**) 👇
+
+**scraper.ini** - configuration of the Web scraper script when Ad portal page is dynamic and require JavaScript in order to fully load the content (*optional* cmd argument `--s` or `-scraper`)
+
+    [nodejs]
+    path_to_script=                   # <string>  | required | path to web scraping script
+    page_scraping_timeout_seconds=    # <number>  | required | maximum timeout for scraping a single webpage (when set to 0 waits indefinitely)
+    path_to_cookies_file=             # <string>  | optional | path to file with cookies that may be needed with some Ad portals (see README)
