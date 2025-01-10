@@ -1,13 +1,16 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
-
+using Microsoft.Extensions.Logging;
 using RealEstatesWatcher.Scrapers.Contracts;
 
 namespace RealEstatesWatcher.Scrapers;
 
-public class LocalNodejsConsoleWebScraper(string pathToScript, string? pathToCookiesFile = null) : IWebScraper
+public class LocalNodejsConsoleWebScraper(LocalNodejsConsoleWebScraperSettings settings,
+                                          ILogger<LocalNodejsConsoleWebScraper>? logger = null) : IWebScraper
 {
+    private const int ProcessExitDelaySeconds = 3;
+
     private static readonly Encoding DefaultPageEncoding = Encoding.UTF8;
 
     public async Task<string> GetFullWebPageContentAsync(string url, Encoding? pageEncoding = null, CancellationToken cancellationToken = default)
@@ -21,6 +24,9 @@ public class LocalNodejsConsoleWebScraper(string pathToScript, string? pathToCoo
     {
         ArgumentNullException.ThrowIfNull(uri);
 
+        if (settings.PageScrapingTimeoutSeconds < 0)
+            throw new WebScraperException("Web scraping timeout has invalid value.");
+
         // decide which console to use
         string runner;
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -31,6 +37,8 @@ public class LocalNodejsConsoleWebScraper(string pathToScript, string? pathToCoo
 
         try
         {
+            logger?.LogDebug("Creating process for scraping the page '{Url}'.", uri.OriginalString);
+
             // create process
             var process = new Process
             {
@@ -47,9 +55,13 @@ public class LocalNodejsConsoleWebScraper(string pathToScript, string? pathToCoo
             process.Start();
 
             // build command
-            var command = $"node {pathToScript} \"{uri.AbsoluteUri}\"";
-            if (!string.IsNullOrEmpty(pathToCookiesFile))
-                command += $" \"{pathToCookiesFile}\"";
+            var command = $"node {settings.PathToScript} \"{settings.PageScrapingTimeoutSeconds}\" \"{uri.AbsoluteUri}\"";
+            if (!string.IsNullOrEmpty(settings.PathToCookiesFile))
+                command += $" \"{settings.PathToCookiesFile}\"";
+
+            var startTime = Stopwatch.GetTimestamp();
+
+            logger?.LogDebug("Scraping started...");
 
             // execute external Node.js script
             await process.StandardInput
@@ -61,7 +73,9 @@ public class LocalNodejsConsoleWebScraper(string pathToScript, string? pathToCoo
                          .ConfigureAwait(false);
 
             process.StandardInput.Close();
-            process.WaitForExit(10000);
+            process.WaitForExit(TimeSpan.FromSeconds(settings.PageScrapingTimeoutSeconds + ProcessExitDelaySeconds));
+
+            logger?.LogDebug("Scraping finished in {Seconds} s.", Stopwatch.GetElapsedTime(startTime).TotalSeconds);
 
             using var outputReader = new StreamReader(process.StandardOutput.BaseStream, pageEncoding ?? DefaultPageEncoding);
             using var errorReader = new StreamReader(process.StandardError.BaseStream, pageEncoding ?? DefaultPageEncoding);
@@ -83,6 +97,8 @@ public class LocalNodejsConsoleWebScraper(string pathToScript, string? pathToCoo
 
             if (startIndex < 0 || endIndex < 0)
                 throw new WebScraperException("No web page content has been scraped.");
+
+            logger?.LogDebug("Successfully scraped page content.");
 
             return output[startIndex..endIndex];
         }

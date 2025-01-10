@@ -65,7 +65,7 @@ public class LocalFileAdPostsHandler(LocalFileAdPostsHandlerSettings settings) :
         }
 
         if (filePath is null)
-            throw new RealEstateAdPostsHandlerException($"Error saving new Ad posts to file: Path in settings is not specified.");
+            throw new RealEstateAdPostsHandlerException("Error saving new Ad posts to file: Path in settings is not specified.");
 
         try
         {
@@ -89,7 +89,7 @@ public class LocalFileAdPostsHandler(LocalFileAdPostsHandlerSettings settings) :
         page = page.Insert(index + 8, string.Join(Environment.NewLine, posts));
 
         if (_settings.MainFilePath is null)
-            throw new RealEstateAdPostsHandlerException($"Error saving new Ad posts to file: Path in settings is not specified.");
+            throw new RealEstateAdPostsHandlerException("Error saving new Ad posts to file: Path in settings is not specified.");
 
         try
         {

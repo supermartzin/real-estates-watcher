@@ -10,7 +10,7 @@ using RealEstatesWatcher.Models;
 namespace RealEstatesWatcher.Core;
 
 public class RealEstatesWatchEngine(WatchEngineSettings settings,
-                                    ILogger<RealEstatesWatchEngine>? logger = default)
+                                    ILogger<RealEstatesWatchEngine>? logger = null)
 {
     private readonly ISet<IRealEstateAdsPortal> _adsPortals = new HashSet<IRealEstateAdsPortal>();
     private readonly ISet<IRealEstateAdPostsHandler> _handlers = new HashSet<IRealEstateAdPostsHandler>();
