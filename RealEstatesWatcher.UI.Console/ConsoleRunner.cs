@@ -198,7 +198,7 @@ public class ConsoleRunner
             watcher.RegisterAdsPortal(new RealityIdnesCzAdsPortal(url, container.GetService<ILogger<RealityIdnesCzAdsPortal>>()));
             return;
         }
-        if (url.Contains("remax.cz"))
+        if (url.Contains("remax-czech.cz"))
         {
             watcher.RegisterAdsPortal(new RemaxCzAdsProtal(url, container.GetService<ILogger<RemaxCzAdsProtal>>()));
             return;
