@@ -10,14 +10,14 @@ namespace RealEstatesWatcher.AdsPortals.RemaxCz;
 
 public class RemaxCzAdsProtal : RealEstateAdsPortalBase
 {
-    public override string Name => "Remax.cz";
+    public override string Name => "RE/MAX CZ";
 
     public RemaxCzAdsProtal(string watchedUrl,
                             ILogger<RemaxCzAdsProtal>? logger = null) : base(watchedUrl, logger)
     {
     }
 
-    protected override string GetPathToAdsElements() => "//a[@class=\"pl-items__link\"]";
+    protected override string GetPathToAdsElements() => "//div[@class='pl-items__item']";
 
     protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new()
     {
@@ -37,7 +37,7 @@ public class RemaxCzAdsProtal : RealEstateAdsPortalBase
     private static decimal ParsePrice(HtmlNode node)
     {
         var value = node.SelectSingleNode(".//div[contains(@class,\"item-price\")]/strong")?.FirstChild?.InnerText;
-        if (value == null)
+        if (value is null)
             return decimal.Zero;
 
         value = RegexMatchers.AllNonNumberValues().Replace(value, string.Empty);
@@ -48,20 +48,20 @@ public class RemaxCzAdsProtal : RealEstateAdsPortalBase
     }
 
     private static string? ParsePriceComment(HtmlNode node) => ParsePrice(node) is decimal.Zero
-        ? node.SelectSingleNode(".//div[contains(@class,\"item-price\")]/strong")?.InnerText?.Trim()
+        ? node.SelectSingleNode(".//div[contains(@class,'item-price')]/strong")?.InnerText?.Trim()
         : null;
 
     private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//h2/strong").InnerText;
 
     private static string ParseAddress(HtmlNode node)
     {
-        var address = node.SelectSingleNode("./div[contains(@class,\"item-info\")]//p").InnerText?.Trim();
+        var address = node.SelectSingleNode(".//div[contains(@class,'item-info')]//p").InnerText?.Trim();
 
         if (address is null)
             return string.Empty;
 
         address = HttpUtility.HtmlDecode(address);
-        address = RegexMatchers.AllWhitespaceCharacters().Replace(address, string.Empty);
+        address = RegexMatchers.AllWhitespaceCharacters().Replace(address, " ");
         address = address.TrimEnd(',', '.');
 
         return address;
@@ -69,14 +69,14 @@ public class RemaxCzAdsProtal : RealEstateAdsPortalBase
 
     private static Uri ParseWebUrl(HtmlNode node, string rootHost)
     {
-        var relativePath = node.GetAttributeValue("href", string.Empty);
+        var relativePath = node.FirstChild.GetAttributeValue("href", string.Empty);
 
         return new Uri(rootHost + relativePath);
     }
 
     private static Uri? ParseImageUrl(HtmlNode node)
     {
-        var path = node.SelectSingleNode("./div[@class=\"pl-items__images\"]//img")?.GetAttributeValue("data-src", null);
+        var path = node.SelectSingleNode(".//div[@class='pl-items__images']//img")?.GetAttributeValue("data-src", null);
 
         return path is not null
             ? new Uri(path)
