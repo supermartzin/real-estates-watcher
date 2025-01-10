@@ -24,14 +24,14 @@ function parseCookies(pathToCookiesFile) {
     
         const page = await browser.newPage();
 
-        const cookies = parseCookies(process.argv[3]);
+        const cookies = parseCookies(process.argv[4]);
         if (cookies) {
             await page.setCookie(...cookies);
         }
 
-        await page.goto(process.argv[2], {
+        await page.goto(process.argv[3], {
             waitUntil: "networkidle0",
-            timeout: 20000
+            timeout: process.argv[2] * 1000
         }).then(async () => {
             const data = await page.content();
             await browser.close();

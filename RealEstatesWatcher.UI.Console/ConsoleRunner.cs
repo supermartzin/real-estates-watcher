@@ -105,13 +105,32 @@ public class ConsoleRunner
         });
 
         // add scraper
-        collection.AddSingleton<IWebScraper>(new LocalNodejsConsoleWebScraper("./scraper/index.js", "./scraper/cookies.json"));
+        if (CmdArguments.WebScraperConfigFilePath is not null)
+        {
+            collection.AddSingleton(LoadWebScraperSettings(CmdArguments.WebScraperConfigFilePath));
+            collection.AddSingleton<IWebScraper, LocalNodejsConsoleWebScraper>();
+        }
 
         // add engine
         collection.AddSingleton(LoadWatchEngineSettings());
         collection.AddSingleton<RealEstatesWatchEngine>();
 
         _container = collection.BuildServiceProvider();
+    }
+
+    private static LocalNodejsConsoleWebScraperSettings LoadWebScraperSettings(string webScraperConfigFilePath)
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddIniFile(webScraperConfigFilePath)
+            .Build()
+            .GetSection("nodejs");
+        
+        return new LocalNodejsConsoleWebScraperSettings
+        {
+            PathToScript = configuration["path_to_script"] ?? string.Empty,
+            PageScrapingTimeoutSeconds = configuration.GetValue<int>("page_scraping_timeout_seconds"),
+            PathToCookiesFile = configuration["path_to_cookies_file"]
+        };
     }
 
     private static WatchEngineSettings LoadWatchEngineSettings()
