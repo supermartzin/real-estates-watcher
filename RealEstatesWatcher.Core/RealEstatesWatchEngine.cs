@@ -88,10 +88,22 @@ public class RealEstatesWatchEngine(WatchEngineSettings settings,
             // make initial load of posts
             var posts = await GetCurrentAdsPortalsSnapshot().ConfigureAwait(false);
 
-            logger?.LogDebug("Successfully downloaded initial {PostsCount} post(s) from {PortalsCount} portal(s).", posts.Count, _adsPortals.Count);
+            if (posts.Count is 0)
+            {
+                logger?.LogDebug("No initial posts downloaded.");
+                return;
+            }
+
+            logger?.LogDebug("Downloaded initial {PostsCount} post(s) from {PortalsCount} portal(s).", posts.Count, _adsPortals.Count);
 
             // run posts through filters
             posts = _filters.Aggregate(posts, (current, filter) => filter.Filter(current).ToList());
+
+            if (posts.Count is 0)
+            {
+                logger?.LogDebug("All downloaded posts have been filtered based on set filters.");
+                return;
+            }
 
             logger?.LogDebug("Filtered {Count} post(s) from all downloaded posts.", posts.Count);
 
