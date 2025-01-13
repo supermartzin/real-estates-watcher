@@ -18,8 +18,8 @@ function parseCookies(pathToCookiesFile) {
 (async function () {
     try {
         const browser = await puppeteer.launch({
-            ignoreDefaultArgs: ['--disable-extensions'],
-            headless: true
+            ignoreDefaultArgs: ['--disable-extensions --user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'],
+            headless: false
         });
     
         const page = await browser.newPage();
@@ -29,14 +29,13 @@ function parseCookies(pathToCookiesFile) {
             await page.setCookie(...cookies);
         }
 
-        await page.goto(process.argv[3], {
-            waitUntil: "networkidle0",
-            timeout: process.argv[2] * 1000
-        }).then(async () => {
-            const data = await page.content();
-            await browser.close();
+        await page.goto(process.argv[3]).then(async () => {
+            // wait for the specified time before closing the browser
+            setTimeout(async () => {
+                console.log(await page.content());
 
-            console.log(data);
+                await browser.close();
+            }, process.argv[2] * 1000);
         }).catch(async (err) => {
             console.error(err);
 
