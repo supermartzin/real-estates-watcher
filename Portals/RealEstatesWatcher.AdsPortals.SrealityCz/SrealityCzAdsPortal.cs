@@ -15,7 +15,7 @@ public class SrealityCzAdsPortal(string watchedUrl,
 {
     public override string Name => "Sreality.cz";
 
-    protected override string GetPathToAdsElements() => "//ul[@data-e2e='estates-list']/li[not(@data-e2e='nativni')]";
+    protected override string GetPathToAdsElements() => "//li[contains(@id,'estate-list-item')]";
 
     protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new()
     {
