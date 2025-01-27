@@ -90,6 +90,11 @@ public class RealityIdnesCzAdsPortal(string watchedUrl,
     {
         var value = HttpUtility.HtmlDecode(ParseTitle(node)).Replace(NonBreakingSpace, string.Empty);
 
+        // workaround for the case like "Prodej bytu 4+1 111 m²" when it parses to "1111 m²"
+        var layout = RegexMatchers.Layout().Match(value);
+        if (layout.Success)
+            value = value.Replace(layout.Groups[1].Value, string.Empty);
+
         var result = RegexMatchers.FloorArea().Match(value);
         if (!result.Success)
             return decimal.Zero;

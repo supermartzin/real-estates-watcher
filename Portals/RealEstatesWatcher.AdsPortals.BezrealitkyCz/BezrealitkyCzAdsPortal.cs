@@ -64,10 +64,7 @@ public partial class BezrealitkyCzAdsPortal(string watchedUrl,
     private static decimal ParseAdditionalFees(HtmlNode node)
     {
         var value = node.SelectSingleNode(".//strong[@class=\"product__value\"]")?.InnerText;
-        if (value == null)
-            return decimal.Zero;
-
-        if (!value.Contains('+'))
+        if (value is null || !value.Contains('+'))
             return decimal.Zero;
 
         // get second value as additional
