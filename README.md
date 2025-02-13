@@ -109,6 +109,8 @@ https://reality.bazos.cz/prodam/chata/...<b>↩</b>
 
 **handlers.ini** - configuration of the classes handling the received Ad posts (*required* cmd argument `--h` or `-handlers`)
 
+❗**CHANGE**❗(since **v1.4.7**)
+
     [email]         
     enabled=                      # <bool>    | required | enable/disable this handler
     from=                         # <string>  | required | email address for outgoing notifications
@@ -127,6 +129,7 @@ https://reality.bazos.cz/prodam/chata/...<b>↩</b>
     main_path=                    # <string>  | required | path to the file where to save initial and new Ad posts
     separate_new_posts=           # <bool>    | optional | set 'true' if you want to save new Ad posts in separate file from the initial list
     new_posts_path=               # <bool>    | optional | path to the file where to save new Ad posts (required when separate_new_posts=true)
+    format=                       # <strings> | optional | format of printing parsed Ads to file, (allowed enum values below) (defaults to 'plain')
     
 **filters.ini** - configuration of the Ads filter (*optional* cmd argument `--f` or `-filters`)
 
@@ -139,6 +142,7 @@ https://reality.bazos.cz/prodam/chata/...<b>↩</b>
     
  * Leave any of the values empty if you don't want to filter Ad posts by it
  * **Layout** option supported values: `1+1, 1+kk, 2+1, 2+kk, 3+1, 3+kk, 4+1, 4+kk, 5+1, 5+kk`
+ * **Format** option supported values: `plain, html`
 
 ❗**ADDED**❗(since **v1.4.6**) 👇
 
