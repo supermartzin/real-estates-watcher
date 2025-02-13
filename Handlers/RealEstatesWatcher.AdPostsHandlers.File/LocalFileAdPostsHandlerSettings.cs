@@ -1,13 +1,14 @@
-﻿namespace RealEstatesWatcher.AdPostsHandlers.File
+﻿namespace RealEstatesWatcher.AdPostsHandlers.File;
+
+public record LocalFileAdPostsHandlerSettings
 {
-    public class LocalFileAdPostsHandlerSettings
-    {
-        public bool Enabled { get; set; }
+    public bool Enabled { get; init; }
 
-        public string? MainFilePath { get; set; }
+    public string? MainFilePath { get; init; }
 
-        public bool NewPostsToSeparateFile { get; set; }
+    public bool NewPostsToSeparateFile { get; init; }
 
-        public string? NewPostsFilePath { get; set; }
-    }
+    public string? NewPostsFilePath { get; init; }
+
+    public PrintFormat PrintFormat { get; init; }
 }

@@ -39,25 +39,25 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
         
     public bool IsEnabled { get; } = settings.Enabled;
 
-    public async Task HandleNewRealEstateAdPostAsync(RealEstateAdPost adPost)
+    public async Task HandleNewRealEstateAdPostAsync(RealEstateAdPost adPost, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(adPost);
 
         logger?.LogDebug("Received new Real Estate Ad Post: {Post}", adPost);
 
-        await SendEmail("🆕 New Real Estate Advert published!", CreateHtmlBody(adPost, HtmlTemplates.TitleNewPosts)).ConfigureAwait(false);
+        await SendEmailAsync("🆕 New Real Estate Advert published!", CreateHtmlBody(adPost, HtmlTemplates.TitleNewPosts), cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task HandleNewRealEstatesAdPostsAsync(IList<RealEstateAdPost> adPosts)
+    public async Task HandleNewRealEstatesAdPostsAsync(IList<RealEstateAdPost> adPosts, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(adPosts);
 
         logger?.LogDebug("Received '{PostsCount}' new Real Estate Ad Posts.", adPosts.Count);
 
-        await SendEmail("🆕 New Real Estate Adverts published!", CreateHtmlBody(adPosts, HtmlTemplates.TitleNewPosts)).ConfigureAwait(false);
+        await SendEmailAsync("🆕 New Real Estate Adverts published!", CreateHtmlBody(adPosts, HtmlTemplates.TitleNewPosts), cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task HandleInitialRealEstateAdPostsAsync(IList<RealEstateAdPost> adPosts)
+    public async Task HandleInitialRealEstateAdPostsAsync(IList<RealEstateAdPost> adPosts, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(adPosts);
 
@@ -69,10 +69,10 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
             
         logger?.LogDebug("Received initial {PostsCount} Real Estate Ad Posts.", adPosts.Count);
 
-        await SendEmail("🏦 Current Real Estate Adverts offering", CreateHtmlBody(adPosts, HtmlTemplates.TitleInitialPosts)).ConfigureAwait(false);
+        await SendEmailAsync("🏦 Current Real Estate Adverts offering", CreateHtmlBody(adPosts, HtmlTemplates.TitleInitialPosts), cancellationToken).ConfigureAwait(false);
     }
 
-    private async Task SendEmail(string subject, string body)
+    private async Task SendEmailAsync(string subject, string body, CancellationToken cancellationToken = default)
     {
         var message = new MimeMessage
         {
@@ -95,14 +95,14 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
 
             await client.ConnectAsync(_settings.SmtpServerHost,
                 _settings.SmtpServerPort,
-                _settings.UseSecureConnection).ConfigureAwait(false);
+                _settings.UseSecureConnection, cancellationToken).ConfigureAwait(false);
 
             await client.AuthenticateAsync(new NetworkCredential(_settings.Username,
-                _settings.Password)).ConfigureAwait(false);
+                _settings.Password), cancellationToken).ConfigureAwait(false);
 
             // send email
-            await client.SendAsync(message).ConfigureAwait(false);
-            await client.DisconnectAsync(true).ConfigureAwait(false);
+            await client.SendAsync(message, cancellationToken).ConfigureAwait(false);
+            await client.DisconnectAsync(true, cancellationToken).ConfigureAwait(false);
 
             logger?.LogInformation("Notification email has been successfully sent.");
         }
