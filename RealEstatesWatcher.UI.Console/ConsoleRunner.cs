@@ -273,7 +273,9 @@ public class ConsoleRunner
                 Enabled = configuration.GetValue<bool>("enabled"),
                 MainFilePath = configuration["main_path"],
                 NewPostsToSeparateFile = configuration.GetValue<bool>("separate_new_posts"),
-                NewPostsFilePath = configuration["new_posts_path"]
+                NewPostsFilePath = configuration["new_posts_path"],
+                PrintFormat = Enum.TryParse(configuration["print_format"], ignoreCase: true, out PrintFormat format)
+                    ? format : PrintFormat.PlainText
             };
         }
     }

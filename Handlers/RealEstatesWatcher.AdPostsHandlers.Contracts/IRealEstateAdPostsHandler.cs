@@ -1,15 +1,14 @@
 ﻿using RealEstatesWatcher.Models;
 
-namespace RealEstatesWatcher.AdPostsHandlers.Contracts
+namespace RealEstatesWatcher.AdPostsHandlers.Contracts;
+
+public interface IRealEstateAdPostsHandler
 {
-    public interface IRealEstateAdPostsHandler
-    {
-        bool IsEnabled { get; }
+    bool IsEnabled { get; }
 
-        Task HandleNewRealEstateAdPostAsync(RealEstateAdPost adPost);
+    Task HandleNewRealEstateAdPostAsync(RealEstateAdPost adPost, CancellationToken cancellationToken = default);
 
-        Task HandleNewRealEstatesAdPostsAsync(IList<RealEstateAdPost> adPosts);
+    Task HandleNewRealEstatesAdPostsAsync(IList<RealEstateAdPost> adPosts, CancellationToken cancellationToken = default);
 
-        Task HandleInitialRealEstateAdPostsAsync(IList<RealEstateAdPost> adPosts);
-    }
+    Task HandleInitialRealEstateAdPostsAsync(IList<RealEstateAdPost> adPosts, CancellationToken cancellationToken = default);
 }
