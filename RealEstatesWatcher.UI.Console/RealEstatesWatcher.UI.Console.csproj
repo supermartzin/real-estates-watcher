@@ -8,8 +8,8 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>1.4.6</Version>
-    <AssemblyVersion>1.4.6.0</AssemblyVersion>
+    <Version>1.4.7</Version>
+    <AssemblyVersion>1.4.7.0</AssemblyVersion>
     <Authors>Martin Vrábel</Authors>
     <Product>Real Estates Watcher</Product>
     <Description>Simple C# script for periodic watching of selected Real estate advertisement portals with notifications on new ads.</Description>
