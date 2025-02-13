@@ -35,9 +35,9 @@ public partial class CeskeRealityCzAdsPortal : RealEstateAdsPortalBase
         ImageUrl = ParseImageUrl(node)
     };
         
-    private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//h2[@class=\"i-estate__header-title\"]").InnerText;
+    private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//h2[@class=\"i-estate__header-title\"]").InnerText.Trim();
 
-    private static string ParseText(HtmlNode node) => node.SelectSingleNode(".//p[@class=\"i-estate__description-text\"]").InnerText;
+    private static string ParseText(HtmlNode node) => node.SelectSingleNode(".//p[@class=\"i-estate__description-text\"]").InnerText.Trim();
 
     private static decimal ParsePrice(HtmlNode node)
     {
