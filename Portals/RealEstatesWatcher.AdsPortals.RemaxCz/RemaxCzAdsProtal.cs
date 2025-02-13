@@ -69,7 +69,7 @@ public class RemaxCzAdsProtal : RealEstateAdsPortalBase
 
     private static Uri ParseWebUrl(HtmlNode node, string rootHost)
     {
-        var relativePath = node.FirstChild.GetAttributeValue("href", string.Empty);
+        var relativePath = node.SelectSingleNode("./a").GetAttributeValue("href", string.Empty);
 
         return new Uri(rootHost + relativePath);
     }
