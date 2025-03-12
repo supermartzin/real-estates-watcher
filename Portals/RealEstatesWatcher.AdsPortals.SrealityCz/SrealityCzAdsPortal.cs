@@ -28,7 +28,8 @@ public class SrealityCzAdsPortal(string watchedUrl,
         Layout = ParseLayout(node),
         WebUrl = ParseWebUrl(node, RootHost),
         FloorArea = ParseFloorArea(node),
-        ImageUrl = ParseImageUrl(node)
+        ImageUrl = ParseImageUrl(node),
+        PriceComment = ParsePriceComment(node)
     };
 
     private static string ParseTitle(HtmlNode node) => node.SelectNodes(".//p").Count < 1
@@ -79,6 +80,17 @@ public class SrealityCzAdsPortal(string watchedUrl,
         return decimal.TryParse(value, out var price)
             ? price
             : decimal.Zero;
+    }
+
+    private static string? ParsePriceComment(HtmlNode node)
+    {
+        if (ParsePrice(node) is not decimal.Zero)
+            return null;
+
+        var descriptionNodes = node.SelectNodes(".//p");
+        return descriptionNodes.Count < 3 
+            ? null 
+            : HttpUtility.HtmlDecode(descriptionNodes[2].InnerText.Trim());
     }
 
     private static Layout ParseLayout(HtmlNode node)

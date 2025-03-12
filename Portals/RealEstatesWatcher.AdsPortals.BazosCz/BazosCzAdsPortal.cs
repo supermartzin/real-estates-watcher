@@ -8,19 +8,15 @@ using RealEstatesWatcher.Models;
 
 namespace RealEstatesWatcher.AdsPortals.BazosCz;
 
-public partial class BazosCzAdsPortal : RealEstateAdsPortalBase
+public partial class BazosCzAdsPortal(string watchedUrl,
+                                      ILogger<BazosCzAdsPortal>? logger = null) : RealEstateAdsPortalBase(watchedUrl, logger)
 {
     [GeneratedRegex(@"\[([0-9.\s]+)\]")]
     private static partial Regex DateTimeParseRegex();
 
     public override string Name => "Bazoš.cz";
 
-    public BazosCzAdsPortal(string watchedUrl,
-        ILogger<BazosCzAdsPortal>? logger = null) : base(watchedUrl, logger)
-    {
-    }
-        
-    protected override string GetPathToAdsElements() => @"//div[@class=""maincontent""]/div[contains(@class,""inzeraty inzeratyflex"")]";
+    protected override string GetPathToAdsElements() => "//div[@class='maincontent']/div[contains(@class,'inzeraty inzeratyflex')]";
         
     protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new()
     {
