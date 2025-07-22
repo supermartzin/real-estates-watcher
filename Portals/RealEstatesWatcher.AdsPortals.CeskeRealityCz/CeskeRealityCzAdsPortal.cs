@@ -77,6 +77,7 @@ public partial class CeskeRealityCzAdsPortal(string watchedUrl,
         var title = ParseTitle(node);
 
         var result = AddressRegex().Match(title);
+
         return result.Success 
             ? result.Groups.Skip<Group>(1).First(group => group.Success).Value.Trim()
             : string.Empty;

@@ -8,13 +8,16 @@ using RealEstatesWatcher.Scrapers.Contracts;
 
 namespace RealEstatesWatcher.AdsPortals.MMRealityCz;
 
-public class MmRealityCzAdsPortal(string watchedUrl,
+public partial class MmRealityCzAdsPortal(string watchedUrl,
                                   IWebScraper webScraper,
                                   ILogger<MmRealityCzAdsPortal>? logger = null) : RealEstateAdsPortalBase(watchedUrl, webScraper, logger)
 {
+    [GeneratedRegex(@".*,\s(.+,\s.+)")]
+    private static partial Regex AddressRegex();
+
     public override string Name => "M&M Reality";
 
-    protected override string GetPathToAdsElements() => "//div[@id='offers-list']//div[contains(@class,'cell')]";
+    protected override string GetPathToAdsElements() => "//div[@id='offers-list']/a[./article]";
     
     protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => new()
     {
@@ -31,11 +34,11 @@ public class MmRealityCzAdsPortal(string watchedUrl,
         ImageUrl = ParseImageUrl(node)
     };
 
-    private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//a[contains(@class,'text-underline')]").InnerText;
+    private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//h4[contains(@class, 'rds-property-title')]").InnerText;
 
     private static decimal ParsePrice(HtmlNode node)
     {
-        var value = node.SelectSingleNode(".//strong[contains(@class,\"text-secondary\")]")?.InnerText;
+        var value = node.SelectSingleNode(".//div[@class='rds-content']//div[contains(@class, 'price')]")?.InnerText;
         if (value is null)
             return decimal.Zero;
 
@@ -46,7 +49,7 @@ public class MmRealityCzAdsPortal(string watchedUrl,
             : decimal.Zero;
     }
 
-    private static string? ParsePriceComment(HtmlNode node) => node.SelectSingleNode(".//strong[contains(@class,\"text-secondary\")]")?.InnerText;
+    private static string? ParsePriceComment(HtmlNode node) => node.SelectSingleNode(".//div[@class='rds-content']//div[contains(@class, 'price')]")?.InnerText;
 
     private static Layout ParseLayout(HtmlNode node)
     {
@@ -62,9 +65,20 @@ public class MmRealityCzAdsPortal(string watchedUrl,
         return LayoutExtensions.ToLayout(layoutValue);
     }
 
-    private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//p[contains(@class,'fw-light')]").FirstChild.InnerText.Trim();
+    private static string ParseAddress(HtmlNode node)
+    {
+        var title = node.SelectSingleNode(".//button[contains(@class, 'rds-favorite-icon')]")?.GetAttributeValue<string?>("data-realty-name", null);
+        if (title is null)
+            return string.Empty;
 
-    private static Uri ParseWebUrl(HtmlNode node) => new(node.SelectSingleNode(".//a[contains(@class,'text-underline')]").GetAttributeValue("href", string.Empty));
+        var result = AddressRegex().Match(title);
+
+        return result.Success
+            ? result.Groups.Skip<Group>(1).First(group => group.Success).Value.Trim()
+            : string.Empty;
+    }
+
+    private Uri ParseWebUrl(HtmlNode node) => new($"{RootHost}{node.PreviousSibling.GetAttributeValue("href", string.Empty)}");
 
     private static decimal ParseFloorArea(HtmlNode node)
     {
@@ -89,7 +103,7 @@ public class MmRealityCzAdsPortal(string watchedUrl,
 
     private static Uri? ParseImageUrl(HtmlNode node)
     {
-        var path = node.SelectSingleNode(".//a[contains(@class,'image-wrapper')]/img")?.GetAttributeValue("data-src", null);
+        var path = node.SelectSingleNode(".//div[@class='rds-image-carousel']//img[@class='rds-image']")?.GetAttributeValue<string?>("src", null);
 
         return path is not null
             ? new Uri(path)
