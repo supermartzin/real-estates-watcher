@@ -102,10 +102,11 @@ public class RealEstatesWatchEngine(WatchEngineSettings settings,
             if (posts.Count is 0)
             {
                 logger?.LogDebug("All downloaded posts have been filtered based on set filters.");
-                return;
             }
-
-            logger?.LogDebug("Filtered {Count} post(s) from all downloaded posts.", posts.Count);
+            else
+            {
+                logger?.LogDebug("Filtered {Count} post(s) from all downloaded posts.", posts.Count);
+            }
 
             // add to collection of processed posts
             foreach (var post in posts)
@@ -113,16 +114,19 @@ public class RealEstatesWatchEngine(WatchEngineSettings settings,
                 _posts.Add(post);
             }
 
-            // notify handlers
-            foreach (var handler in _handlers)
+            if (posts.Count > 0)
             {
-                if (!handler.IsEnabled)
-                    continue;
+                // notify handlers
+                foreach (var handler in _handlers)
+                {
+                    if (!handler.IsEnabled)
+                        continue;
 
-                await handler.HandleInitialRealEstateAdPostsAsync(posts).ConfigureAwait(false);
-            }
+                    await handler.HandleInitialRealEstateAdPostsAsync(posts).ConfigureAwait(false);
+                }
 
-            logger?.LogDebug("Handlers notified about initial posts.");
+                logger?.LogDebug("Handlers notified about initial posts.");
+            }            
         }
         catch (RealEstateAdsPortalException reapEx)
         {
