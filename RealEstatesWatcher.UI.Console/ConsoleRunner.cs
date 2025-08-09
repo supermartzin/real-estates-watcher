@@ -316,8 +316,9 @@ public class ConsoleRunner
             var layouts = layoutsValue.Split(",")
                                       .Select(LayoutExtensions.ToLayout)
                                       .ToHashSet();
-            
-            layouts.Remove(Layout.NotSpecified);
+
+            // add NotSpecified layout to include all ads without explicit layout
+            layouts.Add(Layout.NotSpecified);
 
             return layouts;
         }
