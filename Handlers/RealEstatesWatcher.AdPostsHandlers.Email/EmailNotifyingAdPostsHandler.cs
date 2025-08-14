@@ -32,7 +32,30 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
 
         public const string TitleInitialPosts = """<h1>🏦 <span style="color: #4f4f4f; font-style: italic;"> Current Real estate offer</span></h1>""";
 
-        public const string Post = "<div style=\"padding: 10px; background: #ededed; min-height: 200px;\">\r\n    <div style=\"float: left; margin-right: 1em; width: 30%; height: 180px; display: {$img-display};\">\r\n        <img src=\"{$img-link}\" style=\"height: 100%; width: 100%; object-fit: cover;\" />\r\n    </div>\r\n    <a href=\"{$post-link}\">\r\n        <h3 style=\"margin: 0.2em; margin-top: 0;\">{$title}</h3>\r\n    </a>\r\n    <span style=\"font-size: medium; color: #4f4f4f; display: {$price-display};\">\r\n        <strong>{$price}</strong> {$currency}\r\n        <span style=\"display: {$additional-fees-display};\"> + {$additional-fees} {$currency}</span><br/>\r\n    </span>\r\n    <span style=\"font-size: medium; color: #4f4f4f; display: {$price-comment-display};\">\r\n        <strong>{$price-comment}</strong><br/>\r\n    </span>\r\n    <span>\r\n        <strong>Server:</strong> {$portal-name}<br/>\r\n        <strong>Adresa:</strong> {$address}<br/>\r\n        <strong>Výmera:</strong> {$floor-area}<br/>\r\n        <strong>Dispozícia:</strong> {$layout}</br>\r\n    </span>\r\n    <p style=\"margin: 0.2em; font-size: small; text-align: justify; display: {$text-display};\">{$text}</p>\r\n</div>";
+        public const string Post = """
+            <div style="padding: 10px; background: #ededed; min-height: 200px;">
+                <div style="float: left; margin-right: 1em; width: 30%; height: 180px; display: {$img-display};">
+                    <img src="{$img-link}" style="height: 100%; width: 100%; object-fit: cover;" />
+                </div>
+                <a href="{$post-link}">
+                    <h3 style="margin: 0.2em; margin-top: 0;">{$title}</h3>
+                </a>
+                <span style="font-size: medium; color: #4f4f4f; display: {$price-display};">
+                    <strong>{$price}</strong> {$currency}
+                    <span style="display: {$additional-fees-display};"> + {$additional-fees} {$currency}</span><br/>
+                </span>
+                <span style="font-size: medium; color: #4f4f4f; display: {$price-comment-display};">
+                    <strong>{$price-comment}</strong><br/>
+                </span>
+                <span>
+                    <strong>Server:</strong> {$portal-name}<br/>
+                    <strong>Adresa:</strong> {$address}<br/>
+                    <strong>Výmera:</strong> {$floor-area}<br/>
+                    <strong>Dispozícia:</strong> {$layout}</br>
+                </span>
+                <p style="margin: 0.2em; font-size: small; text-align: justify; display: {$text-display};">{$text}</p>
+            </div>
+            """;
     }
 
     private readonly EmailNotifyingAdPostsHandlerSettings _settings = settings ?? throw new ArgumentNullException(nameof(settings));
@@ -136,54 +159,60 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
         postHtml = postHtml.Replace("{$layout}", post.Layout is not Layout.NotSpecified ? post.Layout.ToDisplayString() : "-");
 
         // floor area
-        postHtml = post.FloorArea is not null and not decimal.Zero ? postHtml.Replace("{$floor-area}", post.FloorArea + " m²") : postHtml.Replace("{$floor-area}", " -");
+        postHtml = post.FloorArea is not null and not decimal.Zero ? postHtml.Replace("{$floor-area}", post.FloorArea + " m²") : postHtml.Replace("{$floor-area}", "-");
             
         // image
         if (post.ImageUrl is not null)
         {
             postHtml = postHtml.Replace("{$img-link}", post.ImageUrl.AbsoluteUri)
-                .Replace("{$img-display}", "block");
+                               .Replace("{$img-display}", "block");
         }
         else
         {
-            postHtml = postHtml.Replace("{$img-display}", "none");
+            postHtml = postHtml.Replace("{$img-link}", string.Empty)
+                               .Replace("{$img-display}", "none");
         }
 
         // price
         if (post.Price is not decimal.Zero)
         {
             postHtml = postHtml.Replace("{$price}", post.Price.ToString("N", new NumberFormatInfo {NumberGroupSeparator = " "}))
-                .Replace("{$currency}", post.Currency.ToString())
-                .Replace("{$price-display}", "block")
-                .Replace("{$price-comment-display}", "none");
+                               .Replace("{$currency}", post.Currency.ToString())
+                               .Replace("{$price-display}", "block")
+                               .Replace("{$price-comment-display}", "none")
+                               .Replace("{$price-comment}", string.Empty);
         }
         else
         {
             postHtml = postHtml.Replace("{$price-comment}", post.PriceComment ?? "-")
-                .Replace("{$price-display}", "none")
-                .Replace("{$price-comment-display}", "block");
+                               .Replace("{$price-comment-display}", "block")
+                               .Replace("{$price-display}", "none")
+                               .Replace("{$price}", string.Empty)
+                               .Replace("{$currency}", string.Empty);
         }
 
         // additional fees
         if (post.AdditionalFees is not null and not decimal.Zero)
         {
             postHtml = postHtml.Replace("{$additional-fees}", post.AdditionalFees.Value.ToString("N", new NumberFormatInfo { NumberGroupSeparator = " " }))
-                .Replace("{$additional-fees-display}", "inline-block");
+                               .Replace("{$additional-fees-display}", "inline-block");
         }
         else
         {
-            postHtml = postHtml.Replace("{$additional-fees-display}", "none");
+            postHtml = postHtml.Replace("{$additional-fees}", decimal.Zero.ToString("N"))
+                               .Replace("{$additional-fees-display}", "none");
         }
 
         // text
         if (!string.IsNullOrEmpty(post.Text))
         {
             postHtml = postHtml.Replace("{$text}", post.Text)
-                .Replace("{$text-display}", "table");
+                               .Replace("{$text-display}", "table");
         }
         else
         {
-            postHtml = postHtml.Replace("{$text-display}", "none");
+            postHtml = postHtml.Replace("{$text}", string.Empty)
+                               .Replace("{$text-display}", "none");
         }
 
         return postHtml;
