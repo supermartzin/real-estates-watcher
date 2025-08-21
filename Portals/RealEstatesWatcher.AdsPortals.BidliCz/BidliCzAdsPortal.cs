@@ -80,7 +80,7 @@ public partial class BidliCzAdsPortal(string watchedUrl,
         if (!result.Success)
             return Layout.NotSpecified;
 
-        var layoutValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
+        var layoutValue = result.Groups[1].Value;
         layoutValue = RegexMatchers.AllWhitespaceCharacters().Replace(layoutValue, string.Empty);
 
         return LayoutExtensions.ToLayout(layoutValue);
@@ -103,7 +103,7 @@ public partial class BidliCzAdsPortal(string watchedUrl,
         if (!result.Success)
             return decimal.Zero;
 
-        var floorAreaValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
+        var floorAreaValue = result.Groups[1].Value;
 
         return decimal.TryParse(floorAreaValue, out var floorArea)
             ? floorArea
