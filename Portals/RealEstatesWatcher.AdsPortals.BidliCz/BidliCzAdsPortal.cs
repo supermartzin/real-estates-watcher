@@ -120,8 +120,8 @@ public partial class BidliCzAdsPortal(string watchedUrl,
         if (!result.Success)
             return null;
 
-        var relativePath = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
+        var relativePath = result.Groups[1].Value;
 
-        return new Uri(rootHost + UrlPathSeparator + relativePath);
+        return new Uri(new Uri(rootHost), relativePath);
     }
 }
