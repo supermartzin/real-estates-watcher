@@ -80,7 +80,7 @@ public partial class BidliCzAdsPortal(string watchedUrl,
         if (!result.Success)
             return Layout.NotSpecified;
 
-        var layoutValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
+        var layoutValue = result.Groups[1].Value;
         layoutValue = RegexMatchers.AllWhitespaceCharacters().Replace(layoutValue, string.Empty);
 
         return LayoutExtensions.ToLayout(layoutValue);
@@ -92,7 +92,7 @@ public partial class BidliCzAdsPortal(string watchedUrl,
     {
         var relativePath = node.GetAttributeValue("href", string.Empty);
 
-        return new Uri(rootHost + UrlPathSeparator + relativePath);
+        return new Uri(new Uri(rootHost), relativePath);
     }
 
     private static decimal ParseFloorArea(HtmlNode node)
@@ -103,7 +103,7 @@ public partial class BidliCzAdsPortal(string watchedUrl,
         if (!result.Success)
             return decimal.Zero;
 
-        var floorAreaValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
+        var floorAreaValue = result.Groups[1].Value;
 
         return decimal.TryParse(floorAreaValue, out var floorArea)
             ? floorArea
@@ -112,7 +112,7 @@ public partial class BidliCzAdsPortal(string watchedUrl,
 
     private static Uri? ParseImageUrl(HtmlNode node, string rootHost)
     {
-        var styleValue = node.SelectSingleNode(".//span[@class=\"img\"]")?.GetAttributeValue("style", null);
+        var styleValue = node.SelectSingleNode(".//span[contains(@class,\"img\")]")?.GetAttributeValue<string?>("style", null);
         if (styleValue is null)
             return null;
 
@@ -120,8 +120,8 @@ public partial class BidliCzAdsPortal(string watchedUrl,
         if (!result.Success)
             return null;
 
-        var relativePath = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
+        var relativePath = result.Groups[1].Value;
 
-        return new Uri(rootHost + UrlPathSeparator + relativePath);
+        return new Uri(new Uri(rootHost), relativePath);
     }
 }
