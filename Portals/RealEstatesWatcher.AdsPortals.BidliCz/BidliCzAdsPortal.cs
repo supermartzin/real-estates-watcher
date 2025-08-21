@@ -92,7 +92,7 @@ public partial class BidliCzAdsPortal(string watchedUrl,
     {
         var relativePath = node.GetAttributeValue("href", string.Empty);
 
-        return new Uri(rootHost + relativePath);
+        return new Uri(new Uri(rootHost), relativePath);
     }
 
     private static decimal ParseFloorArea(HtmlNode node)

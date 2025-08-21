@@ -26,7 +26,7 @@ public abstract partial class RealEstateAdsPortalBase : IRealEstateAdsPortal
         [GeneratedRegex(@"(\s+)")]
         public static partial Regex AllWhitespaceCharacters();
 
-        [GeneratedRegex(@"([\d]+?)\s*?m2|([\d]+?[,.]??[\d]+?)\s*?m2|([\d]+?)\s*?m²|([\d]+?[,.]?[\d]+?)\s*?m²|([\d]+?)\s*?m|([\d]+?[,.]??[\d]+?)\s*?m")]
+        [GeneratedRegex(@"([\d]+(?:[,.]\d+)?)\s*?(?:m2|m²|m)")]
         public static partial Regex FloorArea();
     }
 
