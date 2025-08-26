@@ -62,7 +62,7 @@ public class CmdArguments
             "Script for real-time periodic watching of Real estate advertisement portals with notifications on new ads.";
     }
 
-    public async Task<bool> ParseAsync(string[] arguments)
+    public async Task<bool> ParseAsync(string[] arguments, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(arguments);
 
@@ -79,7 +79,7 @@ public class CmdArguments
             parsed = true;
         });
 
-        var configuration = await new CommandLineConfiguration(_rootCommand).InvokeAsync(arguments);
+        await _rootCommand.Parse(arguments).InvokeAsync(cancellationToken: cancellationToken);
         
         return parsed;
     }
