@@ -33,7 +33,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="9.0.8" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.9" />
     <PackageReference Include="NLog.Extensions.Logging" Version="6.0.4" />
-    <PackageReference Include="Sentry.Extensions.Logging" Version="5.14.1" />
+    <PackageReference Include="Sentry.Extensions.Logging" Version="5.15.1" />
     <PackageReference Include="Sentry.Profiling" Version="5.14.1" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta7.25380.108" />
   </ItemGroup>
