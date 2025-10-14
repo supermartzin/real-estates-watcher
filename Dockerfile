@@ -7,6 +7,7 @@ WORKDIR /app
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+COPY "Directory.Packages.props" "Directory.Packages.props"
 COPY "RealEstatesWatcher.UI.Console/Properties/PublishProfiles" "RealEstatesWatcher.UI.Console/Properties/PublishProfiles/"
 COPY "RealEstatesWatcher.UI.Console" "RealEstatesWatcher.UI.Console/"
 COPY "Filters/RealEstatesWatcher.AdPostsFilters.BasicFilter" "Filters/RealEstatesWatcher.AdPostsFilters.BasicFilter/"
