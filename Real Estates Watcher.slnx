@@ -1,0 +1,46 @@
+<Solution>
+  <Folder Name="/Filters/">
+    <Project Path="Filters/RealEstatesWatcher.AdPostsFilters.BasicFilter/RealEstatesWatcher.AdPostsFilters.BasicFilter.csproj" />
+    <Project Path="Filters/RealEstatesWatcher.AdPostsFilters.Contracts/RealEstatesWatcher.AdPostsFilters.Contracts.csproj" />
+  </Folder>
+  <Folder Name="/Handlers/">
+    <Project Path="Handlers/RealEstatesWatcher.AdPostsHandlers.Contracts/RealEstatesWatcher.AdPostsHandlers.Contracts.csproj" />
+    <Project Path="Handlers/RealEstatesWatcher.AdPostsHandlers.Email/RealEstatesWatcher.AdPostsHandlers.Email.csproj" />
+    <Project Path="Handlers/RealEstatesWatcher.AdPostsHandlers.File/RealEstatesWatcher.AdPostsHandlers.File.csproj" />
+  </Folder>
+  <Folder Name="/Portals/">
+    <Project Path="Portals/RealEstatesWatcher.AdsPortals.Base/RealEstatesWatcher.AdsPortals.Base.csproj" />
+    <Project Path="Portals/RealEstatesWatcher.AdsPortals.BazosCz/RealEstatesWatcher.AdsPortals.BazosCz.csproj" />
+    <Project Path="Portals/RealEstatesWatcher.AdsPortals.BezrealitkyCz/RealEstatesWatcher.AdsPortals.BezrealitkyCz.csproj" />
+    <Project Path="Portals/RealEstatesWatcher.AdsPortals.BidliCz/RealEstatesWatcher.AdsPortals.BidliCz.csproj" />
+    <Project Path="Portals/RealEstatesWatcher.AdsPortals.BravisCz/RealEstatesWatcher.AdsPortals.BravisCz.csproj" />
+    <Project Path="Portals/RealEstatesWatcher.AdsPortals.CeskeRealityCz/RealEstatesWatcher.AdsPortals.CeskeRealityCz.csproj" />
+    <Project Path="Portals/RealEstatesWatcher.AdsPortals.Contracts/RealEstatesWatcher.AdsPortals.Contracts.csproj" />
+    <Project Path="Portals/RealEstatesWatcher.AdsPortals.FlatZoneCz/RealEstatesWatcher.AdsPortals.FlatZoneCz.csproj" />
+    <Project Path="Portals/RealEstatesWatcher.AdsPortals.MMRealityCz/RealEstatesWatcher.AdsPortals.MMRealityCz.csproj" />
+    <Project Path="Portals/RealEstatesWatcher.AdsPortals.RealcityCz/RealEstatesWatcher.AdsPortals.RealcityCz.csproj" />
+    <Project Path="Portals/RealEstatesWatcher.AdsPortals.RealityIdnesCz/RealEstatesWatcher.AdsPortals.RealityIdnesCz.csproj" />
+    <Project Path="Portals/RealEstatesWatcher.AdsPortals.RemaxCz/RealEstatesWatcher.AdsPortals.RemaxCz.csproj" />
+    <Project Path="Portals/RealEstatesWatcher.AdsPortals.SrealityCz/RealEstatesWatcher.AdsPortals.SrealityCz.csproj" />
+  </Folder>
+  <Folder Name="/Scrapers/">
+    <Project Path="Scrapers/RealEstatesWatcher.Scrapers.Contracts/RealEstatesWatcher.Scrapers.Contracts.csproj" />
+    <Project Path="Scrapers/RealEstatesWatcher.Scrapers/RealEstatesWatcher.Scrapers.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="Dockerfile" />
+    <File Path="global.json" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/Tools/">
+    <File Path="Tools/post-email-template.html" />
+  </Folder>
+  <Folder Name="/Tools/Node.js web scraper/">
+    <File Path="Tools/scraper/cookies.json" />
+    <File Path="Tools/scraper/index.js" />
+    <File Path="Tools/scraper/package.json" />
+  </Folder>
+  <Project Path="RealEstatesWatcher.Core/RealEstatesWatcher.Core.csproj" />
+  <Project Path="RealEstatesWatcher.Models/RealEstatesWatcher.Models.csproj" />
+  <Project Path="RealEstatesWatcher.UI.Console/RealEstatesWatcher.UI.Console.csproj" />
+</Solution>
