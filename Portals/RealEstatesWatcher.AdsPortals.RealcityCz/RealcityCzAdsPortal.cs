@@ -36,33 +36,18 @@ public class RealcityCzAdsPortal(string watchedUrl,
 
     private static decimal ParsePrice(HtmlNode node)
     {
-        var value = node.SelectSingleNode(".//div[@class=\"price\"]/span")?.InnerText;
-        if (value is null)
-            return decimal.Zero;
-
-        value = RegexMatchers.AllNonNumberValues().Replace(value, string.Empty);
-
-        return decimal.TryParse(value, out var price)
-            ? price
-            : decimal.Zero;
+        return ParsePriceFromNode(node, ".//div[@class=\"price\"]/span");
     }
 
-    private static string? ParsePriceComment(HtmlNode node) => ParsePrice(node) is decimal.Zero
-        ? node.SelectSingleNode(".//div[@class=\"price\"]/span")?.InnerText?.Trim()
-        : null;
+    private static string? ParsePriceComment(HtmlNode node)
+    {
+        return GetPriceCommentWhenZero(ParsePrice(node), node, ".//div[@class=\"price\"]/span");
+    }
 
     private static Layout ParseLayout(HtmlNode node)
     {
         var value = ParseTitle(node);
-
-        var result = RegexMatchers.Layout().Match(value);
-        if (!result.Success)
-            return Layout.NotSpecified;
-
-        var layoutValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
-        layoutValue = RegexMatchers.AllWhitespaceCharacters().Replace(layoutValue, string.Empty);
-
-        return LayoutExtensions.ToLayout(layoutValue);
+        return ParseLayoutFromText(value);
     }
 
     private static string ParseAddress(HtmlNode node) => HttpUtility.HtmlDecode(node.SelectSingleNode(".//div[@class=\"address\"]").InnerText).Trim();

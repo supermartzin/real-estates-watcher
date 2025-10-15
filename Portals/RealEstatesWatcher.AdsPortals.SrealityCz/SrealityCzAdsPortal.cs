@@ -95,11 +95,7 @@ public class SrealityCzAdsPortal(string watchedUrl,
 
     private static Layout ParseLayout(HtmlNode node)
     {
-        var result = RegexMatchers.Layout().Match(ParseTitle(node));
-
-        return result.Success 
-            ? LayoutExtensions.ToLayout(result.Groups[1].Value)
-            : Layout.NotSpecified;
+        return ParseLayoutFromText(ParseTitle(node));
     }
 
     private static decimal ParseFloorArea(HtmlNode node)

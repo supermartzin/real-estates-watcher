@@ -43,15 +43,7 @@ public class RealityIdnesCzAdsPortal(string watchedUrl,
 
     private static decimal ParsePrice(HtmlNode node)
     {
-        var value = node.SelectSingleNode(".//p[@class=\"c-products__price\"]/strong")?.InnerText;
-        if (value is null)
-            return decimal.Zero;
-
-        value = RegexMatchers.AllNonNumberValues().Replace(value, "");
-
-        return decimal.TryParse(value.Trim(), out var price)
-            ? price
-            : decimal.Zero;
+        return ParsePriceFromNode(node, ".//p[@class=\"c-products__price\"]/strong");
     }
 
     private static string? ParsePriceComment(HtmlNode node)
@@ -66,15 +58,7 @@ public class RealityIdnesCzAdsPortal(string watchedUrl,
     private static Layout ParseLayout(HtmlNode node)
     {
         var value = ParseTitle(node);
-
-        var result = RegexMatchers.Layout().Match(value);
-        if (!result.Success)
-            return Layout.NotSpecified;
-
-        var layoutValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
-        layoutValue = RegexMatchers.AllWhitespaceCharacters().Replace(layoutValue, "");
-
-        return LayoutExtensions.ToLayout(layoutValue);
+        return ParseLayoutFromText(value);
     }
 
     private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//p[@class=\"c-products__info\"]").InnerText.Trim();

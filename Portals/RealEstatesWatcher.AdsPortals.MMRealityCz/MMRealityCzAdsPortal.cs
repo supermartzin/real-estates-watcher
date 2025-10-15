@@ -38,15 +38,7 @@ public partial class MmRealityCzAdsPortal(string watchedUrl,
 
     private static decimal ParsePrice(HtmlNode node)
     {
-        var value = node.SelectSingleNode(".//div[@class='rds-content']//div[contains(@class, 'price')]")?.InnerText;
-        if (value is null)
-            return decimal.Zero;
-
-        value = RegexMatchers.AllNonNumberValues().Replace(value, string.Empty);
-
-        return decimal.TryParse(value, out var price)
-            ? price
-            : decimal.Zero;
+        return ParsePriceFromNode(node, ".//div[@class='rds-content']//div[contains(@class, 'price')]");
     }
 
     private static string? ParsePriceComment(HtmlNode node) => node.SelectSingleNode(".//div[@class='rds-content']//div[contains(@class, 'price')]")?.InnerText;
@@ -54,15 +46,7 @@ public partial class MmRealityCzAdsPortal(string watchedUrl,
     private static Layout ParseLayout(HtmlNode node)
     {
         var title = ParseTitle(node);
-
-        var result = RegexMatchers.Layout().Match(title);
-        if (!result.Success)
-            return Layout.NotSpecified;
-
-        var layoutValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
-        layoutValue = RegexMatchers.AllWhitespaceCharacters().Replace(layoutValue, string.Empty);
-
-        return LayoutExtensions.ToLayout(layoutValue);
+        return ParseLayoutFromText(title);
     }
 
     private static string ParseAddress(HtmlNode node)

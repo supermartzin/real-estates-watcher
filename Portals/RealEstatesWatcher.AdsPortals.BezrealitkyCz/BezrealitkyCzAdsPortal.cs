@@ -50,15 +50,7 @@ public partial class BezrealitkyCzAdsPortal(string watchedUrl,
 
     private static decimal ParsePrice(HtmlNode node)
     {
-        var value = node.SelectSingleNode(".//span[contains(@class,'propertyPriceAmount')]")?.InnerText;
-        if (value is null)
-            return decimal.Zero;
-
-        value = RegexMatchers.AllNonNumberValues().Replace(value, string.Empty);
-
-        return decimal.TryParse(value, out var price)
-            ? price
-            : decimal.Zero;
+        return ParsePriceFromNode(node, ".//span[contains(@class,'propertyPriceAmount')]");
     }
 
     private static decimal ParseAdditionalFees(HtmlNode node)
@@ -84,15 +76,7 @@ public partial class BezrealitkyCzAdsPortal(string watchedUrl,
             return Layout.NotSpecified;
 
         var value = HttpUtility.HtmlDecode(values[0].InnerText);
-
-        var result = RegexMatchers.Layout().Match(value);
-        if (!result.Success)
-            return Layout.NotSpecified;
-
-        var layoutValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
-        layoutValue = RegexMatchers.AllWhitespaceCharacters().Replace(layoutValue, string.Empty);
-
-        return LayoutExtensions.ToLayout(layoutValue);
+        return ParseLayoutFromText(value);
     }
 
     private static decimal ParseFloorArea(HtmlNode node)
@@ -102,16 +86,7 @@ public partial class BezrealitkyCzAdsPortal(string watchedUrl,
             return decimal.Zero;
         
         var value = HttpUtility.HtmlDecode(values[^1].InnerText);
-
-        var result = RegexMatchers.FloorArea().Match(value);
-        if (!result.Success)
-            return decimal.Zero;
-
-        var floorAreaValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
-
-        return decimal.TryParse(floorAreaValue, out var floorArea)
-            ? floorArea
-            : decimal.Zero;
+        return ParseFloorAreaFromText(value);
     }
 
     private static Uri? ParseImageUrl(HtmlNode node)

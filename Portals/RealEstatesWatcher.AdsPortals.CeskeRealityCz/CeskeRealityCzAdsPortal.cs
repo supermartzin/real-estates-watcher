@@ -38,38 +38,24 @@ public partial class CeskeRealityCzAdsPortal(string watchedUrl,
 
     private static decimal ParsePrice(HtmlNode node)
     {
-        var value = node.SelectSingleNode(".//h3[@class='i-estate__footer-price-value']")?.InnerText;
-        if (value is null)
-            return decimal.Zero;
-
-        value = RegexMatchers.AllNonNumberValues().Replace(value, string.Empty);
-
-        return decimal.TryParse(value, out var price)
-            ? price
-            : decimal.Zero;
+        return ParsePriceFromNode(node, ".//h3[@class='i-estate__footer-price-value']");
     }
 
-    private static string? ParsePriceComment(HtmlNode node) => ParsePrice(node) is decimal.Zero
-        ? node.SelectSingleNode(".//h3[@class='i-estate__footer-price-value']")?.InnerText?.Trim()
-        : null;
+    private static string? ParsePriceComment(HtmlNode node)
+    {
+        return GetPriceCommentWhenZero(ParsePrice(node), node, ".//h3[@class='i-estate__footer-price-value']");
+    }
 
     private static Layout ParseLayout(HtmlNode node)
     {
         var value = ParseTitle(node);
 
-        var result = RegexMatchers.Layout().Match(value);
-        if (!result.Success)
-        {
-            value = ParseText(node);
-            result = RegexMatchers.Layout().Match(value);
-            if (!result.Success)
-                return Layout.NotSpecified;
-        }
+        var layout = ParseLayoutFromText(value);
+        if (layout != Layout.NotSpecified)
+            return layout;
 
-        var layoutValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
-        layoutValue = RegexMatchers.AllWhitespaceCharacters().Replace(layoutValue, string.Empty);
-
-        return LayoutExtensions.ToLayout(layoutValue);
+        value = ParseText(node);
+        return ParseLayoutFromText(value);
     }
 
     private static string ParseAddress(HtmlNode node)
@@ -95,16 +81,7 @@ public partial class CeskeRealityCzAdsPortal(string watchedUrl,
     private static decimal ParseFloorArea(HtmlNode node)
     {
         var value = ParseTitle(node);
-
-        var result = RegexMatchers.FloorArea().Match(value);
-        if (!result.Success)
-            return decimal.Zero;
-
-        var floorAreaValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
-
-        return decimal.TryParse(floorAreaValue, out var floorArea)
-            ? floorArea
-            : decimal.Zero;
+        return ParseFloorAreaFromText(value);
     }
 
     private static Uri? ParseImageUrl(HtmlNode node)
