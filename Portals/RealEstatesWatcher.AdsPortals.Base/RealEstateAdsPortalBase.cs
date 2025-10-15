@@ -140,4 +140,72 @@ public abstract partial class RealEstateAdsPortalBase : IRealEstateAdsPortal
             throw new RealEstateAdsPortalException($"({Name}): Error getting latest ads: {ex.Message}", ex);
         }
     }
+
+    /// <summary>
+    /// Parses a price value from a node's inner text by removing all non-numeric characters.
+    /// </summary>
+    /// <param name="node">The HTML node containing the price information</param>
+    /// <param name="xpath">XPath to select the specific node containing the price</param>
+    /// <returns>The parsed decimal price, or decimal.Zero if parsing fails</returns>
+    protected static decimal ParsePriceFromNode(HtmlNode node, string xpath)
+    {
+        var value = node.SelectSingleNode(xpath)?.InnerText;
+        if (value is null)
+            return decimal.Zero;
+
+        value = RegexMatchers.AllNonNumberValues().Replace(value, string.Empty);
+
+        return decimal.TryParse(value, out var price)
+            ? price
+            : decimal.Zero;
+    }
+
+    /// <summary>
+    /// Parses layout information from text using regex pattern matching.
+    /// </summary>
+    /// <param name="text">The text to parse for layout information</param>
+    /// <returns>The parsed Layout enum value, or Layout.NotSpecified if not found</returns>
+    protected static Layout ParseLayoutFromText(string text)
+    {
+        var result = RegexMatchers.Layout().Match(text);
+        if (!result.Success)
+            return Layout.NotSpecified;
+
+        var layoutValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
+        layoutValue = RegexMatchers.AllWhitespaceCharacters().Replace(layoutValue, string.Empty);
+
+        return LayoutExtensions.ToLayout(layoutValue);
+    }
+
+    /// <summary>
+    /// Parses floor area from text using regex pattern matching.
+    /// </summary>
+    /// <param name="text">The text to parse for floor area information</param>
+    /// <returns>The parsed decimal floor area, or decimal.Zero if not found</returns>
+    protected static decimal ParseFloorAreaFromText(string text)
+    {
+        var result = RegexMatchers.FloorArea().Match(text);
+        if (!result.Success)
+            return decimal.Zero;
+
+        var floorAreaValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
+
+        return decimal.TryParse(floorAreaValue, out var floorArea)
+            ? floorArea
+            : decimal.Zero;
+    }
+
+    /// <summary>
+    /// Returns the price comment when the price is zero, otherwise returns null.
+    /// </summary>
+    /// <param name="price">The price value to check</param>
+    /// <param name="node">The HTML node containing the price comment</param>
+    /// <param name="xpath">XPath to select the specific node containing the price comment</param>
+    /// <returns>The price comment text if price is zero, otherwise null</returns>
+    protected static string? GetPriceCommentWhenZero(decimal price, HtmlNode node, string xpath)
+    {
+        return price is decimal.Zero
+            ? node.SelectSingleNode(xpath)?.InnerText?.Trim()
+            : null;
+    }
 }

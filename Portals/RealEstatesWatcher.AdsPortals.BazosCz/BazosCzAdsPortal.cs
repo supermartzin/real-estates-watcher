@@ -77,60 +77,63 @@ public partial class BazosCzAdsPortal(string watchedUrl,
 
     private static decimal ParsePrice(HtmlNode node)
     {
-        var value = node.SelectSingleNode(@"./div[@class=""inzeratycena""]")?.InnerText;
-        if (value is null)
-            return decimal.Zero;
-
-        value = RegexMatchers.AllNonNumberValues().Replace(value, string.Empty);
-            
-        return decimal.TryParse(value, out var price)
-            ? price
-            : decimal.Zero;
+        return ParsePriceFromNode(node, @"./div[@class=""inzeratycena""]");
     }
 
     private static decimal ParseFloorArea(HtmlNode node)
     {
         var value = ParseTitle(node);
 
-        var result = RegexMatchers.FloorArea().Match(value);
-        if (!result.Success)
+        var floorArea = ParseFloorAreaFromText(value);
+        if (floorArea != decimal.Zero)
         {
-            value = ParseText(node);
-            result = RegexMatchers.FloorArea().Match(value);
-            if (!result.Success)
-                return decimal.Zero;
+            // Handle special number format with dots and commas
+            var result = RegexMatchers.FloorArea().Match(value);
+            if (result.Success)
+            {
+                var floorAreaValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
+                floorAreaValue = floorAreaValue.Replace(".", ",")
+                                               .Replace(" ", string.Empty)
+                                               .Trim(',');
+
+                return decimal.TryParse(floorAreaValue, NumberStyles.AllowDecimalPoint, new NumberFormatInfo{ NumberDecimalSeparator = ","}, out var parsedFloorArea)
+                    ? parsedFloorArea
+                    : decimal.Zero;
+            }
+            return floorArea;
         }
 
-        var floorAreaValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
-        floorAreaValue = floorAreaValue.Replace(".", ",")
-                                       .Replace(" ", string.Empty)
-                                       .Trim(',');
+        value = ParseText(node);
+        var result2 = RegexMatchers.FloorArea().Match(value);
+        if (result2.Success)
+        {
+            var floorAreaValue = result2.Groups.Skip<Group>(1).First(group => group.Success).Value;
+            floorAreaValue = floorAreaValue.Replace(".", ",")
+                                           .Replace(" ", string.Empty)
+                                           .Trim(',');
 
-        return decimal.TryParse(floorAreaValue, NumberStyles.AllowDecimalPoint, new NumberFormatInfo{ NumberDecimalSeparator = ","}, out var floorArea)
-            ? floorArea
-            : decimal.Zero;
+            return decimal.TryParse(floorAreaValue, NumberStyles.AllowDecimalPoint, new NumberFormatInfo{ NumberDecimalSeparator = ","}, out var parsedFloorArea)
+                ? parsedFloorArea
+                : decimal.Zero;
+        }
+
+        return decimal.Zero;
     }
 
-    private static string? ParsePriceComment(HtmlNode node) => ParsePrice(node) is decimal.Zero
-        ? node.SelectSingleNode("./div[@class=\"inzeratycena\"]")?.InnerText?.Trim()
-        : null;
+    private static string? ParsePriceComment(HtmlNode node)
+    {
+        return GetPriceCommentWhenZero(ParsePrice(node), node, "./div[@class=\"inzeratycena\"]");
+    }
 
     private static Layout ParseLayout(HtmlNode node)
     {
         var value = ParseTitle(node);
 
-        var result = RegexMatchers.Layout().Match(value);
-        if (!result.Success)
-        {
-            value = ParseText(node);
-            result = RegexMatchers.Layout().Match(value);
-            if (!result.Success)
-                return Layout.NotSpecified;
-        }
+        var layout = ParseLayoutFromText(value);
+        if (layout != Layout.NotSpecified)
+            return layout;
 
-        var layoutValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
-        layoutValue = RegexMatchers.AllWhitespaceCharacters().Replace(layoutValue, string.Empty);
-
-        return LayoutExtensions.ToLayout(layoutValue);
+        value = ParseText(node);
+        return ParseLayoutFromText(value);
     }
 }

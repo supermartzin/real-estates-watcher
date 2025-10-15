@@ -35,15 +35,7 @@ public class BravisCzAdsPortal(string watchedUrl,
 
     private static decimal ParsePrice(HtmlNode node)
     {
-        var value = node.SelectSingleNode(".//strong[@class='price']")?.FirstChild?.InnerText;
-        if (value == null)
-            return decimal.Zero;
-
-        value = RegexMatchers.AllNonNumberValues().Replace(value, string.Empty);
-
-        return decimal.TryParse(value, out var price)
-            ? price
-            : decimal.Zero;
+        return ParsePriceFromNode(node, ".//strong[@class='price']");
     }
 
     private static decimal ParseAdditionalFees(HtmlNode node)
@@ -74,15 +66,7 @@ public class BravisCzAdsPortal(string watchedUrl,
     private static Layout ParseLayout(HtmlNode node)
     {
         var value = node.SelectSingleNode(".//ul[@class='params']/li[contains(text(),\"Typ\")]").InnerText;
-
-        var result = RegexMatchers.Layout().Match(value);
-        if (!result.Success)
-            return Layout.NotSpecified;
-
-        var layoutValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
-        layoutValue = RegexMatchers.AllWhitespaceCharacters().Replace(layoutValue, string.Empty);
-
-        return LayoutExtensions.ToLayout(layoutValue);
+        return ParseLayoutFromText(value);
     }
 
     private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//em[@class=\"location\"]").InnerText;

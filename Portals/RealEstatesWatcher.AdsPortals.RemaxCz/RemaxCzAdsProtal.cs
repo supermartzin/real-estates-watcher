@@ -36,20 +36,13 @@ public class RemaxCzAdsProtal : RealEstateAdsPortalBase
 
     private static decimal ParsePrice(HtmlNode node)
     {
-        var value = node.SelectSingleNode(".//div[contains(@class,\"item-price\")]/strong")?.FirstChild?.InnerText;
-        if (value is null)
-            return decimal.Zero;
-
-        value = RegexMatchers.AllNonNumberValues().Replace(value, string.Empty);
-
-        return decimal.TryParse(value, out var price)
-            ? price
-            : decimal.Zero;
+        return ParsePriceFromNode(node, ".//div[contains(@class,\"item-price\")]/strong");
     }
 
-    private static string? ParsePriceComment(HtmlNode node) => ParsePrice(node) is decimal.Zero
-        ? node.SelectSingleNode(".//div[contains(@class,'item-price')]/strong")?.InnerText?.Trim()
-        : null;
+    private static string? ParsePriceComment(HtmlNode node)
+    {
+        return GetPriceCommentWhenZero(ParsePrice(node), node, ".//div[contains(@class,'item-price')]/strong");
+    }
 
     private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//h2/strong").InnerText;
 
@@ -86,29 +79,12 @@ public class RemaxCzAdsProtal : RealEstateAdsPortalBase
     private static decimal ParseFloorArea(HtmlNode node)
     {
         var value = ParseTitle(node);
-
-        var result = RegexMatchers.FloorArea().Match(value);
-        if (!result.Success)
-            return decimal.Zero;
-
-        var floorAreaValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
-
-        return decimal.TryParse(floorAreaValue, out var floorArea)
-            ? floorArea
-            : decimal.Zero;
+        return ParseFloorAreaFromText(value);
     }
 
     private static Layout ParseLayout(HtmlNode node)
     {
         var value = ParseTitle(node);
-
-        var result = RegexMatchers.Layout().Match(value);
-        if (!result.Success)
-            return Layout.NotSpecified;
-
-        var layoutValue = result.Groups.Skip<Group>(1).First(group => group.Success).Value;
-        layoutValue = RegexMatchers.AllWhitespaceCharacters().Replace(layoutValue, string.Empty);
-
-        return LayoutExtensions.ToLayout(layoutValue);
+        return ParseLayoutFromText(value);
     }
 }
