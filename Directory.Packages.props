@@ -10,8 +10,8 @@
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.10" />
     <PackageVersion Include="NLog.Extensions.Logging" Version="6.0.5" />
-    <PackageVersion Include="Sentry.Extensions.Logging" Version="5.16.1" />
-    <PackageVersion Include="Sentry.Profiling" Version="5.16.1" />
+    <PackageVersion Include="Sentry.Extensions.Logging" Version="5.16.2" />
+    <PackageVersion Include="Sentry.Profiling" Version="5.16.2" />
     <PackageVersion Include="System.CommandLine" Version="2.0.0-rc.2.25502.107" />
     <PackageVersion Include="System.Text.Encoding.CodePages" Version="9.0.10" />
   </ItemGroup>
