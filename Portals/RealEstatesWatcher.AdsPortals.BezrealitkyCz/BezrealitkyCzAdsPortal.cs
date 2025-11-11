@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 
 using RealEstatesWatcher.AdsPortals.Base;
 using RealEstatesWatcher.Models;
-using RealEstatesWatcher.Scrapers.Contracts;
 
 namespace RealEstatesWatcher.AdsPortals.BezrealitkyCz;
 
