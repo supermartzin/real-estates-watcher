@@ -10,7 +10,7 @@
     <PackageVersion Include="Microsoft.Extensions.Configuration.Ini" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
-    <PackageVersion Include="NLog.Extensions.Logging" Version="6.0.6" />
+    <PackageVersion Include="NLog.Extensions.Logging" Version="6.1.0" />
     <PackageVersion Include="Sentry.Extensions.Logging" Version="5.16.2" />
     <PackageVersion Include="Sentry.Profiling" Version="5.16.2" />
     <PackageVersion Include="System.CommandLine" Version="2.0.0" />
