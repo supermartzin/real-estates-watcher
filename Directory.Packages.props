@@ -13,6 +13,6 @@
     <PackageVersion Include="NLog.Extensions.Logging" Version="6.1.0" />
     <PackageVersion Include="Sentry.Extensions.Logging" Version="6.0.0" />
     <PackageVersion Include="Sentry.Profiling" Version="6.0.0" />
-    <PackageVersion Include="System.CommandLine" Version="2.0.0" />
+    <PackageVersion Include="System.CommandLine" Version="2.0.1" />
   </ItemGroup>
 </Project>
