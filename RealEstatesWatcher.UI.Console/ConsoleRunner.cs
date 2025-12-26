@@ -1,4 +1,7 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Reflection;
+using System.Text;
+using Google.Cloud.Diagnostics.Common;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -83,6 +86,7 @@ public class ConsoleRunner
         var collection = new ServiceCollection();
 
         // add logging
+        AddAndSetUpGoogleLogging(collection);
         collection.AddLogging(builder =>
         {
             builder.AddNLog();
@@ -116,6 +120,23 @@ public class ConsoleRunner
         collection.AddSingleton<RealEstatesWatchEngine>();
 
         _container = collection.BuildServiceProvider();
+    }
+
+    private static void AddAndSetUpGoogleLogging(ServiceCollection collection)
+    {
+        var fileVersionInfo = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location);
+        var loggingOptions = LoggingOptions.Create(LogLevel.Debug, $"REW-{fileVersionInfo.FileVersion}", new Dictionary<string, string>
+        {
+            { "appId", $"App-{CmdArguments.ApplicationId ?? Guid.NewGuid().ToString()}" }
+        });
+#if DEBUG
+        collection.AddGoogleDiagnostics("real-estates-watcher-475712",
+                                        "Real Estates Watcher",
+                                        fileVersionInfo.FileVersion ?? "N/A",
+                                        loggingOptions: loggingOptions);
+#else
+        collection.AddGoogleDiagnostics(loggingOptions: loggingOptions);
+#endif
     }
 
     private static LocalNodejsConsoleWebScraperSettings LoadWebScraperSettings(string webScraperConfigFilePath)
