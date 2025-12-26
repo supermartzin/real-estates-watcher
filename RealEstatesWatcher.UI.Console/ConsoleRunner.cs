@@ -85,9 +85,8 @@ public class ConsoleRunner
     {
         var collection = new ServiceCollection();
 
-        AddAndSetUpGoogleLogging(collection);
-
         // add logging
+        AddAndSetUpGoogleLogging(collection);
         collection.AddLogging(builder =>
         {
             builder.AddNLog();
@@ -126,19 +125,18 @@ public class ConsoleRunner
     private static void AddAndSetUpGoogleLogging(ServiceCollection collection)
     {
         var fileVersionInfo = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location);
-
-//#if DEBUG
-        collection.AddGoogleDiagnostics("real-estates-watcher-475712", "Real Estates Watcher", fileVersionInfo.FileVersion ?? "N/A",
-            loggingOptions: LoggingOptions.Create(LogLevel.Debug, $"REW-{fileVersionInfo.FileVersion}", new Dictionary<string, string>
-            {
-                { "appId", $"App-{CmdArguments.ApplicationId ?? Guid.NewGuid().ToString()}" }
-            }));
-//#else
-//        collection.AddGoogleDiagnostics(loggingOptions: LoggingOptions.Create(LogLevel.Debug, $"REW-{fileVersionInfo.FileVersion}", new Dictionary<string, string>
-//        {
-//            { "appId", $"App-{CmdArguments.ApplicationId ?? Guid.NewGuid().ToString()}" }
-//        }));
-//#endif
+        var loggingOptions = LoggingOptions.Create(LogLevel.Debug, $"REW-{fileVersionInfo.FileVersion}", new Dictionary<string, string>
+        {
+            { "appId", $"App-{CmdArguments.ApplicationId ?? Guid.NewGuid().ToString()}" }
+        });
+#if DEBUG
+        collection.AddGoogleDiagnostics("real-estates-watcher-475712",
+                                        "Real Estates Watcher",
+                                        fileVersionInfo.FileVersion ?? "N/A",
+                                        loggingOptions: loggingOptions);
+#else
+        collection.AddGoogleDiagnostics(loggingOptions: loggingOptions);
+#endif
     }
 
     private static LocalNodejsConsoleWebScraperSettings LoadWebScraperSettings(string webScraperConfigFilePath)
