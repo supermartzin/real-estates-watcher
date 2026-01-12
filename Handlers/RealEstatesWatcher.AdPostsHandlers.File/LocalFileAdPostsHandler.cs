@@ -154,10 +154,14 @@ public class LocalFileAdPostsHandler(LocalFileAdPostsHandlerSettings settings) :
         }
 
         // layout
-        postHtmlBuilder = postHtmlBuilder.Replace("{$layout}", post.Layout is not Layout.NotSpecified ? post.Layout.ToDisplayString() : "-");
+        postHtmlBuilder = postHtmlBuilder.Replace("{$layout}", post.Layout is not Layout.NotSpecified
+            ? post.Layout.ToDisplayString()
+            : "-");
 
         // floor area
-        postHtmlBuilder = post.FloorArea is not null and not decimal.Zero ? postHtmlBuilder.Replace("{$floor-area}", post.FloorArea + " m²") : postHtml.Replace("{$floor-area}", " -");
+        postHtmlBuilder = post.FloorArea is not null and not decimal.Zero
+            ? postHtmlBuilder.Replace("{$floor-area}", post.FloorArea + " m²")
+            : postHtmlBuilder.Replace("{$floor-area}", " -");
 
         // image
         if (post.ImageUrl is not null)
