@@ -1,13 +1,17 @@
-﻿using System.Globalization;
-using System.Net;
-using System.Web;
+﻿using MailKit.Net.Smtp;
+
 using Microsoft.Extensions.Logging;
+
 using MimeKit;
-using MailKit.Net.Smtp;
 
 using RealEstatesWatcher.AdPostsHandlers.Contracts;
 using RealEstatesWatcher.AdPostsHandlers.Templates;
 using RealEstatesWatcher.Models;
+
+using System.Globalization;
+using System.Net;
+using System.Text;
+using System.Web;
 
 namespace RealEstatesWatcher.AdPostsHandlers.Email;
 
@@ -105,7 +109,7 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
 
     private static string CreateSingleHtmlPost(RealEstateAdPost post)
     {
-        var postHtml = CommonHtmlTemplateElements.Post
+        var postHtmlBuilder = new StringBuilder(CommonHtmlTemplateElements.Post)
             .Replace("{$title}", post.Title)
             .Replace("{$portal-name}", post.AdsPortalName)
             .Replace("{$post-link}", post.WebUrl.AbsoluteUri)
@@ -114,36 +118,36 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
         // address links
         if (!string.IsNullOrEmpty(post.Address))
         {
-            postHtml = postHtml.Replace("{$address-links-display}", "inline-block")
+            postHtmlBuilder = postHtmlBuilder.Replace("{$address-links-display}", "inline-block")
                                .Replace("{$address-encoded}", HttpUtility.UrlEncode(post.Address));
         }
         else
         {
-            postHtml = postHtml.Replace("{$address-links-display}", "none");
+            postHtmlBuilder = postHtmlBuilder.Replace("{$address-links-display}", "none");
         }
 
         // layout
-        postHtml = postHtml.Replace("{$layout}", post.Layout is not Layout.NotSpecified ? post.Layout.ToDisplayString() : "-");
+        postHtmlBuilder = postHtmlBuilder.Replace("{$layout}", post.Layout is not Layout.NotSpecified ? post.Layout.ToDisplayString() : "-");
 
         // floor area
-        postHtml = post.FloorArea is not null and not decimal.Zero ? postHtml.Replace("{$floor-area}", post.FloorArea + " m²") : postHtml.Replace("{$floor-area}", "-");
+        postHtmlBuilder = post.FloorArea is not null and not decimal.Zero ? postHtmlBuilder.Replace("{$floor-area}", post.FloorArea + " m²") : postHtmlBuilder.Replace("{$floor-area}", "-");
 
         // image
         if (post.ImageUrl is not null)
         {
-            postHtml = postHtml.Replace("{$img-link}", post.ImageUrl.AbsoluteUri)
+            postHtmlBuilder = postHtmlBuilder.Replace("{$img-link}", post.ImageUrl.AbsoluteUri)
                                .Replace("{$img-display}", "block");
         }
         else
         {
-            postHtml = postHtml.Replace("{$img-link}", string.Empty)
+            postHtmlBuilder = postHtmlBuilder.Replace("{$img-link}", string.Empty)
                                .Replace("{$img-display}", "none");
         }
 
         // price
         if (post.Price is not decimal.Zero)
         {
-            postHtml = postHtml.Replace("{$price}", post.Price.ToString("N", new NumberFormatInfo { NumberGroupSeparator = " " }))
+            postHtmlBuilder = postHtmlBuilder.Replace("{$price}", post.Price.ToString("N", new NumberFormatInfo { NumberGroupSeparator = " " }))
                                .Replace("{$currency}", post.Currency.ToString())
                                .Replace("{$price-display}", "block")
                                .Replace("{$price-comment-display}", "none")
@@ -151,7 +155,7 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
         }
         else
         {
-            postHtml = postHtml.Replace("{$price-comment}", post.PriceComment ?? "-")
+            postHtmlBuilder = postHtmlBuilder.Replace("{$price-comment}", post.PriceComment ?? "-")
                                .Replace("{$price-comment-display}", "block")
                                .Replace("{$price-display}", "none")
                                .Replace("{$price}", string.Empty)
@@ -161,27 +165,27 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
         // additional fees
         if (post.AdditionalFees is not null and not decimal.Zero)
         {
-            postHtml = postHtml.Replace("{$additional-fees}", post.AdditionalFees.Value.ToString("N", new NumberFormatInfo { NumberGroupSeparator = " " }))
+            postHtmlBuilder = postHtmlBuilder.Replace("{$additional-fees}", post.AdditionalFees.Value.ToString("N", new NumberFormatInfo { NumberGroupSeparator = " " }))
                                .Replace("{$additional-fees-display}", "inline-block");
         }
         else
         {
-            postHtml = postHtml.Replace("{$additional-fees}", decimal.Zero.ToString("N"))
+            postHtmlBuilder = postHtmlBuilder.Replace("{$additional-fees}", decimal.Zero.ToString("N"))
                                .Replace("{$additional-fees-display}", "none");
         }
 
         // text
         if (!string.IsNullOrEmpty(post.Text))
         {
-            postHtml = postHtml.Replace("{$text}", post.Text)
+            postHtmlBuilder = postHtmlBuilder.Replace("{$text}", post.Text)
                                .Replace("{$text-display}", "table");
         }
         else
         {
-            postHtml = postHtml.Replace("{$text}", string.Empty)
+            postHtmlBuilder = postHtmlBuilder.Replace("{$text}", string.Empty)
                                .Replace("{$text-display}", "none");
         }
 
-        return postHtml;
+        return postHtmlBuilder.ToString();
     }
 }
