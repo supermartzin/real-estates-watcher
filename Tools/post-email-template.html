@@ -28,9 +28,14 @@
     </span>
     <span>
         <strong>Server:</strong> {$portal-name}<br/>
-        <strong>Adresa:</strong> {$address}<br/>
+        <strong>Adresa:</strong> {$address} 
+        <span style="display: {$address-links-display};">
+            <a target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/search/?api=1&query={$address-encoded}"><img alt="Google's map logo" title="Otvoriť v Google Mapách" src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Google_Maps_icon_%282020%29.svg/32px-Google_Maps_icon_%282020%29.svg.png?20200218211225" style="margin-left: 6px; max-height: 14px; width: auto" /></a>
+            <a target="_blank" rel="noopener noreferrer" href="https://mapy.com/fnc/v1/search?query={$address-encoded}"><img alt="Icon of Mapy.com" title="Otvoriť na Mapy.com" src="https://mapy.com/img/favicon/common/plain/favicon-32x32.png" style="max-height: 14px; width: auto"></a>
+            <a target="_blank" rel="noopener noreferrer" href="http://maps.apple.com/?q={$address-encoded}"><img alt="Icon of Apple Maps" title="Otvoriť v Apple Mapách" src="https://maps.apple.com/static/maps-app-web-client/images/maps-app-icon-120x120.png" style="max-height: 14px; width: auto"></a>
+        </span><br/>
         <strong>Výmera:</strong> {$floor-area}<br/>
-        <strong>Dispozícia:</strong> {$layout}</br>
+        <strong>Dispozícia:</strong> {$layout}<br/>
     </span>
     <p style="margin: 0.2em; font-size: small; text-align: justify; display: {$text-display};">{$text}</p>
 </div>
