@@ -7,6 +7,7 @@
     <Project Path="Handlers/RealEstatesWatcher.AdPostsHandlers.Contracts/RealEstatesWatcher.AdPostsHandlers.Contracts.csproj" />
     <Project Path="Handlers/RealEstatesWatcher.AdPostsHandlers.Email/RealEstatesWatcher.AdPostsHandlers.Email.csproj" />
     <Project Path="Handlers/RealEstatesWatcher.AdPostsHandlers.File/RealEstatesWatcher.AdPostsHandlers.File.csproj" />
+    <Project Path="Handlers/RealEstatesWatcher.AdPostsHandlers.Templates/RealEstatesWatcher.AdPostsHandlers.Templates.csproj" />
   </Folder>
   <Folder Name="/Portals/">
     <Project Path="Portals/RealEstatesWatcher.AdsPortals.Base/RealEstatesWatcher.AdsPortals.Base.csproj" />
