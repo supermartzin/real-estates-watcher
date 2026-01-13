@@ -8,12 +8,14 @@ using RealEstatesWatcher.AdPostsHandlers.Base.Html;
 using RealEstatesWatcher.AdPostsHandlers.Contracts;
 using RealEstatesWatcher.Models;
 
+using System.Globalization;
 using System.Net;
 
 namespace RealEstatesWatcher.AdPostsHandlers.Email;
 
 public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings settings,
-                                          ILogger<EmailNotifyingAdPostsHandler>? logger = null) : HtmlBasedAdPostsHandlerBase, IRealEstateAdPostsHandler
+                                          NumberFormatInfo? numberFormat = null,
+                                          ILogger<EmailNotifyingAdPostsHandler>? logger = null) : HtmlBasedAdPostsHandlerBase(numberFormat ?? NumberFormatInfo.CurrentInfo), IRealEstateAdPostsHandler
 {
     private readonly EmailNotifyingAdPostsHandlerSettings _settings = settings ?? throw new ArgumentNullException(nameof(settings));
 
@@ -25,7 +27,7 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
 
         logger?.LogDebug("Received new Real Estate Ad Post: {Post}", adPost);
 
-        await SendEmailAsync("🆕 New Real Estate Advert published!", CreateFullHtmlPage([adPost], CommonHtmlTemplateElements.TitleInitialPosts), cancellationToken).ConfigureAwait(false);
+        await SendEmailAsync("🆕 New Real Estate Advert published!", CreateFullHtmlPage([adPost], CommonHtmlTemplateElements.TitleNewPosts), cancellationToken).ConfigureAwait(false);
     }
 
     public async Task HandleNewRealEstatesAdPostsAsync(IList<RealEstateAdPost> adPosts, CancellationToken cancellationToken = default)

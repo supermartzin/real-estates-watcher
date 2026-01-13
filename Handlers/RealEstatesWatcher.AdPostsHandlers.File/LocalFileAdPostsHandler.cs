@@ -2,9 +2,13 @@
 using RealEstatesWatcher.AdPostsHandlers.Contracts;
 using RealEstatesWatcher.Models;
 
+using System.Globalization;
+
 namespace RealEstatesWatcher.AdPostsHandlers.File;
 
-public class LocalFileAdPostsHandler(LocalFileAdPostsHandlerSettings settings) : HtmlBasedAdPostsHandlerBase, IRealEstateAdPostsHandler
+public class LocalFileAdPostsHandler(LocalFileAdPostsHandlerSettings settings, NumberFormatInfo? numberFormat = null) :
+    HtmlBasedAdPostsHandlerBase(numberFormat ?? NumberFormatInfo.CurrentInfo),
+    IRealEstateAdPostsHandler
 {
     private readonly LocalFileAdPostsHandlerSettings _settings = settings ?? throw new ArgumentNullException(nameof(settings));
 
@@ -69,7 +73,7 @@ public class LocalFileAdPostsHandler(LocalFileAdPostsHandlerSettings settings) :
         var index = pageContent.IndexOf("<posts/>", StringComparison.Ordinal);
         var htmlPostsElements = string.Join(Environment.NewLine, adPosts.Select(CreateHtmlPostElement));
 
-        // write to file, keeping the <posts/> element for future appends
+        // insert into page, keeping the <posts/> element at start for future appends of newer posts
         pageContent = pageContent.Insert(index + 8, htmlPostsElements + Environment.NewLine);
 
         await WriteToFileAsync(filePath, pageContent, cancellationToken).ConfigureAwait(false);
