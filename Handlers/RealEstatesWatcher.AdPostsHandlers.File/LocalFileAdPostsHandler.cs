@@ -1,14 +1,14 @@
-﻿using RealEstatesWatcher.AdPostsHandlers.Contracts;
-using RealEstatesWatcher.AdPostsHandlers.Templates;
+﻿using RealEstatesWatcher.AdPostsHandlers.Base.Html;
+using RealEstatesWatcher.AdPostsHandlers.Contracts;
 using RealEstatesWatcher.Models;
 
 using System.Globalization;
-using System.Text;
-using System.Web;
 
 namespace RealEstatesWatcher.AdPostsHandlers.File;
 
-public class LocalFileAdPostsHandler(LocalFileAdPostsHandlerSettings settings) : IRealEstateAdPostsHandler
+public class LocalFileAdPostsHandler(LocalFileAdPostsHandlerSettings settings, NumberFormatInfo? numberFormat = null) :
+    HtmlBasedAdPostsHandlerBase(numberFormat ?? NumberFormatInfo.CurrentInfo),
+    IRealEstateAdPostsHandler
 {
     private readonly LocalFileAdPostsHandlerSettings _settings = settings ?? throw new ArgumentNullException(nameof(settings));
 
@@ -66,25 +66,15 @@ public class LocalFileAdPostsHandler(LocalFileAdPostsHandlerSettings settings) :
             ? _settings.NewPostsFilePath
             : _settings.MainFilePath;
 
+        var pageContent = System.IO.File.Exists(filePath)
+            ? await System.IO.File.ReadAllTextAsync(filePath, cancellationToken).ConfigureAwait(false)
+            : CommonHtmlTemplateElements.FullPage.Replace("<maintitle/>", CommonHtmlTemplateElements.TitleNewPosts);
+
+        var index = pageContent.IndexOf("<posts/>", StringComparison.Ordinal);
         var htmlPostsElements = string.Join(Environment.NewLine, adPosts.Select(CreateHtmlPostElement));
 
-        string pageContent;
-        if (System.IO.File.Exists(filePath))
-        {
-            // read content of existing file
-            var fileContents = await System.IO.File.ReadAllTextAsync(filePath, cancellationToken).ConfigureAwait(false);
-            var index = fileContents.IndexOf("<posts/>", StringComparison.Ordinal);
-
-            pageContent = fileContents.Insert(index + 8, htmlPostsElements + Environment.NewLine);
-        }
-        else
-        {
-            // create new content
-            pageContent = CommonHtmlTemplateElements.FullPage.Replace("<maintitle/>", CommonHtmlTemplateElements.TitleNewPosts);
-
-            var index = pageContent.IndexOf("<posts/>", StringComparison.Ordinal);
-            pageContent = pageContent.Insert(index + 8, htmlPostsElements + Environment.NewLine);
-        }
+        // insert into page, keeping the <posts/> element at start for future appends of newer posts
+        pageContent = pageContent.Insert(index + 8, htmlPostsElements + Environment.NewLine);
 
         await WriteToFileAsync(filePath, pageContent, cancellationToken).ConfigureAwait(false);
     }
@@ -132,86 +122,6 @@ public class LocalFileAdPostsHandler(LocalFileAdPostsHandlerSettings settings) :
         {
             throw new RealEstateAdPostsHandlerException($"Error saving Ad posts to file: {ex.Message}", ex);
         }
-    }
-
-    private static string CreateHtmlPostElement(RealEstateAdPost post)
-    {
-        var postHtmlBuilder = new StringBuilder(CommonHtmlTemplateElements.Post)
-            .Replace("{$title}", post.Title)
-            .Replace("{$portal-name}", post.AdsPortalName)
-            .Replace("{$post-link}", post.WebUrl.AbsoluteUri)
-            .Replace("{$address}", post.Address);
-
-        // address links
-        if (!string.IsNullOrEmpty(post.Address))
-        {
-            postHtmlBuilder = postHtmlBuilder.Replace("{$address-links-display}", "inline-block")
-                .Replace("{$address-encoded}", HttpUtility.UrlEncode(post.Address));
-        }
-        else
-        {
-            postHtmlBuilder = postHtmlBuilder.Replace("{$address-links-display}", "none");
-        }
-
-        // layout
-        postHtmlBuilder = postHtmlBuilder.Replace("{$layout}", post.Layout is not Layout.NotSpecified
-            ? post.Layout.ToDisplayString()
-            : "-");
-
-        // floor area
-        postHtmlBuilder = post.FloorArea is not null and not decimal.Zero
-            ? postHtmlBuilder.Replace("{$floor-area}", post.FloorArea + " m²")
-            : postHtmlBuilder.Replace("{$floor-area}", " -");
-
-        // image
-        if (post.ImageUrl is not null)
-        {
-            postHtmlBuilder = postHtmlBuilder.Replace("{$img-link}", post.ImageUrl.AbsoluteUri)
-                .Replace("{$img-display}", "block");
-        }
-        else
-        {
-            postHtmlBuilder = postHtmlBuilder.Replace("{$img-display}", "none");
-        }
-
-        // price
-        if (post.Price is not decimal.Zero)
-        {
-            postHtmlBuilder = postHtmlBuilder.Replace("{$price}", post.Price.ToString("N", new NumberFormatInfo {NumberGroupSeparator = " "}))
-                .Replace("{$currency}", post.Currency.ToString())
-                .Replace("{$price-display}", "block")
-                .Replace("{$price-comment-display}", "none");
-        }
-        else
-        {
-            postHtmlBuilder = postHtmlBuilder.Replace("{$price-comment}", post.PriceComment ?? "-")
-                .Replace("{$price-display}", "none")
-                .Replace("{$price-comment-display}", "block");
-        }
-
-        // additional fees
-        if (post.AdditionalFees is not null and not decimal.Zero)
-        {
-            postHtmlBuilder = postHtmlBuilder.Replace("{$additional-fees}", post.AdditionalFees.Value.ToString("N", new NumberFormatInfo {NumberGroupSeparator = " "}))
-                .Replace("{$additional-fees-display}", "inline-block");
-        }
-        else
-        {
-            postHtmlBuilder = postHtmlBuilder.Replace("{$additional-fees-display}", "none");
-        }
-
-        // text
-        if (!string.IsNullOrEmpty(post.Text))
-        {
-            postHtmlBuilder = postHtmlBuilder.Replace("{$text}", post.Text)
-                .Replace("{$text-display}", "table");
-        }
-        else
-        {
-            postHtmlBuilder = postHtmlBuilder.Replace("{$text-display}", "none");
-        }
-
-        return postHtmlBuilder.ToString();
     }
 
     #endregion

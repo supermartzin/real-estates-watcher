@@ -1,32 +1,37 @@
-﻿using System.Diagnostics;
-using System.Reflection;
-using System.Text;
-using Google.Cloud.Diagnostics.Common;
+﻿using Google.Cloud.Diagnostics.Common;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
 using NLog;
 using NLog.Extensions.Logging;
-using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
+using RealEstatesWatcher.AdPostsFilters.BasicFilter;
+using RealEstatesWatcher.AdPostsHandlers.Email;
+using RealEstatesWatcher.AdPostsHandlers.File;
 using RealEstatesWatcher.AdsPortals.BazosCz;
-using RealEstatesWatcher.AdsPortals.FlatZoneCz;
-using RealEstatesWatcher.AdsPortals.RemaxCz;
-using RealEstatesWatcher.AdsPortals.SrealityCz;
 using RealEstatesWatcher.AdsPortals.BezrealitkyCz;
 using RealEstatesWatcher.AdsPortals.BidliCz;
 using RealEstatesWatcher.AdsPortals.BravisCz;
 using RealEstatesWatcher.AdsPortals.CeskeRealityCz;
+using RealEstatesWatcher.AdsPortals.FlatZoneCz;
 using RealEstatesWatcher.AdsPortals.MMRealityCz;
 using RealEstatesWatcher.AdsPortals.RealcityCz;
 using RealEstatesWatcher.AdsPortals.RealityIdnesCz;
+using RealEstatesWatcher.AdsPortals.RemaxCz;
+using RealEstatesWatcher.AdsPortals.SrealityCz;
 using RealEstatesWatcher.Core;
 using RealEstatesWatcher.Models;
 using RealEstatesWatcher.Scrapers;
 using RealEstatesWatcher.Scrapers.Contracts;
-using RealEstatesWatcher.AdPostsHandlers.Email;
-using RealEstatesWatcher.AdPostsHandlers.File;
-using RealEstatesWatcher.AdPostsFilters.BasicFilter;
+
+using System.Diagnostics;
+using System.Globalization;
+using System.Reflection;
+using System.Text;
+
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace RealEstatesWatcher.UI.Console;
 
@@ -257,8 +262,10 @@ public class ConsoleRunner
     {
         _logger?.LogInformation("Registering Ad posts handlers..");
 
-        watcher.RegisterAdPostsHandler(new EmailNotifyingAdPostsHandler(LoadEmailSettings(), container.GetService<ILogger<EmailNotifyingAdPostsHandler>>()));
-        watcher.RegisterAdPostsHandler(new LocalFileAdPostsHandler(LoadFileSettings()));
+        var spaceSeparatedNumberFormat = new NumberFormatInfo() { NumberGroupSeparator = " " };
+
+        watcher.RegisterAdPostsHandler(new EmailNotifyingAdPostsHandler(LoadEmailSettings(), spaceSeparatedNumberFormat, container.GetService<ILogger<EmailNotifyingAdPostsHandler>>()));
+        watcher.RegisterAdPostsHandler(new LocalFileAdPostsHandler(LoadFileSettings(), spaceSeparatedNumberFormat));
 
         static EmailNotifyingAdPostsHandlerSettings LoadEmailSettings()
         {
