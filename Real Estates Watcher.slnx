@@ -4,10 +4,10 @@
     <Project Path="Filters/RealEstatesWatcher.AdPostsFilters.Contracts/RealEstatesWatcher.AdPostsFilters.Contracts.csproj" />
   </Folder>
   <Folder Name="/Handlers/">
+    <Project Path="Handlers/RealEstatesWatcher.AdPostsHandlers.Base.Html/RealEstatesWatcher.AdPostsHandlers.Base.Html.csproj" Id="3f9f7884-6bf9-41f1-beec-e5b6ed209236" />
     <Project Path="Handlers/RealEstatesWatcher.AdPostsHandlers.Contracts/RealEstatesWatcher.AdPostsHandlers.Contracts.csproj" />
     <Project Path="Handlers/RealEstatesWatcher.AdPostsHandlers.Email/RealEstatesWatcher.AdPostsHandlers.Email.csproj" />
     <Project Path="Handlers/RealEstatesWatcher.AdPostsHandlers.File/RealEstatesWatcher.AdPostsHandlers.File.csproj" />
-    <Project Path="Handlers/RealEstatesWatcher.AdPostsHandlers.Templates/RealEstatesWatcher.AdPostsHandlers.Templates.csproj" />
   </Folder>
   <Folder Name="/Portals/">
     <Project Path="Portals/RealEstatesWatcher.AdsPortals.Base/RealEstatesWatcher.AdsPortals.Base.csproj" />
