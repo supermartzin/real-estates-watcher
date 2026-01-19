@@ -135,7 +135,7 @@ public class ConsoleRunner
             { "appId", $"App-{CmdArguments.ApplicationId ?? Guid.NewGuid().ToString()}" }
         });
 #if DEBUG
-        collection.AddGoogleDiagnostics("real-estates-watcher-475712",
+        collection.AddGoogleDiagnostics("project-05e6d71f-b6e2-484b-9f6",
                                         "Real Estates Watcher",
                                         fileVersionInfo.FileVersion ?? "N/A",
                                         loggingOptions: loggingOptions);
