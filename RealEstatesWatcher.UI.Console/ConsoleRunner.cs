@@ -309,17 +309,17 @@ public class ConsoleRunner
                 .Build()
                 .GetSection(Attributes.GetSettingsSectionKey<EmailNotifyingAdPostsHandlerSettings>());
 
-            var toAddresses = Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.ToAddresses));
-            var ccAddresses = Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.CcAddresses));
-            var bccAddresses = Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.BccAddresses));
+            var toAddressesKey = Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.ToAddresses));
+            var ccAddressesKey = Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.CcAddresses));
+            var bccAddressesKey = Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.BccAddresses));
 
             return new EmailNotifyingAdPostsHandlerSettings
             {
                 Enabled = configuration.GetValue<bool>(Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.Enabled))),
                 FromAddress = configuration.GetValue<string?>(Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.FromAddress))),
-                ToAddresses = string.IsNullOrEmpty(toAddresses) ? [] : toAddresses.Split(','),
-                CcAddresses = string.IsNullOrEmpty(ccAddresses) ? [] : ccAddresses.Split(','),
-                BccAddresses = string.IsNullOrEmpty(bccAddresses) ? [] : bccAddresses.Split(','),
+                ToAddresses = string.IsNullOrEmpty(toAddressesKey) ? [] : configuration.GetValue<string?>(toAddressesKey)?.Split(',') ?? [],
+                CcAddresses = string.IsNullOrEmpty(ccAddressesKey) ? [] : configuration.GetValue<string?>(ccAddressesKey)?.Split(',') ?? [],
+                BccAddresses = string.IsNullOrEmpty(bccAddressesKey) ? [] : configuration.GetValue<string?>(bccAddressesKey)?.Split(',') ?? [],
                 SenderName = configuration.GetValue<string?>(Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.SenderName))),
                 SmtpServerHost = configuration.GetValue<string?>(Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.SmtpServerHost))),
                 SmtpServerPort = configuration.GetValue<int?>(Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.SmtpServerPort))),

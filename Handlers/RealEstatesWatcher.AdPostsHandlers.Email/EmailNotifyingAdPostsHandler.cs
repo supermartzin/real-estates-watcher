@@ -13,41 +13,20 @@ using System.Net;
 
 namespace RealEstatesWatcher.AdPostsHandlers.Email;
 
-public class EmailNotifyingAdPostsHandler : HtmlBasedAdPostsHandlerBase, IRealEstateAdPostsHandler
+public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings settings,
+                                          NumberFormatInfo? numberFormat = null,
+                                          ILogger<EmailNotifyingAdPostsHandler>? logger = null)
+    : HtmlBasedAdPostsHandlerBase(numberFormat ?? NumberFormatInfo.CurrentInfo), IRealEstateAdPostsHandler
 {
-    private readonly EmailNotifyingAdPostsHandlerSettings _settings;
-    private readonly ILogger<EmailNotifyingAdPostsHandler>? _logger;
+    private readonly EmailNotifyingAdPostsHandlerSettings _settings = settings ?? throw new ArgumentNullException(nameof(settings));
 
-    public EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings settings,
-        NumberFormatInfo? numberFormat = null,
-        ILogger<EmailNotifyingAdPostsHandler>? logger = null) : base(numberFormat ?? NumberFormatInfo.CurrentInfo)
-    {
-        _logger = logger;
-
-        _settings = settings ?? throw new ArgumentNullException(nameof(settings));
-        if (settings.FromAddress is null)
-            throw new ArgumentNullException(nameof(settings.FromAddress));
-        if (settings.SenderName is null)
-            throw new ArgumentNullException(nameof(settings.SenderName));
-        if (settings.SmtpServerHost is null)
-            throw new ArgumentNullException(nameof(settings.SmtpServerHost));
-        if (settings.SmtpServerPort is null)
-            throw new ArgumentNullException(nameof(settings.SmtpServerPort));
-        if (settings.Username is null)
-            throw new ArgumentNullException(nameof(settings.Username));
-        if (settings.Password is null)
-            throw new ArgumentNullException(nameof(settings.Password));
-
-        IsEnabled = settings.Enabled;
-    }
-
-    public bool IsEnabled { get; }
+    public bool IsEnabled { get; } = settings.Enabled;
 
     public async Task HandleNewRealEstateAdPostAsync(RealEstateAdPost adPost, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(adPost);
 
-        _logger?.LogDebug("Received new Real Estate Ad Post: {Post}", adPost);
+        logger?.LogDebug("Received new Real Estate Ad Post: {Post}", adPost);
 
         await SendEmailAsync("🆕 New Real Estate Advert published!", CreateFullHtmlPage([adPost], CommonHtmlTemplateElements.TitleNewPosts), cancellationToken).ConfigureAwait(false);
     }
@@ -56,7 +35,7 @@ public class EmailNotifyingAdPostsHandler : HtmlBasedAdPostsHandlerBase, IRealEs
     {
         ArgumentNullException.ThrowIfNull(adPosts);
 
-        _logger?.LogDebug("Received '{PostsCount}' new Real Estate Ad Posts.", adPosts.Count);
+        logger?.LogDebug("Received '{PostsCount}' new Real Estate Ad Posts.", adPosts.Count);
 
         await SendEmailAsync("🆕 New Real Estate Adverts published!", CreateFullHtmlPage(adPosts, CommonHtmlTemplateElements.TitleNewPosts), cancellationToken).ConfigureAwait(false);
     }
@@ -65,19 +44,32 @@ public class EmailNotifyingAdPostsHandler : HtmlBasedAdPostsHandlerBase, IRealEs
     {
         ArgumentNullException.ThrowIfNull(adPosts);
 
-        if (_settings.SkipInitialNotification is true)
+        if (_settings.SkipInitialNotification is null or true)
         {
-            _logger?.LogDebug("Skipping initial notification on {PostsCount} Real Estate Ad posts", adPosts.Count);
+            logger?.LogDebug("Skipping initial notification on {PostsCount} Real Estate Ad posts", adPosts.Count);
             return;
         }
 
-        _logger?.LogDebug("Received initial {PostsCount} Real Estate Ad Posts.", adPosts.Count);
+        logger?.LogDebug("Received initial {PostsCount} Real Estate Ad Posts.", adPosts.Count);
 
         await SendEmailAsync("🏦 Current Real Estate Adverts offering", CreateFullHtmlPage(adPosts, CommonHtmlTemplateElements.TitleInitialPosts), cancellationToken).ConfigureAwait(false);
     }
 
     private async Task SendEmailAsync(string subject, string body, CancellationToken cancellationToken = default)
     {
+        if (string.IsNullOrEmpty(_settings.FromAddress))
+            throw new RealEstateAdPostsHandlerException("Email settings -> From address is not specified in the configuration.");
+        if (string.IsNullOrEmpty(_settings.SenderName))
+            throw new RealEstateAdPostsHandlerException("Email settings -> Sender name is not specified in the configuration.");
+        if (string.IsNullOrEmpty(_settings.SmtpServerHost))
+            throw new RealEstateAdPostsHandlerException("Email settings -> SMTP server host is not specified in the configuration.");
+        if (_settings.SmtpServerPort is null)
+            throw new RealEstateAdPostsHandlerException("Email settings -> SMTP server port is not specified in the configuration.");
+        if (string.IsNullOrEmpty(_settings.Username))
+            throw new RealEstateAdPostsHandlerException("Email settings -> Username of sender's email server is not specified in the configuration.");
+        if (string.IsNullOrEmpty(_settings.Password))
+            throw new RealEstateAdPostsHandlerException("Email settings -> Password of sender's email server is not specified in the configuration.");
+
         var message = new MimeMessage
         {
             Subject = subject,
@@ -97,19 +89,19 @@ public class EmailNotifyingAdPostsHandler : HtmlBasedAdPostsHandlerBase, IRealEs
         {
             using var client = new SmtpClient();
 
-            await client.ConnectAsync(_settings.SmtpServerHost!,
-                                      _settings.SmtpServerPort!.Value,
+            await client.ConnectAsync(_settings.SmtpServerHost,
+                                      _settings.SmtpServerPort.Value,
                                       _settings.UseSecureConnection ?? true,
                                       cancellationToken).ConfigureAwait(false);
 
-            await client.AuthenticateAsync(new NetworkCredential(_settings.Username!,
-                _settings.Password!), cancellationToken).ConfigureAwait(false);
+            await client.AuthenticateAsync(new NetworkCredential(_settings.Username, _settings.Password), cancellationToken)
+                .ConfigureAwait(false);
 
             // send email
             await client.SendAsync(message, cancellationToken).ConfigureAwait(false);
             await client.DisconnectAsync(true, cancellationToken).ConfigureAwait(false);
 
-            _logger?.LogInformation("Notification email has been successfully sent.");
+            logger?.LogInformation("Notification email has been successfully sent.");
         }
         catch (Exception ex)
         {
