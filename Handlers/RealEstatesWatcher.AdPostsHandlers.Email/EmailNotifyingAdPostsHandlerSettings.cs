@@ -1,28 +1,43 @@
-﻿namespace RealEstatesWatcher.AdPostsHandlers.Email;
+﻿using RealEstatesWatcher.Tools.Attributes;
 
+namespace RealEstatesWatcher.AdPostsHandlers.Email;
+
+[SettingsSectionKey("email")]
 public record EmailNotifyingAdPostsHandlerSettings
 {
-    public bool Enabled { get; set; }
-
-    public string? FromAddress { get; set; }
-
-    public string? SenderName { get; set; }
-
-    public IEnumerable<string> ToAddresses { get; set; } = [];
-
-    public IEnumerable<string> CcAddresses { get; set; } = [];
+    [SettingsKey("enabled")]
+    public bool Enabled { get; init; }
     
-    public IEnumerable<string> BccAddresses { get; set; } = [];
+    [SettingsKey("from")]
+    public string? FromAddress { get; init; }
+    
+    [SettingsKey("sender_name")]
+    public string? SenderName { get; init; }
+
+    [SettingsKey("to")]
+    public IEnumerable<string> ToAddresses { get; init; } = [];
+    
+    [SettingsKey("cc")]
+    public IEnumerable<string> CcAddresses { get; init; } = [];
+
+    [SettingsKey("bcc")]
+    public IEnumerable<string> BccAddresses { get; init; } = [];
         
-    public string? SmtpServerHost { get; set; }
+    [SettingsKey("smtp_server_host")]
+    public string? SmtpServerHost { get; init; }
 
-    public int SmtpServerPort { get; set; }
+    [SettingsKey("smtp_server_port")]
+    public int? SmtpServerPort { get; init; }
 
-    public bool UseSecureConnection { get; set; }
-        
-    public string? Username { get; set; }
+    [SettingsKey("use_secure_connection")]
+    public bool? UseSecureConnection { get; init; } = true;
 
-    public string? Password { get; set; }
+    [SettingsKey("username")]
+    public string? Username { get; init; }
+    
+    [SettingsKey("password")]
+    public string? Password { get; init; }
 
-    public bool SkipInitialNotification { get; set; }
+    [SettingsKey("skip_initial_notification")]
+    public bool? SkipInitialNotification { get; init; } = false;
 }

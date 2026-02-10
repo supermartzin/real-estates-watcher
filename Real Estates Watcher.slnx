@@ -29,12 +29,14 @@
     <Project Path="Scrapers/RealEstatesWatcher.Scrapers/RealEstatesWatcher.Scrapers.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">
+    <File Path="Directory.Packages.props" />
     <File Path="Dockerfile" />
     <File Path="global.json" />
     <File Path="README.md" />
   </Folder>
   <Folder Name="/Tools/">
     <File Path="Tools/post-email-template.html" />
+    <Project Path="Tools/RealEstatesWatcher.Tools.Attributes/RealEstatesWatcher.Tools.Attributes.csproj" Id="1d161496-31e0-47f9-996f-25a19b303554" />
   </Folder>
   <Folder Name="/Tools/Node.js web scraper/">
     <File Path="Tools/scraper/cookies.json" />

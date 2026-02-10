@@ -49,7 +49,7 @@ public partial class BazosCzAdsPortal(string watchedUrl,
 
     private static Uri? ParseImageUrl(HtmlNode node)
     {
-        var path = node.SelectSingleNode(""".//img[@class="obrazek"]""")?.GetAttributeValue("src", null);
+        var path = node.SelectSingleNode(""".//img[@class="obrazek"]""")?.GetAttributeValue<string?>("src", null);
 
         return path is not null
             ? new Uri(path)

@@ -13,19 +13,41 @@ using System.Net;
 
 namespace RealEstatesWatcher.AdPostsHandlers.Email;
 
-public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings settings,
-                                          NumberFormatInfo? numberFormat = null,
-                                          ILogger<EmailNotifyingAdPostsHandler>? logger = null) : HtmlBasedAdPostsHandlerBase(numberFormat ?? NumberFormatInfo.CurrentInfo), IRealEstateAdPostsHandler
+public class EmailNotifyingAdPostsHandler : HtmlBasedAdPostsHandlerBase, IRealEstateAdPostsHandler
 {
-    private readonly EmailNotifyingAdPostsHandlerSettings _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+    private readonly EmailNotifyingAdPostsHandlerSettings _settings;
+    private readonly ILogger<EmailNotifyingAdPostsHandler>? _logger;
 
-    public bool IsEnabled { get; } = settings.Enabled;
+    public EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings settings,
+        NumberFormatInfo? numberFormat = null,
+        ILogger<EmailNotifyingAdPostsHandler>? logger = null) : base(numberFormat ?? NumberFormatInfo.CurrentInfo)
+    {
+        _logger = logger;
+
+        _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+        if (settings.FromAddress is null)
+            throw new ArgumentNullException(nameof(settings.FromAddress));
+        if (settings.SenderName is null)
+            throw new ArgumentNullException(nameof(settings.SenderName));
+        if (settings.SmtpServerHost is null)
+            throw new ArgumentNullException(nameof(settings.SmtpServerHost));
+        if (settings.SmtpServerPort is null)
+            throw new ArgumentNullException(nameof(settings.SmtpServerPort));
+        if (settings.Username is null)
+            throw new ArgumentNullException(nameof(settings.Username));
+        if (settings.Password is null)
+            throw new ArgumentNullException(nameof(settings.Password));
+
+        IsEnabled = settings.Enabled;
+    }
+
+    public bool IsEnabled { get; }
 
     public async Task HandleNewRealEstateAdPostAsync(RealEstateAdPost adPost, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(adPost);
 
-        logger?.LogDebug("Received new Real Estate Ad Post: {Post}", adPost);
+        _logger?.LogDebug("Received new Real Estate Ad Post: {Post}", adPost);
 
         await SendEmailAsync("🆕 New Real Estate Advert published!", CreateFullHtmlPage([adPost], CommonHtmlTemplateElements.TitleNewPosts), cancellationToken).ConfigureAwait(false);
     }
@@ -34,7 +56,7 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
     {
         ArgumentNullException.ThrowIfNull(adPosts);
 
-        logger?.LogDebug("Received '{PostsCount}' new Real Estate Ad Posts.", adPosts.Count);
+        _logger?.LogDebug("Received '{PostsCount}' new Real Estate Ad Posts.", adPosts.Count);
 
         await SendEmailAsync("🆕 New Real Estate Adverts published!", CreateFullHtmlPage(adPosts, CommonHtmlTemplateElements.TitleNewPosts), cancellationToken).ConfigureAwait(false);
     }
@@ -43,13 +65,13 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
     {
         ArgumentNullException.ThrowIfNull(adPosts);
 
-        if (_settings.SkipInitialNotification)
+        if (_settings.SkipInitialNotification is true)
         {
-            logger?.LogDebug("Skipping initial notification on {PostsCount} Real Estate Ad posts", adPosts.Count);
+            _logger?.LogDebug("Skipping initial notification on {PostsCount} Real Estate Ad posts", adPosts.Count);
             return;
         }
 
-        logger?.LogDebug("Received initial {PostsCount} Real Estate Ad Posts.", adPosts.Count);
+        _logger?.LogDebug("Received initial {PostsCount} Real Estate Ad Posts.", adPosts.Count);
 
         await SendEmailAsync("🏦 Current Real Estate Adverts offering", CreateFullHtmlPage(adPosts, CommonHtmlTemplateElements.TitleInitialPosts), cancellationToken).ConfigureAwait(false);
     }
@@ -75,18 +97,19 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
         {
             using var client = new SmtpClient();
 
-            await client.ConnectAsync(_settings.SmtpServerHost,
-                _settings.SmtpServerPort,
-                _settings.UseSecureConnection, cancellationToken).ConfigureAwait(false);
+            await client.ConnectAsync(_settings.SmtpServerHost!,
+                                      _settings.SmtpServerPort!.Value,
+                                      _settings.UseSecureConnection ?? true,
+                                      cancellationToken).ConfigureAwait(false);
 
-            await client.AuthenticateAsync(new NetworkCredential(_settings.Username,
-                _settings.Password), cancellationToken).ConfigureAwait(false);
+            await client.AuthenticateAsync(new NetworkCredential(_settings.Username!,
+                _settings.Password!), cancellationToken).ConfigureAwait(false);
 
             // send email
             await client.SendAsync(message, cancellationToken).ConfigureAwait(false);
             await client.DisconnectAsync(true, cancellationToken).ConfigureAwait(false);
 
-            logger?.LogInformation("Notification email has been successfully sent.");
+            _logger?.LogInformation("Notification email has been successfully sent.");
         }
         catch (Exception ex)
         {
