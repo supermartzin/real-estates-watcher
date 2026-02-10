@@ -57,18 +57,12 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
 
     private async Task SendEmailAsync(string subject, string body, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(_settings.FromAddress))
-            throw new RealEstateAdPostsHandlerException("Email settings -> From address is not specified in the configuration.");
-        if (string.IsNullOrEmpty(_settings.SenderName))
-            throw new RealEstateAdPostsHandlerException("Email settings -> Sender name is not specified in the configuration.");
-        if (string.IsNullOrEmpty(_settings.SmtpServerHost))
-            throw new RealEstateAdPostsHandlerException("Email settings -> SMTP server host is not specified in the configuration.");
-        if (_settings.SmtpServerPort is null)
-            throw new RealEstateAdPostsHandlerException("Email settings -> SMTP server port is not specified in the configuration.");
-        if (string.IsNullOrEmpty(_settings.Username))
-            throw new RealEstateAdPostsHandlerException("Email settings -> Username of sender's email server is not specified in the configuration.");
-        if (string.IsNullOrEmpty(_settings.Password))
-            throw new RealEstateAdPostsHandlerException("Email settings -> Password of sender's email server is not specified in the configuration.");
+        ThrowIfMissing(string.IsNullOrEmpty(_settings.FromAddress), "From address");
+        ThrowIfMissing(string.IsNullOrEmpty(_settings.SenderName), "Sender name");
+        ThrowIfMissing(string.IsNullOrEmpty(_settings.Username), "Username of sender's email server");
+        ThrowIfMissing(string.IsNullOrEmpty(_settings.Password), "Password of sender's email server");
+        ThrowIfMissing(string.IsNullOrEmpty(_settings.SmtpServerHost), "SMTP server host");
+        ThrowIfMissing(_settings.SmtpServerPort is null, "SMTP server port");
 
         var message = new MimeMessage
         {
@@ -90,7 +84,7 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
             using var client = new SmtpClient();
 
             await client.ConnectAsync(_settings.SmtpServerHost,
-                                      _settings.SmtpServerPort.Value,
+                                      _settings.SmtpServerPort!.Value,
                                       _settings.UseSecureConnection ?? true,
                                       cancellationToken).ConfigureAwait(false);
 
@@ -107,5 +101,12 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
         {
             throw new RealEstateAdPostsHandlerException($"Error during sending email notification: {ex.Message}", ex);
         }
+    }
+
+
+    private static void ThrowIfMissing(bool isMissing, string settingName)
+    {
+        if (isMissing)
+            throw new RealEstateAdPostsHandlerException($"Email settings -> {settingName} is not specified in the configuration.");
     }
 }

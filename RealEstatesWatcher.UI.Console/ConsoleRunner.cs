@@ -317,9 +317,9 @@ public class ConsoleRunner
             {
                 Enabled = configuration.GetValue<bool>(Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.Enabled))),
                 FromAddress = configuration.GetValue<string?>(Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.FromAddress))),
-                ToAddresses = string.IsNullOrEmpty(toAddressesKey) ? [] : configuration.GetValue<string?>(toAddressesKey)?.Split(',') ?? [],
-                CcAddresses = string.IsNullOrEmpty(ccAddressesKey) ? [] : configuration.GetValue<string?>(ccAddressesKey)?.Split(',') ?? [],
-                BccAddresses = string.IsNullOrEmpty(bccAddressesKey) ? [] : configuration.GetValue<string?>(bccAddressesKey)?.Split(',') ?? [],
+                ToAddresses = configuration.GetValue<string?>(toAddressesKey)?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [],
+                CcAddresses = configuration.GetValue<string?>(ccAddressesKey)?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [],
+                BccAddresses = configuration.GetValue<string?>(bccAddressesKey)?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [],
                 SenderName = configuration.GetValue<string?>(Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.SenderName))),
                 SmtpServerHost = configuration.GetValue<string?>(Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.SmtpServerHost))),
                 SmtpServerPort = configuration.GetValue<int?>(Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.SmtpServerPort))),
