@@ -44,7 +44,7 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
     {
         ArgumentNullException.ThrowIfNull(adPosts);
 
-        if (_settings.SkipInitialNotification is null or true)
+        if (_settings.SkipInitialNotification is true)
         {
             logger?.LogDebug("Skipping initial notification on {PostsCount} Real Estate Ad posts", adPosts.Count);
             return;

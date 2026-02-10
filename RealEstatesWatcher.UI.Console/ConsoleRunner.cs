@@ -146,6 +146,17 @@ public class ConsoleRunner
         });
 
 #if DEBUG
+        if (string.IsNullOrEmpty(settings.ProjectId))
+        {
+            Logger.LogWarning("Google Cloud Logging is enabled and the app is running in DEBUG mode but Project ID is not set, skipping further configuration.");
+            return;
+        }
+        if (string.IsNullOrEmpty(settings.ServiceName))
+        {
+            Logger.LogWarning("Google Cloud Logging is enabled and the app is running in DEBUG mode but Service Name is not set, skipping further configuration.");
+            return;
+        }
+
         loggingBuilder.AddGoogle(new LoggingServiceOptions
         {
             ProjectId = settings.ProjectId,
