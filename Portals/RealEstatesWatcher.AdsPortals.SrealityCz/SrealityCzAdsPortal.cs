@@ -57,9 +57,8 @@ public class SrealityCzAdsPortal(string watchedUrl,
         var path = imageNodes.Count switch
         {
             < 1 => null,
-            1 => imageNodes[0].GetAttributeValue("src", null),
-            2 => imageNodes[1].GetAttributeValue("src", null),
-            > 2 => imageNodes[1].GetAttributeValue("src", null),
+            1 => imageNodes[0].GetAttributeValue<string?>("src", null),
+            2 or > 2 => imageNodes[1].GetAttributeValue<string?>("src", null),
         };
 
         return path is not null

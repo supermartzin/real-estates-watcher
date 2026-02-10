@@ -8,8 +8,8 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>1.5.1</Version>
-    <AssemblyVersion>1.5.1.0</AssemblyVersion>
+    <Version>1.5.2</Version>
+    <AssemblyVersion>1.5.2.0</AssemblyVersion>
     <Authors>Martin Vrábel</Authors>
     <Product>Real Estates Watcher</Product>
     <Description>Simple C# script for periodic watching of selected Real estate advertisement portals with notifications on new ads.</Description>
@@ -56,6 +56,7 @@
     <ProjectReference Include="..\Portals\RealEstatesWatcher.AdsPortals.BezrealitkyCz\RealEstatesWatcher.AdsPortals.BezrealitkyCz.csproj" />
     <ProjectReference Include="..\RealEstatesWatcher.Core\RealEstatesWatcher.Core.csproj" />
     <ProjectReference Include="..\Scrapers\RealEstatesWatcher.Scrapers\RealEstatesWatcher.Scrapers.csproj" />
+    <ProjectReference Include="..\Tools\RealEstatesWatcher.Tools.Attributes\RealEstatesWatcher.Tools.Attributes.csproj" />
   </ItemGroup>
 
   <ItemGroup>

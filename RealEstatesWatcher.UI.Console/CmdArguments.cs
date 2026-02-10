@@ -11,7 +11,6 @@ public class CmdArguments
     private readonly Option<string> _engineConfigurationFileOption;
     private readonly Option<string?> _filtersFileOption;
     private readonly Option<string?> _scraperFileOption;
-    private readonly Option<string?> _applicationIdOption;
 
     public string PortalsConfigFilePath { get; private set; } = string.Empty;
 
@@ -22,8 +21,6 @@ public class CmdArguments
     public string? FiltersConfigFilePath { get; private set; }
 
     public string? WebScraperConfigFilePath { get; private set; }
-
-    public string? ApplicationId { get; private set; }
 
     public CmdArguments()
     {
@@ -52,11 +49,6 @@ public class CmdArguments
             Description = "The path to the configuration file of the web scraper",
             Required = false
         };
-        _applicationIdOption = new Option<string?>("-application_id", "--id")
-        {
-            Description = "The application ID for identifying specific instance of the app",
-            Required = false
-        };
 
         _rootCommand =
         [
@@ -64,8 +56,7 @@ public class CmdArguments
             _handlersFileOption,
             _engineConfigurationFileOption,
             _filtersFileOption,
-            _scraperFileOption,
-            _applicationIdOption
+            _scraperFileOption
         ];
         _rootCommand.Description =
             "Script for real-time periodic watching of Real estate advertisement portals with notifications on new ads.";
@@ -84,7 +75,6 @@ public class CmdArguments
             EngineConfigFilePath = parsedResults.GetRequiredValue(_engineConfigurationFileOption);
             FiltersConfigFilePath = parsedResults.GetValue(_filtersFileOption);
             WebScraperConfigFilePath = parsedResults.GetValue(_scraperFileOption);
-            ApplicationId = parsedResults.GetValue(_applicationIdOption);
 
             parsed = true;
         });

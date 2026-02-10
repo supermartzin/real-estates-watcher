@@ -51,7 +51,7 @@ public class LocalFileAdPostsHandler(LocalFileAdPostsHandlerSettings settings, N
 
     private async Task WriteNewAdPostsToFileInPlainTextAsync(IList<RealEstateAdPost> adPosts, CancellationToken cancellationToken = default)
     {
-        var filePath = _settings.NewPostsToSeparateFile
+        var filePath = _settings.NewPostsToSeparateFile is true
             ? _settings.NewPostsFilePath
             : _settings.MainFilePath;
 
@@ -62,7 +62,7 @@ public class LocalFileAdPostsHandler(LocalFileAdPostsHandlerSettings settings, N
 
     private async Task WriteNewAdPostsToFileInHtmlAsync(IList<RealEstateAdPost> adPosts, CancellationToken cancellationToken = default)
     {
-        var filePath = _settings.NewPostsToSeparateFile
+        var filePath = _settings.NewPostsToSeparateFile is true
             ? _settings.NewPostsFilePath
             : _settings.MainFilePath;
 

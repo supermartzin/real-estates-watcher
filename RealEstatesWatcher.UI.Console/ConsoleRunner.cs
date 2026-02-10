@@ -30,7 +30,8 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
-
+using RealEstatesWatcher.Tools.Attributes;
+using RealEstatesWatcher.UI.Console.Settings;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace RealEstatesWatcher.UI.Console;
@@ -39,10 +40,10 @@ public class ConsoleRunner
 {
     private static readonly AutoResetEvent WaitHandle = new(false);
     private static readonly CmdArguments CmdArguments = new();
-
-    private static IServiceProvider? _container;
-    private static ILogger<ConsoleRunner>? _logger;
+    private static readonly ILogger<ConsoleRunner> Logger = LoggerFactory.Create(builder => builder.AddNLog()).CreateLogger<ConsoleRunner>();
     
+    private static IServiceProvider? _container;
+
     protected ConsoleRunner() { }
 
     public static async Task Main(string[] args)
@@ -53,15 +54,15 @@ public class ConsoleRunner
         if (!parsed)
             return;
 
+        
+        Logger.LogInformation("------------------------------------------------");
+
         ConfigureDependencyInjection();
         if (_container is null)
         {
-            _logger?.LogCritical("Error starting Real estates Watcher: Unable to build all required components.");
+            Logger.LogCritical("Error starting Real estates Watcher: Unable to build all required components.");
             return;
         }
-
-        _logger = _container.GetService<ILogger<ConsoleRunner>>();
-        _logger?.LogInformation("------------------------------------------------");
 
         try
         {
@@ -70,7 +71,7 @@ public class ConsoleRunner
             RegisterAdPostsHandlers(watcher, _container);
             RegisterAdPostsFilters(watcher, _container);
 
-            _logger?.LogInformation("Starting Real estate Watcher engine...");
+            Logger.LogInformation("Starting Real estate Watcher engine...");
 
             // start watcher
             await watcher.StartAsync().ConfigureAwait(false);
@@ -82,7 +83,7 @@ public class ConsoleRunner
         }
         catch (RealEstatesWatchEngineException reweEx)
         {
-            _logger?.LogCritical(reweEx, "Error starting Real estates Watcher: {Message}", reweEx.Message);
+            Logger.LogCritical(reweEx, "Error starting Real estates Watcher: {Message}", reweEx.Message);
         }
     }
 
@@ -91,10 +92,12 @@ public class ConsoleRunner
         var collection = new ServiceCollection();
 
         // add logging
-        AddAndSetUpGoogleLogging(collection);
         collection.AddLogging(builder =>
         {
+            // NLog
             builder.AddNLog();
+
+            // Sentry
             builder.AddSentry(options =>
             {
                 options.Dsn = "https://8a560ec7c9c241c6bc9f00e116bace08@o504575.ingest.sentry.io/5792424";
@@ -106,6 +109,9 @@ public class ConsoleRunner
                 options.ProfilesSampleRate = 1.0;
                 options.AddIntegration(new ProfilingIntegration());
             });
+
+            // Google Cloud Logging
+            AddAndSetUpGoogleLogging(builder);
 
             // set Minimum log level based on variable in NLog.config --> default == INFO
             var minLevelVariable = LogManager.Configuration?.Variables["minLogLevel"].ToString();
@@ -127,20 +133,36 @@ public class ConsoleRunner
         _container = collection.BuildServiceProvider();
     }
 
-    private static void AddAndSetUpGoogleLogging(ServiceCollection collection)
+    private static void AddAndSetUpGoogleLogging(ILoggingBuilder loggingBuilder)
     {
+        var settings = LoadGoogleCloudSettings();
+        if (!settings.EnableCloudLogging)
+            return;
+
         var fileVersionInfo = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location);
         var loggingOptions = LoggingOptions.Create(LogLevel.Debug, $"REW-{fileVersionInfo.FileVersion}", new Dictionary<string, string>
         {
-            { "appId", $"App-{CmdArguments.ApplicationId ?? Guid.NewGuid().ToString()}" }
+            { "appId", $"App-{settings.ApplicationId ?? Guid.NewGuid().ToString()}" }
         });
+
 #if DEBUG
-        collection.AddGoogleDiagnostics("project-05e6d71f-b6e2-484b-9f6",
-                                        "Real Estates Watcher",
-                                        fileVersionInfo.FileVersion ?? "N/A",
-                                        loggingOptions: loggingOptions);
+        if (string.IsNullOrEmpty(settings.ProjectId))
+            Logger.LogWarning("Google Cloud Logging is enabled and the app is running in DEBUG mode but Project ID is not set, logging might not work as expected.");
+        if (string.IsNullOrEmpty(settings.ServiceName))
+            Logger.LogWarning("Google Cloud Logging is enabled and the app is running in DEBUG mode but Service Name is not set, logging might not work as expected.");
+
+        loggingBuilder.AddGoogle(new LoggingServiceOptions
+        {
+            ProjectId = settings.ProjectId,
+            ServiceName = settings.ServiceName,
+            Version = fileVersionInfo.FileVersion ?? "N/A",
+            Options = loggingOptions
+        });
 #else
-        collection.AddGoogleDiagnostics(loggingOptions: loggingOptions);
+        loggingBuilder.AddGoogle(new LoggingServiceOptions
+        {
+            Options = loggingOptions
+        });
 #endif
     }
 
@@ -149,13 +171,29 @@ public class ConsoleRunner
         var configuration = new ConfigurationBuilder()
             .AddIniFile(webScraperConfigFilePath)
             .Build()
-            .GetSection("nodejs");
+            .GetSection(Attributes.GetSettingsSectionKey<LocalNodejsConsoleWebScraperSettings>());
         
         return new LocalNodejsConsoleWebScraperSettings
         {
-            PathToScript = configuration["path_to_script"] ?? string.Empty,
-            PageScrapingTimeoutSeconds = configuration.GetValue<int>("page_scraping_timeout_seconds"),
-            PathToCookiesFile = configuration["path_to_cookies_file"]
+            PathToScript = configuration.GetValue(Attributes.GetSettingsKey<LocalNodejsConsoleWebScraperSettings>(nameof(LocalNodejsConsoleWebScraperSettings.PathToScript)), string.Empty),
+            PageScrapingTimeoutSeconds = configuration.GetValue<int>(Attributes.GetSettingsKey<LocalNodejsConsoleWebScraperSettings>(nameof(LocalNodejsConsoleWebScraperSettings.PageScrapingTimeoutSeconds))),
+            PathToCookiesFile = configuration.GetValue<string?>(Attributes.GetSettingsKey<LocalNodejsConsoleWebScraperSettings>(nameof(LocalNodejsConsoleWebScraperSettings.PathToCookiesFile)), null)
+        };
+    }
+
+    private static GoogleCloudSettings LoadGoogleCloudSettings()
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddIniFile(CmdArguments.EngineConfigFilePath)
+            .Build()
+            .GetSection(Attributes.GetSettingsSectionKey<GoogleCloudSettings>());
+
+        return new GoogleCloudSettings
+        {
+            EnableCloudLogging = configuration.GetValue<bool>(Attributes.GetSettingsKey<GoogleCloudSettings>(nameof(GoogleCloudSettings.EnableCloudLogging))),
+            ApplicationId = configuration.GetValue<string?>(Attributes.GetSettingsKey<GoogleCloudSettings>(nameof(GoogleCloudSettings.ApplicationId))),
+            ProjectId = configuration.GetValue<string?>(Attributes.GetSettingsKey<GoogleCloudSettings>(nameof(GoogleCloudSettings.ProjectId))),
+            ServiceName = configuration.GetValue<string?>(Attributes.GetSettingsKey<GoogleCloudSettings>(nameof(GoogleCloudSettings.ServiceName)))
         };
     }
 
@@ -164,18 +202,20 @@ public class ConsoleRunner
         var configuration = new ConfigurationBuilder()
             .AddIniFile(CmdArguments.EngineConfigFilePath)
             .Build()
-            .GetSection("settings");
-
+            .GetSection(Attributes.GetSettingsSectionKey<WatchEngineSettings>());
+        
         return new WatchEngineSettings
         {
-            CheckIntervalMinutes = configuration.GetValue<int>("check_interval_minutes"),
-            EnableMultiplePortalInstances = configuration.GetValue<bool>("enable_multiple_portal_instances")
+            CheckIntervalMinutes = configuration.GetValue<int>(
+                Attributes.GetSettingsKey<WatchEngineSettings>(nameof(WatchEngineSettings.CheckIntervalMinutes))),
+            EnableMultiplePortalInstances = configuration.GetValue<bool>(
+                Attributes.GetSettingsKey<WatchEngineSettings>(nameof(WatchEngineSettings.EnableMultiplePortalInstances)))
         };
     }
 
     private static void RegisterAdsPortals(RealEstatesWatchEngine watcher, IServiceProvider container)
     {
-        _logger?.LogInformation("Registering Ads portals..");
+        Logger.LogInformation("Registering Ads portals..");
 
         if (!File.Exists(CmdArguments.PortalsConfigFilePath))
             throw new ArgumentOutOfRangeException($"Configuration file for Ads portals not found at '{CmdArguments.PortalsConfigFilePath}'!");
@@ -260,49 +300,55 @@ public class ConsoleRunner
 
     private static void RegisterAdPostsHandlers(RealEstatesWatchEngine watcher, IServiceProvider container)
     {
-        _logger?.LogInformation("Registering Ad posts handlers..");
+        Logger.LogInformation("Registering Ad posts handlers..");
 
-        var spaceSeparatedNumberFormat = new NumberFormatInfo() { NumberGroupSeparator = " " };
+        var spaceSeparatedNumberFormat = new NumberFormatInfo { NumberGroupSeparator = " " };
 
         watcher.RegisterAdPostsHandler(new EmailNotifyingAdPostsHandler(LoadEmailSettings(), spaceSeparatedNumberFormat, container.GetService<ILogger<EmailNotifyingAdPostsHandler>>()));
         watcher.RegisterAdPostsHandler(new LocalFileAdPostsHandler(LoadFileSettings(), spaceSeparatedNumberFormat));
 
         static EmailNotifyingAdPostsHandlerSettings LoadEmailSettings()
         {
-            var configuration = new ConfigurationBuilder().AddIniFile(CmdArguments.HandlersConfigFilePath)
+            var configuration = new ConfigurationBuilder()
+                .AddIniFile(CmdArguments.HandlersConfigFilePath)
                 .Build()
-                .GetSection("email");
+                .GetSection(Attributes.GetSettingsSectionKey<EmailNotifyingAdPostsHandlerSettings>());
+
+            var toAddressesKey = Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.ToAddresses));
+            var ccAddressesKey = Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.CcAddresses));
+            var bccAddressesKey = Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.BccAddresses));
 
             return new EmailNotifyingAdPostsHandlerSettings
             {
-                Enabled = configuration.GetValue<bool>("enabled"),
-                FromAddress = configuration["from"],
-                ToAddresses = string.IsNullOrEmpty(configuration["to"]) ? [] : configuration["to"]?.Split(',') ?? [],
-                CcAddresses = string.IsNullOrEmpty(configuration["cc"]) ? [] : configuration["cc"]?.Split(',') ?? [],
-                BccAddresses = string.IsNullOrEmpty(configuration["bcc"]) ? [] : configuration["bcc"]?.Split(',') ?? [],
-                SenderName = configuration["sender_name"],
-                SmtpServerHost = configuration["smtp_server_host"],
-                SmtpServerPort = configuration.GetValue<int>("smtp_server_port"),
-                UseSecureConnection = configuration.GetValue<bool>("use_secure_connection"),
-                Username = configuration["username"],
-                Password = configuration["password"],
-                SkipInitialNotification = configuration.GetValue<bool>("skip_initial_notification")
+                Enabled = configuration.GetValue<bool>(Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.Enabled))),
+                FromAddress = configuration.GetValue<string?>(Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.FromAddress))),
+                ToAddresses = configuration.GetValue<string?>(toAddressesKey)?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [],
+                CcAddresses = configuration.GetValue<string?>(ccAddressesKey)?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [],
+                BccAddresses = configuration.GetValue<string?>(bccAddressesKey)?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [],
+                SenderName = configuration.GetValue<string?>(Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.SenderName))),
+                SmtpServerHost = configuration.GetValue<string?>(Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.SmtpServerHost))),
+                SmtpServerPort = configuration.GetValue<int?>(Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.SmtpServerPort))),
+                UseSecureConnection = configuration.GetValue<bool?>(Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.UseSecureConnection))),
+                Username = configuration.GetValue<string?>(Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.Username))),
+                Password = configuration.GetValue<string?>(Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.Password))),
+                SkipInitialNotification = configuration.GetValue<bool?>(Attributes.GetSettingsKey<EmailNotifyingAdPostsHandlerSettings>(nameof(EmailNotifyingAdPostsHandlerSettings.SkipInitialNotification)))
             };
         }
 
         static LocalFileAdPostsHandlerSettings LoadFileSettings()
         {
-            var configuration = new ConfigurationBuilder().AddIniFile(CmdArguments.HandlersConfigFilePath)
+            var configuration = new ConfigurationBuilder()
+                .AddIniFile(CmdArguments.HandlersConfigFilePath)
                 .Build()
-                .GetSection("file");
+                .GetSection(Attributes.GetSettingsSectionKey<LocalFileAdPostsHandlerSettings>());
 
             return new LocalFileAdPostsHandlerSettings
             {
-                Enabled = configuration.GetValue<bool>("enabled"),
-                MainFilePath = configuration["main_path"],
-                NewPostsToSeparateFile = configuration.GetValue<bool>("separate_new_posts"),
-                NewPostsFilePath = configuration["new_posts_path"],
-                PrintFormat = Enum.TryParse(configuration["print_format"], ignoreCase: true, out PrintFormat format)
+                Enabled = configuration.GetValue<bool>(Attributes.GetSettingsKey<LocalFileAdPostsHandlerSettings>(nameof(LocalFileAdPostsHandlerSettings.Enabled))),
+                MainFilePath = configuration.GetValue<string?>(Attributes.GetSettingsKey<LocalFileAdPostsHandlerSettings>(nameof(LocalFileAdPostsHandlerSettings.MainFilePath))),
+                NewPostsToSeparateFile = configuration.GetValue<bool?>(Attributes.GetSettingsKey<LocalFileAdPostsHandlerSettings>(nameof(LocalFileAdPostsHandlerSettings.NewPostsToSeparateFile))),
+                NewPostsFilePath = configuration.GetValue<string?>(Attributes.GetSettingsKey<LocalFileAdPostsHandlerSettings>(nameof(LocalFileAdPostsHandlerSettings.NewPostsFilePath))),
+                PrintFormat = Enum.TryParse(configuration.GetValue<string?>(Attributes.GetSettingsKey<LocalFileAdPostsHandlerSettings>(nameof(LocalFileAdPostsHandlerSettings.PrintFormat))), ignoreCase: true, out PrintFormat format)
                     ? format : PrintFormat.PlainText
             };
         }
@@ -310,11 +356,11 @@ public class ConsoleRunner
 
     private static void RegisterAdPostsFilters(RealEstatesWatchEngine watcher, IServiceProvider container)
     {
-        _logger?.LogInformation("Registering Ad posts filters..");
+        Logger.LogInformation("Registering Ad posts filters..");
 
         if (string.IsNullOrEmpty(CmdArguments.FiltersConfigFilePath))
         {
-            _logger?.LogInformation("No filters provided.");
+            Logger.LogInformation("No filters provided.");
             return;
         }
 
@@ -322,17 +368,18 @@ public class ConsoleRunner
         
         static BasicParametersAdPostsFilterSettings LoadBasicFilterSettings(string filtersConfigFilePath)
         {
-            var configuration = new ConfigurationBuilder().AddIniFile(filtersConfigFilePath)
+            var configuration = new ConfigurationBuilder()
+                .AddIniFile(filtersConfigFilePath)
                 .Build()
-                .GetSection("basic");
+                .GetSection(Attributes.GetSettingsSectionKey<BasicParametersAdPostsFilterSettings>());
 
             return new BasicParametersAdPostsFilterSettings
             {
-                MinPrice = configuration.GetValue<decimal?>("price_min"),
-                MaxPrice = configuration.GetValue<decimal?>("price_max"),
-                MinFloorArea = configuration.GetValue<decimal?>("floor_area_min"),
-                MaxFloorArea = configuration.GetValue<decimal?>("floor_area_max"),
-                Layouts = ParseLayouts(configuration.GetValue<string?>("layouts"))
+                MinPrice = configuration.GetValue<decimal?>(Attributes.GetSettingsKey<BasicParametersAdPostsFilterSettings>(nameof(BasicParametersAdPostsFilterSettings.MinPrice))),
+                MaxPrice = configuration.GetValue<decimal?>(Attributes.GetSettingsKey<BasicParametersAdPostsFilterSettings>(nameof(BasicParametersAdPostsFilterSettings.MaxPrice))),
+                MinFloorArea = configuration.GetValue<decimal?>(Attributes.GetSettingsKey<BasicParametersAdPostsFilterSettings>(nameof(BasicParametersAdPostsFilterSettings.MinFloorArea))),
+                MaxFloorArea = configuration.GetValue<decimal?>(Attributes.GetSettingsKey<BasicParametersAdPostsFilterSettings>(nameof(BasicParametersAdPostsFilterSettings.MaxFloorArea))),
+                Layouts = ParseLayouts(configuration.GetValue<string?>(Attributes.GetSettingsKey<BasicParametersAdPostsFilterSettings>(nameof(BasicParametersAdPostsFilterSettings.Layouts))))
             };
         }
 

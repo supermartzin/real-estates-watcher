@@ -76,7 +76,7 @@ public class RemaxCzAdsProtal : RealEstateAdsPortalBase
 
     private static Uri? ParseImageUrl(HtmlNode node)
     {
-        var path = node.SelectSingleNode(".//div[@class='pl-items__images']//img")?.GetAttributeValue("data-src", null);
+        var path = node.SelectSingleNode(".//div[@class='pl-items__images']//img")?.GetAttributeValue<string?>("data-src", null);
 
         return path is not null
             ? new Uri(path)

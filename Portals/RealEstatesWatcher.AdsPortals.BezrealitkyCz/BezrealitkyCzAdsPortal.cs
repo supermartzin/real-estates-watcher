@@ -116,7 +116,7 @@ public partial class BezrealitkyCzAdsPortal(string watchedUrl,
     private static Uri? ParseImageUrl(HtmlNode node)
     {
         var values = HttpUtility.UrlDecode(node.SelectSingleNode(".//span[contains(@class,'image')]//img")?
-                                               .GetAttributeValue("srcset", null));
+                                               .GetAttributeValue<string?>("srcset", null));
 
         if (values is null)
             return null;

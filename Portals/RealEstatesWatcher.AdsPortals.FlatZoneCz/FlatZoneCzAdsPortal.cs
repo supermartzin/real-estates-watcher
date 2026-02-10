@@ -100,11 +100,11 @@ public class FlatZoneCzAdsPortal(string watchedUrl,
     private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//span[contains(@class,\"js-locality\")]").InnerText;
 
     private static Uri ParseWebUrl(HtmlNode node) => new(node.SelectSingleNode(".//a[contains(@class,\"js-project-detail-btn\")]")
-        .GetAttributeValue("href", null));
+        .GetAttributeValue<string>("href", string.Empty));
 
     private static Uri? ParseImageUrl(HtmlNode node)
     {
-        var path = node.SelectSingleNode(".//amp-img")?.GetAttributeValue("src", null);
+        var path = node.SelectSingleNode(".//amp-img")?.GetAttributeValue<string?>("src", null);
 
         return path is not null
             ? new Uri(path)

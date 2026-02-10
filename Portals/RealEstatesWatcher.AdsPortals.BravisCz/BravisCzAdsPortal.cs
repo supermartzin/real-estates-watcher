@@ -89,7 +89,7 @@ public class BravisCzAdsPortal(string watchedUrl,
 
     private static Uri ParseWebUrl(HtmlNode node, string rootHost)
     {
-        var relativePath = node.SelectSingleNode(".//a[@class=\"main\"]").GetAttributeValue("href", null);
+        var relativePath = node.SelectSingleNode(".//a[@class=\"main\"]").GetAttributeValue<string?>("href", null);
 
         return new Uri(rootHost +  UrlPathSeparator + relativePath);
     }
@@ -113,7 +113,7 @@ public class BravisCzAdsPortal(string watchedUrl,
 
     private static Uri? ParseImageUrl(HtmlNode node, string rootHost)
     {
-        var relativePath = node.SelectSingleNode(".//a[@class=\"img\"]/img")?.GetAttributeValue("src", null);
+        var relativePath = node.SelectSingleNode(".//a[@class=\"img\"]/img")?.GetAttributeValue<string?>("src", null);
 
         return relativePath is not null
             ? new Uri(rootHost + relativePath)

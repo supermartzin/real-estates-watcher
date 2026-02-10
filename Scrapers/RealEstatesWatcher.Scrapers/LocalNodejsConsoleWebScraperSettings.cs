@@ -1,10 +1,16 @@
-﻿namespace RealEstatesWatcher.Scrapers;
+﻿using RealEstatesWatcher.Tools.Attributes;
 
+namespace RealEstatesWatcher.Scrapers;
+
+[SettingsSectionKey("nodejs")]
 public record LocalNodejsConsoleWebScraperSettings
 {
-    public required string PathToScript { get; set; }
+    [SettingsKey("path_to_script")]
+    public required string PathToScript { get; init; }
 
-    public required int PageScrapingTimeoutSeconds { get; set; }
+    [SettingsKey("page_scraping_timeout_seconds")]
+    public required int PageScrapingTimeoutSeconds { get; init; }
 
-    public string? PathToCookiesFile { get; set; }
+    [SettingsKey("path_to_cookies_file")]
+    public string? PathToCookiesFile { get; init; }
 }

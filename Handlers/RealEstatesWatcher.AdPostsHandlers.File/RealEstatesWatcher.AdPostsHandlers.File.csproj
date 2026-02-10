@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Tools\RealEstatesWatcher.Tools.Attributes\RealEstatesWatcher.Tools.Attributes.csproj" />
     <ProjectReference Include="..\RealEstatesWatcher.AdPostsHandlers.Base.Html\RealEstatesWatcher.AdPostsHandlers.Base.Html.csproj" />
     <ProjectReference Include="..\RealEstatesWatcher.AdPostsHandlers.Contracts\RealEstatesWatcher.AdPostsHandlers.Contracts.csproj" />
   </ItemGroup>

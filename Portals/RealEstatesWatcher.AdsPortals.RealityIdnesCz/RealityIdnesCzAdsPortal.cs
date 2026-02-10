@@ -111,7 +111,7 @@ public class RealityIdnesCzAdsPortal(string watchedUrl,
 
     private static Uri? ParseImageUrl(HtmlNode node)
     {
-        var path = node.SelectSingleNode(".//span[@class=\"c-products__img\"]/img")?.GetAttributeValue("data-src", null);
+        var path = node.SelectSingleNode(".//span[@class=\"c-products__img\"]/img")?.GetAttributeValue<string?>("data-src", null);
 
         return path is not null
             ? new Uri(path)

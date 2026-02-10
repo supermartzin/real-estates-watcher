@@ -15,7 +15,8 @@ namespace RealEstatesWatcher.AdPostsHandlers.Email;
 
 public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings settings,
                                           NumberFormatInfo? numberFormat = null,
-                                          ILogger<EmailNotifyingAdPostsHandler>? logger = null) : HtmlBasedAdPostsHandlerBase(numberFormat ?? NumberFormatInfo.CurrentInfo), IRealEstateAdPostsHandler
+                                          ILogger<EmailNotifyingAdPostsHandler>? logger = null)
+    : HtmlBasedAdPostsHandlerBase(numberFormat ?? NumberFormatInfo.CurrentInfo), IRealEstateAdPostsHandler
 {
     private readonly EmailNotifyingAdPostsHandlerSettings _settings = settings ?? throw new ArgumentNullException(nameof(settings));
 
@@ -43,7 +44,7 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
     {
         ArgumentNullException.ThrowIfNull(adPosts);
 
-        if (_settings.SkipInitialNotification)
+        if (_settings.SkipInitialNotification is true)
         {
             logger?.LogDebug("Skipping initial notification on {PostsCount} Real Estate Ad posts", adPosts.Count);
             return;
@@ -56,6 +57,13 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
 
     private async Task SendEmailAsync(string subject, string body, CancellationToken cancellationToken = default)
     {
+        ThrowIfMissing(string.IsNullOrEmpty(_settings.FromAddress), "From address");
+        ThrowIfMissing(string.IsNullOrEmpty(_settings.SenderName), "Sender name");
+        ThrowIfMissing(string.IsNullOrEmpty(_settings.Username), "Username of sender's email server");
+        ThrowIfMissing(string.IsNullOrEmpty(_settings.Password), "Password of sender's email server");
+        ThrowIfMissing(string.IsNullOrEmpty(_settings.SmtpServerHost), "SMTP server host");
+        ThrowIfMissing(_settings.SmtpServerPort is null, "SMTP server port");
+
         var message = new MimeMessage
         {
             Subject = subject,
@@ -76,11 +84,12 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
             using var client = new SmtpClient();
 
             await client.ConnectAsync(_settings.SmtpServerHost,
-                _settings.SmtpServerPort,
-                _settings.UseSecureConnection, cancellationToken).ConfigureAwait(false);
+                                      _settings.SmtpServerPort!.Value,
+                                      _settings.UseSecureConnection ?? true,
+                                      cancellationToken).ConfigureAwait(false);
 
-            await client.AuthenticateAsync(new NetworkCredential(_settings.Username,
-                _settings.Password), cancellationToken).ConfigureAwait(false);
+            await client.AuthenticateAsync(new NetworkCredential(_settings.Username, _settings.Password), cancellationToken)
+                .ConfigureAwait(false);
 
             // send email
             await client.SendAsync(message, cancellationToken).ConfigureAwait(false);
@@ -92,5 +101,12 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
         {
             throw new RealEstateAdPostsHandlerException($"Error during sending email notification: {ex.Message}", ex);
         }
+    }
+
+
+    private static void ThrowIfMissing(bool isMissing, string settingName)
+    {
+        if (isMissing)
+            throw new RealEstateAdPostsHandlerException($"Email settings -> {settingName} is not specified in the configuration.");
     }
 }
