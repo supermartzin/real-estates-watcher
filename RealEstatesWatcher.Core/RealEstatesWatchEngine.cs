@@ -83,6 +83,23 @@ public class RealEstatesWatchEngine(WatchEngineSettings settings,
         if (_settings.CheckIntervalMinutes >= int.MaxValue)
             throw new RealEstatesWatchEngineException("Invalid check interval value: too big number.");
 
+        if (_settings.StartCheckAtSpecificTime is not null && !_settings.PerformCheckOnStartup)
+        {
+            // just start timer with initial delay to the next specific time without performing initial check
+            var checkInterval = CalculateIntervalForNextCheckTime(out var nextCheck);
+
+            logger?.LogInformation(
+                "Real estates Watcher has been started without initial ads check with periodic " +
+                "checking interval of {CheckInterval} minute(s), next check at {NextCheckTime}.",
+                _settings.CheckIntervalMinutes, nextCheck);
+            
+            StartTimer(checkInterval);
+            
+            IsRunning = true;
+            
+            return;
+        }
+
         try
         {
             // make initial load of posts
@@ -137,18 +154,14 @@ public class RealEstatesWatchEngine(WatchEngineSettings settings,
             throw new RealEstatesWatchEngineException($"Error notifying Ad post handlers: {reaphEx.Message}", reaphEx);
         }
 
-        // start periodic checking timer
-        _timer = new Timer
-        {
-            AutoReset = true,
-            Interval = TimeSpan.FromMinutes(_settings.CheckIntervalMinutes).TotalMilliseconds
-        };
-        _timer.Elapsed += Timer_OnElapsed;
-        _timer.Start();
+        StartTimer(CalculateIntervalForNextCheckTime(out var nextCheckTime));
 
         IsRunning = true;
 
-        logger?.LogInformation("Real estates Watcher has been started with periodic checking interval of {CheckInterval} minute(s).", _settings.CheckIntervalMinutes);
+        logger?.LogInformation(
+            "Real estates Watcher has been started with initial ads check and periodic checking interval of " +
+            "{CheckInterval} minute(s), next check scheduled at {NextCheckTime}.",
+            _settings.CheckIntervalMinutes, nextCheckTime);
     }
 
     public Task StopAsync()
@@ -156,10 +169,7 @@ public class RealEstatesWatchEngine(WatchEngineSettings settings,
         if (!IsRunning)
             throw new RealEstatesWatchEngineException("Watcher is not running.");
 
-        _timer!.Stop();
-        _timer.Dispose();
-        _timer.Elapsed -= Timer_OnElapsed;
-        _timer = null;
+        StopAndDisposeTimer();
 
         IsRunning = false;
 
@@ -169,9 +179,58 @@ public class RealEstatesWatchEngine(WatchEngineSettings settings,
         return Task.CompletedTask;
     }
 
+    private void StartTimer(double millisecondsInterval)
+    {
+        if (_timer is not null && _timer.Enabled)
+            StopAndDisposeTimer();
+
+        // start periodic checking timer
+        _timer = new Timer
+        {
+            AutoReset = true,
+            Interval = millisecondsInterval
+        };
+        _timer.Elapsed += Timer_OnElapsed;
+        _timer.Start();
+    }
+
+    private void StopAndDisposeTimer()
+    {
+        if (_timer is null || !_timer.Enabled)
+            return;
+
+        _timer.Stop();
+        _timer.Dispose();
+        _timer.Elapsed -= Timer_OnElapsed;
+        _timer = null;
+    }
+
+    private double CalculateIntervalForNextCheckTime(out DateTime nextCheckTime)
+    {
+        var now = DateTime.UtcNow;
+
+        if (_settings.StartCheckAtSpecificTime is null)
+        {
+            nextCheckTime = now.AddMinutes(_settings.CheckIntervalMinutes);
+            return _settings.CheckIntervalMinutes * 60 * 1000; // interval in ms
+        }
+
+        nextCheckTime = new DateTime(now.Year, now.Month, now.Day,
+            _settings.StartCheckAtSpecificTime.Value.Hour,
+            _settings.StartCheckAtSpecificTime.Value.Minute,
+            _settings.StartCheckAtSpecificTime.Value.Second);
+
+        while (nextCheckTime < now)
+        {
+            nextCheckTime = nextCheckTime.AddMinutes(_settings.CheckIntervalMinutes);
+        }
+
+        return (nextCheckTime - now).TotalMilliseconds;
+    }
+
     private async void Timer_OnElapsed(object? sender, ElapsedEventArgs e)
     {
-        logger?.LogDebug("Periodic check started.");
+        logger?.LogInformation("Periodic check started.");
 
         // get posts snapshot from portals
         var allPosts = await GetCurrentAdsPortalsSnapshot().ConfigureAwait(false);
@@ -193,7 +252,12 @@ public class RealEstatesWatchEngine(WatchEngineSettings settings,
                 break;
         }
 
-        logger?.LogDebug("Periodic check finished - found {Count} new ads.", newPosts.Count);
+        logger?.LogInformation("Periodic check finished - found {Count} new ads.", newPosts.Count);
+
+        StopAndDisposeTimer();
+        StartTimer(CalculateIntervalForNextCheckTime(out var nextCheckTime));
+
+        logger?.LogDebug("Next periodic check is scheduled at {NextCheckTime}.", nextCheckTime);
     }
 
     private async Task NotifyHandlers(RealEstateAdPost adPost)
