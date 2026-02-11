@@ -206,14 +206,15 @@ public class ConsoleRunner
         
         return new WatchEngineSettings
         {
+
+            PerformCheckOnStartup = configuration.GetValue<bool>(
+                Attributes.GetSettingsKey<WatchEngineSettings>(nameof(WatchEngineSettings.PerformCheckOnStartup)), true),
+            EnableMultiplePortalInstances = configuration.GetValue<bool>(
+                Attributes.GetSettingsKey<WatchEngineSettings>(nameof(WatchEngineSettings.EnableMultiplePortalInstances)), true),
             CheckIntervalMinutes = configuration.GetValue<int>(
                 Attributes.GetSettingsKey<WatchEngineSettings>(nameof(WatchEngineSettings.CheckIntervalMinutes))),
             StartCheckAtSpecificTime = configuration.GetValue<TimeOnly?>(
-                Attributes.GetSettingsKey<WatchEngineSettings>(nameof(WatchEngineSettings.StartCheckAtSpecificTime))),
-            PerformCheckOnStartup = configuration.GetValue<bool>(
-                Attributes.GetSettingsKey<WatchEngineSettings>(nameof(WatchEngineSettings.PerformCheckOnStartup))),
-            EnableMultiplePortalInstances = configuration.GetValue<bool>(
-                Attributes.GetSettingsKey<WatchEngineSettings>(nameof(WatchEngineSettings.EnableMultiplePortalInstances)))
+                Attributes.GetSettingsKey<WatchEngineSettings>(nameof(WatchEngineSettings.StartCheckAtSpecificTime)))
         };
     }
 

@@ -181,13 +181,13 @@ public class RealEstatesWatchEngine(WatchEngineSettings settings,
 
     private void StartTimer(double millisecondsInterval)
     {
-        if (_timer is not null && _timer.Enabled)
+        if (_timer is not null)
             StopAndDisposeTimer();
 
         // start periodic checking timer
         _timer = new Timer
         {
-            AutoReset = true,
+            AutoReset = false,
             Interval = millisecondsInterval
         };
         _timer.Elapsed += Timer_OnElapsed;
@@ -196,7 +196,7 @@ public class RealEstatesWatchEngine(WatchEngineSettings settings,
 
     private void StopAndDisposeTimer()
     {
-        if (_timer is null || !_timer.Enabled)
+        if (_timer is null)
             return;
 
         _timer.Stop();
@@ -212,7 +212,7 @@ public class RealEstatesWatchEngine(WatchEngineSettings settings,
         if (_settings.StartCheckAtSpecificTime is null)
         {
             nextCheckTime = now.AddMinutes(_settings.CheckIntervalMinutes);
-            return _settings.CheckIntervalMinutes * 60 * 1000; // interval in ms
+            return TimeSpan.FromMinutes(_settings.CheckIntervalMinutes).TotalMilliseconds;
         }
 
         nextCheckTime = new DateTime(now.Year, now.Month, now.Day,
