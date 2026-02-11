@@ -218,7 +218,8 @@ public class RealEstatesWatchEngine(WatchEngineSettings settings,
         nextCheckTime = new DateTime(now.Year, now.Month, now.Day,
             _settings.StartCheckAtSpecificTime.Value.Hour,
             _settings.StartCheckAtSpecificTime.Value.Minute,
-            _settings.StartCheckAtSpecificTime.Value.Second);
+            _settings.StartCheckAtSpecificTime.Value.Second,
+            DateTimeKind.Utc);
 
         while (nextCheckTime < now)
         {
