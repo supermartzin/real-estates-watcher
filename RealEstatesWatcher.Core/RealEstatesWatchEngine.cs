@@ -232,32 +232,37 @@ public class RealEstatesWatchEngine(WatchEngineSettings settings,
     {
         logger?.LogInformation("Periodic check started.");
 
-        // get posts snapshot from portals
-        var allPosts = await GetCurrentAdsPortalsSnapshot().ConfigureAwait(false);
-
-        // run posts through filters
-        allPosts = _filters.Aggregate(allPosts, (current, filter) => filter.Filter(current).ToList());
-
-        // add to collection of processed posts and filter out new ones
-        var newPosts = allPosts.Where(_posts.Add).ToList();
-
-        // notify
-        switch (newPosts.Count)
+        try
         {
-            case 1:
-                await NotifyHandlers(newPosts[0]).ConfigureAwait(false);
-                break;
-            case > 1:
-                await NotifyHandlers(newPosts).ConfigureAwait(false);
-                break;
+            // get posts snapshot from portals
+            var allPosts = await GetCurrentAdsPortalsSnapshot().ConfigureAwait(false);
+
+            // run posts through filters
+            allPosts = _filters.Aggregate(allPosts, (current, filter) => filter.Filter(current).ToList());
+
+            // add to collection of processed posts and filter out new ones
+            var newPosts = allPosts.Where(_posts.Add).ToList();
+
+            // notify
+            switch (newPosts.Count)
+            {
+                case 1:
+                    await NotifyHandlers(newPosts[0]).ConfigureAwait(false);
+                    break;
+                case > 1:
+                    await NotifyHandlers(newPosts).ConfigureAwait(false);
+                    break;
+            }
+
+            logger?.LogInformation("Periodic check finished - found {Count} new ads.", newPosts.Count);
         }
+        finally
+        {
+            StopAndDisposeTimer();
+            StartTimer(CalculateIntervalForNextCheckTime(out var nextCheckTime));
 
-        logger?.LogInformation("Periodic check finished - found {Count} new ads.", newPosts.Count);
-
-        StopAndDisposeTimer();
-        StartTimer(CalculateIntervalForNextCheckTime(out var nextCheckTime));
-
-        logger?.LogDebug("Next periodic check is scheduled at {NextCheckTime}.", nextCheckTime);
+            logger?.LogDebug("Next periodic check is scheduled at {NextCheckTime}.", nextCheckTime);
+        }
     }
 
     private async Task NotifyHandlers(RealEstateAdPost adPost)
