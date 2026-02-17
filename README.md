@@ -88,11 +88,22 @@ Simply use basic build and run commands:
 
 **engine.ini** - configuration of the watching engine (*required* cmd argument `--e` or `-engine`)
 
-    [settings]
-    check_interval_minutes=            # <number> | required | periodic checking interval, minimum 1 minute
+❗**CHANGE**❗(since **v1.6**) 👇
+* Added support for **setting the exact time** of day of the periodic checks and ability to **start** the application **without the initial ads check** if the time is set.
+* Added integration for sending the logs to **Google Cloud Logging service**.
+* First section name changed from `[settings]` to `[general]`.
+
+    [general]
+    perform_check_on_startup=          # <bool>   | optional | switch to indicate whether to perform the initial check of all portals on application startup when exact time of day for periodic checks is set (see 'start_periodic_check_at' setting below).
     enable_multiple_portal_instances=  # <bool>   | optional | enable/disable multiple instances of the same portal (in case of watching multiple URLs of the same portal)
-    
-    
+    check_interval_minutes=            # <number> | required | periodic checking interval, minimum 1 minute
+    start_periodic_check_at=           # <time>   | optional | exact time of day to start periodic checks (format: HH:mm:ss)
+    [gcloud]
+    enable_cloud_logging=              # <bool>   | optional | switch to enable sending logs to Google Cloud Logging service
+    application_id=                    # <string> | optional | identifier of the application instance in Google Cloud Logging service (defaults to randomly generated GUID)
+    project_id=                        # <string> | optional | identifier of the Google Cloud project (required when running outside of Google Cloud environment, applicable only in DEBUG mode).
+    service_name=                      # <string> | optional | name of the service to be used in Google Cloud Logging service (required when running outside of Google Cloud environment, applicable only in DEBUG mode).
+
 **portals.\*** - configuration of all Ad portals to watch (*required* cmd argument `--p` or `-portals`)
 
 ❗**CHANGE**❗(since **v1.4**)
@@ -129,7 +140,7 @@ https://reality.bazos.cz/prodam/chata/...<b>↩</b>
     main_path=                    # <string>  | required | path to the file where to save initial and new Ad posts
     separate_new_posts=           # <bool>    | optional | set 'true' if you want to save new Ad posts in separate file from the initial list
     new_posts_path=               # <bool>    | optional | path to the file where to save new Ad posts (required when separate_new_posts=true)
-    format=                       # <strings> | optional | format of printing parsed Ads to file, (allowed enum values below) (defaults to 'plain')
+    print_format=                 # <strings> | optional | format of printing parsed Ads to file, (allowed enum values below) (defaults to 'plain')
     
 **filters.ini** - configuration of the Ads filter (*optional* cmd argument `--f` or `-filters`)
 
