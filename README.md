@@ -93,16 +93,19 @@ Simply use basic build and run commands:
 * Added integration for sending the logs to **Google Cloud Logging service**.
 * First section name changed from `[settings]` to `[general]`.
 
+<!-- end of the list -->
+
     [general]
-    perform_check_on_startup=          # <bool>   | optional | switch to indicate whether to perform the initial check of all portals on application startup when exact time of day for periodic checks is set (see 'start_periodic_check_at' setting below).
-    enable_multiple_portal_instances=  # <bool>   | optional | enable/disable multiple instances of the same portal (in case of watching multiple URLs of the same portal)
     check_interval_minutes=            # <number> | required | periodic checking interval, minimum 1 minute
     start_periodic_check_at=           # <time>   | optional | exact time of day to start periodic checks (format: HH:mm:ss)
+    perform_check_on_startup=          # <bool>   | optional | switch to indicate whether to perform the initial check of all portals on application startup when exact time of day for periodic checks is set (see 'start_periodic_check_at' setting below).
+    enable_multiple_portal_instances=  # <bool>   | optional | enable/disable multiple instances of the same portal (in case of watching multiple URLs of the same portal)
     [gcloud]
     enable_cloud_logging=              # <bool>   | optional | switch to enable sending logs to Google Cloud Logging service
     application_id=                    # <string> | optional | identifier of the application instance in Google Cloud Logging service (defaults to randomly generated GUID)
     project_id=                        # <string> | optional | identifier of the Google Cloud project (required when running outside of Google Cloud environment, applicable only in DEBUG mode).
     service_name=                      # <string> | optional | name of the service to be used in Google Cloud Logging service (required when running outside of Google Cloud environment, applicable only in DEBUG mode).
+
 
 **portals.\*** - configuration of all Ad portals to watch (*required* cmd argument `--p` or `-portals`)
 
