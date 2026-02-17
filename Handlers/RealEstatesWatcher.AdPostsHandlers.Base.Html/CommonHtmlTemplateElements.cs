@@ -46,11 +46,11 @@ public static class CommonHtmlTemplateElements
                                                <h3 style="margin: 0 0 10px 0; font-size: 1.1rem; font-weight: 600; color: #6366f1; line-height: 1.35;">{$title}</h3>
                                            </a>
                                            <div style="display: {$price-display}; margin-bottom: 12px;">
-                                               <span style="font-size: 1.25rem; font-weight: 700; color: #059669;">{$price} {$currency}</span>
+                                               <span style="font-size: 1.25rem; font-weight: 700; color: #047857;">{$price} {$currency}</span>
                                                <span style="display: {$additional-fees-display}; font-size: 0.85rem; color: #6b7280; margin-left: 4px;">+ {$additional-fees} {$currency}</span>
                                            </div>
                                            <div style="display: {$price-comment-display}; margin-bottom: 12px;">
-                                               <span style="font-size: 1.1rem; font-weight: 600; color: #059669;">{$price-comment}</span>
+                                               <span style="font-size: 1.1rem; font-weight: 600; color: #047857;">{$price-comment}</span>
                                            </div>
                                            <table style="border-collapse: collapse; font-size: 0.875rem; color: #374151; width: 100%;">
                                                <tr>
