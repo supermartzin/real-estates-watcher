@@ -70,7 +70,7 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
             Body = new BodyBuilder { HtmlBody = body }.ToMessageBody(),
             From =
             {
-                new MailboxAddress(_settings.SenderName, _settings.FromAddress)
+                new MailboxAddress(_settings.SenderName!, _settings.FromAddress!)
             }
         };
         message.To.AddRange(_settings.ToAddresses.Select(address => new MailboxAddress(address, address)));
