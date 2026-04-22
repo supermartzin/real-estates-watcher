@@ -226,6 +226,12 @@ public class RealEstatesWatchEngine(WatchEngineSettings settings,
             nextCheckTime = nextCheckTime.AddMinutes(_settings.CheckIntervalMinutes);
         }
 
+        // move back if the next check date is too far in the future (more than one interval away)
+        while ((nextCheckTime - now).TotalMinutes > _settings.CheckIntervalMinutes)
+        {
+            nextCheckTime = nextCheckTime.AddMinutes(-_settings.CheckIntervalMinutes);
+        }
+
         return (nextCheckTime - now).TotalMilliseconds;
     }
 
