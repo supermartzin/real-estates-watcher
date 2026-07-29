@@ -28,7 +28,7 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
 
         logger?.LogDebug("Received new Real Estate Ad Post: {Post}", adPost);
 
-        await SendEmailAsync("🆕 New Real Estate Advert published!", CreateFullHtmlPage([adPost], CommonHtmlTemplateElements.TitleNewPosts), cancellationToken).ConfigureAwait(false);
+        await SendEmailAsync("🆕 Nový inzerát nehnuteľnosti!", CreateFullHtmlPage([adPost], CommonHtmlTemplateElements.TitleNewPosts), cancellationToken).ConfigureAwait(false);
     }
 
     public async Task HandleNewRealEstatesAdPostsAsync(IList<RealEstateAdPost> adPosts, CancellationToken cancellationToken = default)
@@ -37,7 +37,7 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
 
         logger?.LogDebug("Received '{PostsCount}' new Real Estate Ad Posts.", adPosts.Count);
 
-        await SendEmailAsync("🆕 New Real Estate Adverts published!", CreateFullHtmlPage(adPosts, CommonHtmlTemplateElements.TitleNewPosts), cancellationToken).ConfigureAwait(false);
+        await SendEmailAsync("🆕 Nové inzeráty nehnuteľností!", CreateFullHtmlPage(adPosts, CommonHtmlTemplateElements.TitleNewPosts), cancellationToken).ConfigureAwait(false);
     }
 
     public async Task HandleInitialRealEstateAdPostsAsync(IList<RealEstateAdPost> adPosts, CancellationToken cancellationToken = default)
@@ -52,7 +52,7 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
 
         logger?.LogDebug("Received initial {PostsCount} Real Estate Ad Posts.", adPosts.Count);
 
-        await SendEmailAsync("🏦 Current Real Estate Adverts offering", CreateFullHtmlPage(adPosts, CommonHtmlTemplateElements.TitleInitialPosts), cancellationToken).ConfigureAwait(false);
+        await SendEmailAsync("🏦 Vaše aktuálne ponuky nehnuteľností", CreateFullHtmlPage(adPosts, CommonHtmlTemplateElements.TitleInitialPosts), cancellationToken).ConfigureAwait(false);
     }
 
     private async Task SendEmailAsync(string subject, string body, CancellationToken cancellationToken = default)

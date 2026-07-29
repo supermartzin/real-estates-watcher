@@ -37,7 +37,7 @@ public abstract class HtmlBasedAdPostsHandlerBase(NumberFormatInfo numberFormat)
         if (post.ImageUrl is not null)
         {
             postHtmlBuilder.Replace("{$img-link}", post.ImageUrl.AbsoluteUri)
-                           .Replace("{$img-display}", "block");
+                           .Replace("{$img-display}", "table-row");
         }
         else
         {
@@ -77,7 +77,7 @@ public abstract class HtmlBasedAdPostsHandlerBase(NumberFormatInfo numberFormat)
 
         // text
         postHtmlBuilder.Replace("{$text}", post.Text)
-                       .Replace("{$text-display}", !string.IsNullOrEmpty(post.Text) ? "table" : "none");
+                       .Replace("{$text-display}", !string.IsNullOrEmpty(post.Text) ? "block" : "none");
 
         return postHtmlBuilder.ToString();
     }

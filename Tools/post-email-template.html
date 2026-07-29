@@ -1,46 +1,101 @@
-<!-- Page skelet -->
+<!--
+    Reference copy of the production email markup in
+    Handlers/RealEstatesWatcher.AdPostsHandlers.Base.Html/CommonHtmlTemplateElements.cs.
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Real Estate Advertisements</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="x-apple-disable-message-reformatting">
+    <meta name="format-detection" content="telephone=no,address=no,email=no,date=no,url=no">
+    <title>Ponuky nehnuteľností</title>
+    <style>
+        @media only screen and (min-width: 600px) {
+            .page-padding { padding: 32px 24px !important; }
+            .card-padding { padding: 28px 30px 30px !important; }
+        }
+
+        @media only screen and (max-width: 480px) {
+            .map-link { margin: 6px 6px 0 0 !important; }
+        }
+    </style>
 </head>
-<body style="max-width: 800px; margin:10px auto;">
-    <maintitle/>
-    <posts/>
+<body style="width: 100%; margin: 0; padding: 0; background-color: #dfe7e3; color: #0c1713; font-family: Arial, Helvetica, sans-serif; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; border-collapse: collapse; background-color: #dfe7e3;">
+        <tr>
+            <td class="page-padding" align="center" style="padding: 16px 12px 28px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; max-width: 640px; border-collapse: collapse;">
+                    <tr>
+                        <td>
+                            <!-- Single post element -->
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; border-collapse: separate; background-color: #ffffff; border: 2px solid #a8bbb3; border-radius: 18px; overflow: hidden;">
+                                <tr style="display: {$img-display};">
+                                    <td style="padding: 0;">
+                                        <a href="{$post-link}" target="_blank" rel="noopener noreferrer" style="display: block; text-decoration: none;">
+                                            <img src="{$img-link}" width="638" alt="Property listing" style="display: block; width: 100%; max-width: 638px; height: auto; max-height: 340px; border: 0; object-fit: cover;">
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="card-padding" style="padding: 22px 20px 24px;">
+                                        <div style="margin: 0 0 12px;">
+                                            <span style="display: inline-block; padding: 5px 9px; background-color: #cfe4da; border-radius: 999px; color: #123f32; font-size: 11px; line-height: 14px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">{$portal-name}</span>
+                                        </div>
+                                        <h2 style="margin: 0 0 12px; color: #0c1713; font-size: 21px; line-height: 28px; font-weight: 700;">
+                                            <a href="{$post-link}" target="_blank" rel="noopener noreferrer" style="color: #0c1713; text-decoration: none;">{$title}</a>
+                                        </h2>
+                                        <div style="display: {$price-display}; margin: 0 0 18px;">
+                                            <span style="color: #075a40; font-size: 26px; line-height: 32px; font-weight: 700;">{$price} {$currency}</span>
+                                            <span style="display: {$additional-fees-display}; margin-top: 3px; color: #43534d; font-size: 13px; line-height: 19px;">+ {$additional-fees} {$currency} na poplatkoch</span>
+                                        </div>
+                                        <div style="display: {$price-comment-display}; margin: 0 0 18px;">
+                                            <span style="color: #075a40; font-size: 21px; line-height: 28px; font-weight: 700;">{$price-comment}</span>
+                                        </div>
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; border-collapse: separate; background-color: #e8eeeb; border-radius: 10px; overflow: hidden;">
+                                            <tr>
+                                                <td width="50%" valign="top" style="width: 50%; padding: 12px;">
+                                                    <div style="margin-bottom: 3px; color: #43534d; font-size: 11px; line-height: 15px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">Výmera</div>
+                                                    <div style="color: #17211e; font-size: 15px; line-height: 21px; font-weight: 700;">{$floor-area}</div>
+                                                </td>
+                                                <td width="1" style="width: 1px; padding: 0; background-color: #c5d2cd; font-size: 0; line-height: 0;">&nbsp;</td>
+                                                <td width="50%" valign="top" style="width: 50%; padding: 12px;">
+                                                    <div style="margin-bottom: 3px; color: #43534d; font-size: 11px; line-height: 15px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">Dispozícia</div>
+                                                    <div style="color: #17211e; font-size: 15px; line-height: 21px; font-weight: 700;">{$layout}</div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <div style="margin-top: 16px; color: #26332f; font-size: 14px; line-height: 21px;">
+                                            <div style="margin-bottom: 3px; color: #43534d; font-size: 11px; line-height: 15px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">Adresa</div>
+                                            <div style="word-break: break-word;">{$address}</div>
+                                            <div style="display: {$address-links-display}; margin-top: 5px;">
+                                                <a class="map-link" target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/search/?api=1&amp;query={$address-encoded}" style="display: inline-block; margin: 6px 6px 0 0; padding: 7px 10px; border: 1px solid #8fa69d; border-radius: 8px; color: #0e4938; font-size: 12px; line-height: 16px; font-weight: 700; text-decoration: none;">Google Maps</a>
+                                                <a class="map-link" target="_blank" rel="noopener noreferrer" href="https://mapy.com/fnc/v1/search?query={$address-encoded}" style="display: inline-block; margin: 6px 6px 0 0; padding: 7px 10px; border: 1px solid #8fa69d; border-radius: 8px; color: #0e4938; font-size: 12px; line-height: 16px; font-weight: 700; text-decoration: none;">Mapy.com</a>
+                                                <a class="map-link" target="_blank" rel="noopener noreferrer" href="https://maps.apple.com/?q={$address-encoded}" style="display: inline-block; margin: 6px 0 0; padding: 7px 10px; border: 1px solid #8fa69d; border-radius: 8px; color: #0e4938; font-size: 12px; line-height: 16px; font-weight: 700; text-decoration: none;">Apple Maps</a>
+                                            </div>
+                                        </div>
+                                        <div style="display: {$text-display}; margin-top: 18px; padding-top: 16px; border-top: 1px solid #c5d2cd; color: #34443e; font-size: 14px; line-height: 22px;">{$text}</div>
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; margin-top: 20px; border-collapse: separate;">
+                                            <tr>
+                                                <td align="center" style="background-color: #173f35; border-radius: 10px;">
+                                                    <a href="{$post-link}" target="_blank" rel="noopener noreferrer" style="display: block; padding: 14px 18px; color: #ffffff; font-size: 15px; line-height: 20px; font-weight: 700; text-align: center; text-decoration: none;">Zobraziť detail ponuky&nbsp;&nbsp;→</a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div style="height: 16px; line-height: 16px;">&nbsp;</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" style="padding: 12px 16px 0; color: #50625b; font-size: 12px; line-height: 18px;">
+                            Real Estates Watcher&nbsp;&nbsp;·&nbsp;&nbsp;Automatická aktualizácia ponúk nehnuteľností
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>
-
-<!-- Single post element -->
-<div style="padding: 10px; background: #ededed; min-height: 200px;">
-    <div style="float: left; margin-right: 1em; width: 30%; height: 180px; display: {$img-display};">
-        <img src="{$img-link}" style="height: 100%; width: 100%; object-fit: cover;" alt="Ad main visual presentation"/>
-    </div>
-    <a href="{$post-link}">
-        <h3 style="margin: 0.2em; margin-top: 0;">{$title}</h3>
-    </a>
-    <span style="font-size: medium; color: #4f4f4f; display: {$price-display};">
-        <strong>{$price}</strong> {$currency}
-        <span style="display: {$additional-fees-display};"> + {$additional-fees} {$currency}</span><br/>
-    </span>
-    <span style="font-size: medium; color: #4f4f4f; display: {$price-comment-display};">
-        <strong>{$price-comment}</strong><br/>
-    </span>
-    <span>
-        <strong>Server:</strong> {$portal-name}<br/>
-        <strong>Adresa:</strong> {$address} 
-        <span style="display: {$address-links-display};">
-            <a target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/search/?api=1&query={$address-encoded}"><img alt="Google's map logo" title="Otvoriť v Google Mapách" src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Google_Maps_icon_%282020%29.svg/40px-Google_Maps_icon_%282020%29.svg.png" style="margin-left: 6px; max-height: 14px; width: auto" /></a>
-            <a target="_blank" rel="noopener noreferrer" href="https://mapy.com/fnc/v1/search?query={$address-encoded}"><img alt="Icon of Mapy.com" title="Otvoriť na Mapy.com" src="https://mapy.com/img/favicon/common/plain/favicon-32x32.png" style="max-height: 14px; width: auto"></a>
-            <a target="_blank" rel="noopener noreferrer" href="https://maps.apple.com/?q={$address-encoded}"><img alt="Icon of Apple Maps" title="Otvoriť v Apple Mapách" src="https://maps.apple.com/static/maps-app-web-client/images/maps-app-icon-120x120.png" style="max-height: 14px; width: auto"></a>
-        </span><br/>
-        <strong>Výmera:</strong> {$floor-area}<br/>
-        <strong>Dispozícia:</strong> {$layout}<br/>
-    </span>
-    <p style="margin: 0.2em; font-size: small; text-align: justify; display: {$text-display};">{$text}</p>
-</div>
-
-<!-- Titles -->
-<h1>🏦 <span style="color: #4f4f4f; font-style: italic;">Current Real estate offer</span></h1>
-
-<h1>🏦 <span style="color: #4f4f4f; font-style: italic;">NEW Real estate offer</span></h1>
