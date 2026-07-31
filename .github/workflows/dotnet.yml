@@ -26,6 +26,8 @@ jobs:
       run: dotnet restore
     - name: Build app
       run: dotnet build --no-restore --configuration Release
+    - name: Run tests
+      run: dotnet test --no-build --configuration Release
     - name: Publish app
       run: dotnet publish ./RealEstatesWatcher.UI.Console/RealEstatesWatcher.UI.Console.csproj -c Release /p:PublishProfile="Properties/PublishProfiles/Windows-profile.pubxml"
 
@@ -45,6 +47,8 @@ jobs:
       run: dotnet restore
     - name: Build app
       run: dotnet build --no-restore --configuration Release
+    - name: Run tests
+      run: dotnet test --no-build --configuration Release
     - name: Publish app
       run: dotnet publish ./RealEstatesWatcher.UI.Console/RealEstatesWatcher.UI.Console.csproj -c Release /p:PublishProfile="Properties/PublishProfiles/Windows-profile.pubxml"
   
@@ -64,5 +68,7 @@ jobs:
       run: dotnet restore
     - name: Build app
       run: dotnet build --no-restore --configuration Release
+    - name: Run tests
+      run: dotnet test --no-build --configuration Release
     - name: Publish app
       run: dotnet publish ./RealEstatesWatcher.UI.Console/RealEstatesWatcher.UI.Console.csproj -c Release /p:PublishProfile="Properties/PublishProfiles/Linux-profile.pubxml"
