@@ -43,6 +43,39 @@
     <File Path="Tools/scraper/index.js" />
     <File Path="Tools/scraper/package.json" />
   </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="tests/RealEstatesWatcher.Core.Tests/RealEstatesWatcher.Core.Tests.csproj" />
+    <Project Path="tests/RealEstatesWatcher.Models.Tests/RealEstatesWatcher.Models.Tests.csproj" />
+    <Project Path="tests/RealEstatesWatcher.UI.Console.Tests/RealEstatesWatcher.UI.Console.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Tests/Filters/">
+    <Project Path="tests/Filters/RealEstatesWatcher.AdPostsFilters.BasicFilter.Tests/RealEstatesWatcher.AdPostsFilters.BasicFilter.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Tests/Handlers/">
+    <Project Path="tests/Handlers/RealEstatesWatcher.AdPostsHandlers.Base.Html.Tests/RealEstatesWatcher.AdPostsHandlers.Base.Html.Tests.csproj" />
+    <Project Path="tests/Handlers/RealEstatesWatcher.AdPostsHandlers.Email.Tests/RealEstatesWatcher.AdPostsHandlers.Email.Tests.csproj" />
+    <Project Path="tests/Handlers/RealEstatesWatcher.AdPostsHandlers.File.Tests/RealEstatesWatcher.AdPostsHandlers.File.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Tests/Portals/">
+    <Project Path="tests/Portals/RealEstatesWatcher.AdsPortals.Base.Tests/RealEstatesWatcher.AdsPortals.Base.Tests.csproj" />
+    <Project Path="tests/Portals/RealEstatesWatcher.AdsPortals.BazosCz.Tests/RealEstatesWatcher.AdsPortals.BazosCz.Tests.csproj" />
+    <Project Path="tests/Portals/RealEstatesWatcher.AdsPortals.BezrealitkyCz.Tests/RealEstatesWatcher.AdsPortals.BezrealitkyCz.Tests.csproj" />
+    <Project Path="tests/Portals/RealEstatesWatcher.AdsPortals.BidliCz.Tests/RealEstatesWatcher.AdsPortals.BidliCz.Tests.csproj" />
+    <Project Path="tests/Portals/RealEstatesWatcher.AdsPortals.BravisCz.Tests/RealEstatesWatcher.AdsPortals.BravisCz.Tests.csproj" />
+    <Project Path="tests/Portals/RealEstatesWatcher.AdsPortals.CeskeRealityCz.Tests/RealEstatesWatcher.AdsPortals.CeskeRealityCz.Tests.csproj" />
+    <Project Path="tests/Portals/RealEstatesWatcher.AdsPortals.FlatZoneCz.Tests/RealEstatesWatcher.AdsPortals.FlatZoneCz.Tests.csproj" />
+    <Project Path="tests/Portals/RealEstatesWatcher.AdsPortals.MMRealityCz.Tests/RealEstatesWatcher.AdsPortals.MMRealityCz.Tests.csproj" />
+    <Project Path="tests/Portals/RealEstatesWatcher.AdsPortals.RealcityCz.Tests/RealEstatesWatcher.AdsPortals.RealcityCz.Tests.csproj" />
+    <Project Path="tests/Portals/RealEstatesWatcher.AdsPortals.RealityIdnesCz.Tests/RealEstatesWatcher.AdsPortals.RealityIdnesCz.Tests.csproj" />
+    <Project Path="tests/Portals/RealEstatesWatcher.AdsPortals.RemaxCz.Tests/RealEstatesWatcher.AdsPortals.RemaxCz.Tests.csproj" />
+    <Project Path="tests/Portals/RealEstatesWatcher.AdsPortals.SrealityCz.Tests/RealEstatesWatcher.AdsPortals.SrealityCz.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Tests/Scrapers/">
+    <Project Path="tests/Scrapers/RealEstatesWatcher.Scrapers.Tests/RealEstatesWatcher.Scrapers.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Tests/Tools/">
+    <Project Path="tests/Tools/RealEstatesWatcher.Tools.Attributes.Tests/RealEstatesWatcher.Tools.Attributes.Tests.csproj" />
+  </Folder>
   <Project Path="RealEstatesWatcher.Core/RealEstatesWatcher.Core.csproj" />
   <Project Path="RealEstatesWatcher.Models/RealEstatesWatcher.Models.csproj" />
   <Project Path="RealEstatesWatcher.UI.Console/RealEstatesWatcher.UI.Console.csproj" />

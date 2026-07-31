@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <Compile Include="..\PortalTestSupport.cs" Link="PortalTestSupport.cs" />
+    <ProjectReference Include="..\..\..\Portals\RealEstatesWatcher.AdsPortals.BidliCz\RealEstatesWatcher.AdsPortals.BidliCz.csproj" />
+  </ItemGroup>
+</Project>

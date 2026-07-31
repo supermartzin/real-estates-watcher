@@ -108,10 +108,11 @@ public class RealEstatesWatchEngine(WatchEngineSettings settings,
             if (posts.Count is 0)
             {
                 logger?.LogDebug("No initial posts downloaded.");
-                return;
             }
-
-            logger?.LogDebug("Downloaded initial {PostsCount} post(s) from {PortalsCount} portal(s).", posts.Count, _adsPortals.Count);
+            else
+            {
+                logger?.LogDebug("Downloaded initial {PostsCount} post(s) from {PortalsCount} portal(s).", posts.Count, _adsPortals.Count);
+            }
 
             // run posts through filters
             posts = _filters.Aggregate(posts, (current, filter) => filter.Filter(current).ToList());

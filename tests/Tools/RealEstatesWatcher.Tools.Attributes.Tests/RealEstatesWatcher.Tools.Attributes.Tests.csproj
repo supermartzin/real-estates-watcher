@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Tools\RealEstatesWatcher.Tools.Attributes\RealEstatesWatcher.Tools.Attributes.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <Compile Include="..\Common\TestData.cs" Link="TestData.cs" />
+    <ProjectReference Include="..\..\RealEstatesWatcher.Models\RealEstatesWatcher.Models.csproj" />
+  </ItemGroup>
+</Project>

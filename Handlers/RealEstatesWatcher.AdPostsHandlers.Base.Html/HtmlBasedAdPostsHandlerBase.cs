@@ -24,7 +24,8 @@ public abstract class HtmlBasedAdPostsHandlerBase(NumberFormatInfo numberFormat)
         }
         else
         {
-            postHtmlBuilder.Replace("{$address-links-display}", "none");
+            postHtmlBuilder.Replace("{$address-links-display}", "none")
+                           .Replace("{$address-encoded}", string.Empty);
         }
 
         // layout

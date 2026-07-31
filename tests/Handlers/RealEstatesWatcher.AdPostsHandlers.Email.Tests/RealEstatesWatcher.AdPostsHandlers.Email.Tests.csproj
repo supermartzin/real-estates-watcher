@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <Compile Include="..\..\Common\TestData.cs" Link="TestData.cs" />
+    <ProjectReference Include="..\..\..\Handlers\RealEstatesWatcher.AdPostsHandlers.Email\RealEstatesWatcher.AdPostsHandlers.Email.csproj" />
+  </ItemGroup>
+</Project>
