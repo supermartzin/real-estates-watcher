@@ -38,6 +38,32 @@ public class RealEstateAdsPortalBaseTests
     public void RejectsInvalidUrls() =>
         Assert.Throws<UriFormatException>(() => new TestPortal("not a URL", new StubWebScraper("<html/>")));
 
+    [Fact]
+    public void RejectsNullConstructorArguments()
+    {
+        Assert.Throws<ArgumentNullException>(() => new TestPortal(null!, new StubWebScraper("<html/>")));
+        Assert.Throws<ArgumentNullException>(() => new TestPortal("https://example.test", null!));
+    }
+
+    [Fact]
+    public async Task ReturnsEmptyCollectionWhenPageHasNoMatchingNodes()
+    {
+        var portal = new TestPortal("https://example.test/listings", new StubWebScraper("<html><body><p>Empty</p></body></html>"));
+
+        Assert.Empty(await portal.GetLatestRealEstateAdsAsync());
+    }
+
+    [Fact]
+    public async Task WrapsUnexpectedParserExceptions()
+    {
+        var portal = new ThrowingPortal("https://example.test/listings", new StubWebScraper("<html><body><article></article></body></html>"));
+
+        var exception = await Assert.ThrowsAsync<RealEstateAdsPortalException>(() => portal.GetLatestRealEstateAdsAsync());
+
+        Assert.IsType<InvalidOperationException>(exception.InnerException);
+        Assert.Contains("parse failed", exception.Message);
+    }
+
     private sealed class TestPortal(string watchedUrl, IWebScraper scraper) : RealEstateAdsPortalBase(watchedUrl, scraper)
     {
         public override string Name => "Test";
@@ -54,5 +80,25 @@ public class RealEstateAdsPortalBaseTests
             Currency = Currency.Other,
             Layout = Layout.NotSpecified
         };
+    }
+
+    private sealed class ThrowingPortal(string watchedUrl, IWebScraper scraper) : RealEstateAdsPortalBase(watchedUrl, scraper)
+    {
+        public override string Name => "Throwing";
+        protected override string GetPathToAdsElements() => "//article";
+        protected override RealEstateAdPost ParseRealEstateAdPost(HtmlNode node) => throw new InvalidOperationException("parse failed");
+    }
+}
+
+public class RealEstateAdsPortalExceptionTests
+{
+    [Fact]
+    public void Constructors_PreserveMessagesAndInnerExceptions()
+    {
+        var inner = new InvalidOperationException("inner");
+
+        Assert.Null(new RealEstateAdsPortalException().InnerException);
+        Assert.Equal("message", new RealEstateAdsPortalException("message").Message);
+        Assert.Same(inner, new RealEstateAdsPortalException("message", inner).InnerException);
     }
 }

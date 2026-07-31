@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\RealEstatesWatcher.Integration.ProcessFixture\RealEstatesWatcher.Integration.ProcessFixture.csproj" />
+    <ProjectReference Include="..\..\..\RealEstatesWatcher.Core\RealEstatesWatcher.Core.csproj" />
+    <ProjectReference Include="..\..\..\Filters\RealEstatesWatcher.AdPostsFilters.BasicFilter\RealEstatesWatcher.AdPostsFilters.BasicFilter.csproj" />
+    <ProjectReference Include="..\..\..\Handlers\RealEstatesWatcher.AdPostsHandlers.File\RealEstatesWatcher.AdPostsHandlers.File.csproj" />
+    <ProjectReference Include="..\..\..\Portals\RealEstatesWatcher.AdsPortals.SrealityCz\RealEstatesWatcher.AdsPortals.SrealityCz.csproj" />
+    <ProjectReference Include="..\..\..\Scrapers\RealEstatesWatcher.Scrapers\RealEstatesWatcher.Scrapers.csproj" />
+    <ProjectReference Include="..\..\..\Scrapers\RealEstatesWatcher.Scrapers.Contracts\RealEstatesWatcher.Scrapers.Contracts.csproj" />
+  </ItemGroup>
+</Project>

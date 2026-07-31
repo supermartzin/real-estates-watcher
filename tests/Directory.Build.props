@@ -4,10 +4,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
-    <IsTestProject>true</IsTestProject>
+    <IsTestProject Condition="'$(IsTestProject)' == ''">true</IsTestProject>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(IsTestProject)' == 'true'">
     <Compile Include="$(MSBuildThisFileDirectory)GlobalUsings.cs" Link="GlobalUsings.cs" />
     <PackageReference Include="coverlet.collector">
       <PrivateAssets>all</PrivateAssets>

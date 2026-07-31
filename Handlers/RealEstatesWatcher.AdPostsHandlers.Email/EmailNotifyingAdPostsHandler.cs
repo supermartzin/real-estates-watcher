@@ -1,13 +1,8 @@
-﻿using MailKit.Net.Smtp;
-
 using Microsoft.Extensions.Logging;
-
 using MimeKit;
-
 using RealEstatesWatcher.AdPostsHandlers.Base.Html;
 using RealEstatesWatcher.AdPostsHandlers.Contracts;
 using RealEstatesWatcher.Models;
-
 using System.Globalization;
 using System.Net;
 
@@ -15,10 +10,12 @@ namespace RealEstatesWatcher.AdPostsHandlers.Email;
 
 public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings settings,
                                           NumberFormatInfo? numberFormat = null,
-                                          ILogger<EmailNotifyingAdPostsHandler>? logger = null)
+                                          ILogger<EmailNotifyingAdPostsHandler>? logger = null,
+                                          ISmtpEmailSender? emailSender = null)
     : HtmlBasedAdPostsHandlerBase(numberFormat ?? NumberFormatInfo.CurrentInfo), IRealEstateAdPostsHandler
 {
     private readonly EmailNotifyingAdPostsHandlerSettings _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+    private readonly ISmtpEmailSender _emailSender = emailSender ?? new MailKitSmtpEmailSender();
 
     public bool IsEnabled { get; } = settings.Enabled;
 
@@ -81,19 +78,13 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
 
         try
         {
-            using var client = new SmtpClient();
-
-            await client.ConnectAsync(_settings.SmtpServerHost,
-                                      _settings.SmtpServerPort!.Value,
-                                      _settings.UseSecureConnection ?? true,
-                                      cancellationToken).ConfigureAwait(false);
-
-            await client.AuthenticateAsync(new NetworkCredential(_settings.Username, _settings.Password), cancellationToken)
-                .ConfigureAwait(false);
-
-            // send email
-            await client.SendAsync(message, cancellationToken).ConfigureAwait(false);
-            await client.DisconnectAsync(true, cancellationToken).ConfigureAwait(false);
+            await _emailSender.SendAsync(
+                message,
+                _settings.SmtpServerHost!,
+                _settings.SmtpServerPort!.Value,
+                _settings.UseSecureConnection ?? true,
+                new NetworkCredential(_settings.Username, _settings.Password),
+                cancellationToken).ConfigureAwait(false);
 
             logger?.LogInformation("Notification email has been successfully sent.");
         }
@@ -102,7 +93,6 @@ public class EmailNotifyingAdPostsHandler(EmailNotifyingAdPostsHandlerSettings s
             throw new RealEstateAdPostsHandlerException($"Error during sending email notification: {ex.Message}", ex);
         }
     }
-
 
     private static void ThrowIfMissing(bool isMissing, string settingName)
     {

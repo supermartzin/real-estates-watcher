@@ -66,6 +66,39 @@ public class RealEstateAdPostTests
         Assert.NotEqual(TestData.CreatePost("1"), TestData.CreatePost("2"));
 
     [Fact]
+    public void Equality_HandlesNullSameReferenceAndOtherTypes()
+    {
+        var post = TestData.CreatePost();
+
+        Assert.False(post.Equals((RealEstateAdPost?)null));
+        Assert.False(post.Equals(null));
+        Assert.False(post.Equals("not a post"));
+        Assert.True(post.Equals(post));
+    }
+
+    [Fact]
+    public void OptionalValues_HaveDocumentedDefaults()
+    {
+        var post = new RealEstateAdPost
+        {
+            AdsPortalName = "Portal",
+            Title = "Listing",
+            Text = string.Empty,
+            Price = decimal.Zero,
+            Address = string.Empty,
+            WebUrl = new Uri("https://example.test/listing"),
+            Currency = Currency.Other,
+            Layout = Layout.NotSpecified
+        };
+
+        Assert.Equal(decimal.Zero, post.FloorArea);
+        Assert.Equal(decimal.Zero, post.AdditionalFees);
+        Assert.Null(post.PriceComment);
+        Assert.Null(post.ImageUrl);
+        Assert.Null(post.PublishTime);
+    }
+
+    [Fact]
     public void ToString_ContainsTheMainListingFields()
     {
         var text = TestData.CreatePost().ToString();

@@ -16,4 +16,18 @@ public class RealityIdnesCzAdsPortalTests : PortalParserTestBase
 
         AssertPost(post, "Reality.idnes.cz", "Prodej bytu 1+kk 42 m²", 5_300_000m, 42m, Layout.OnePlusKk, "https://reality.idnes.test/listing/9");
     }
+
+    [Fact]
+    public void MissingPriceAreaLayoutAndImageUseDefaults()
+    {
+        const string html = """
+            <div><h2 class="c-products__title">rodinný dům</h2><p class="c-products__info">Liberec</p><a class="c-products__link" href="https://reality.idnes.test/fallback">Detail</a></div>
+            """;
+
+        var post = Parse(new RealityIdnesCzAdsPortal(WatchedUrl), html);
+
+        AssertPost(post, "Reality.idnes.cz", "Rodinný dům", decimal.Zero, decimal.Zero, Layout.NotSpecified, "https://reality.idnes.test/fallback");
+        Assert.Null(post.PriceComment);
+        Assert.Null(post.ImageUrl);
+    }
 }

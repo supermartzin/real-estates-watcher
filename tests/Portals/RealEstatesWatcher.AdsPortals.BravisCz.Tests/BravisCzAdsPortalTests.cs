@@ -17,4 +17,19 @@ public class BravisCzAdsPortalTests : PortalParserTestBase
         AssertPost(post, "Bravis.cz", "Pronájem bytu 2+kk", 25_000m, 65m, Layout.TwoPlusKk, "https://example.test/listing/4");
         Assert.Equal(3_500m, post.AdditionalFees);
     }
+
+    [Fact]
+    public void MissingPriceAreaLayoutAndImageUseDefaults()
+    {
+        const string html = """
+            <li><h1>Rodinný dům</h1><ul class="params"><li>Typ dům</li><li>Plocha neuvedena</li></ul><em class="location">Zlín</em><a class="main" href="fallback">Detail</a></li>
+            """;
+
+        var post = Parse(new BravisCzAdsPortal(WatchedUrl), html);
+
+        AssertPost(post, "Bravis.cz", "Rodinný dům", decimal.Zero, decimal.Zero, Layout.NotSpecified, "https://example.test/fallback");
+        Assert.Equal(decimal.Zero, post.AdditionalFees);
+        Assert.Null(post.PriceComment);
+        Assert.Null(post.ImageUrl);
+    }
 }

@@ -17,4 +17,19 @@ public class BidliCzAdsPortalTests : PortalParserTestBase
         AssertPost(post, "Bidli.cz", "Prodej bytu 3+kk 75 m²", 6_000_000m, 75m, Layout.ThreePlusKk, "https://example.test/listing/3");
         Assert.Equal(new Uri("https://example.test/images/three.jpg"), post.ImageUrl);
     }
+
+    [Fact]
+    public void TextPriceAndMissingPropertyDetailsUseFallbacks()
+    {
+        const string html = """
+            <a href="fallback"><span class="kategorie">Ateliér</span><span class="cena">Cena na dotaz</span><span class="adresa">Olomouc</span></a>
+            """;
+
+        var post = Parse(new BidliCzAdsPortal(WatchedUrl), html);
+
+        AssertPost(post, "Bidli.cz", "Ateliér", decimal.Zero, decimal.Zero, Layout.NotSpecified, "https://example.test/fallback");
+        Assert.Equal(Currency.Other, post.Currency);
+        Assert.Equal("Cena na dotaz", post.PriceComment);
+        Assert.Null(post.ImageUrl);
+    }
 }

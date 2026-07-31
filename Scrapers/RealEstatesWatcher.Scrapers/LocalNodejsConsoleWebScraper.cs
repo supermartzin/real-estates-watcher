@@ -1,5 +1,5 @@
-﻿using System.Diagnostics;
-using System.Runtime.InteropServices;
+using System.Diagnostics;
+using System.Globalization;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using RealEstatesWatcher.Scrapers.Contracts;
@@ -7,100 +7,68 @@ using RealEstatesWatcher.Scrapers.Contracts;
 namespace RealEstatesWatcher.Scrapers;
 
 public class LocalNodejsConsoleWebScraper(LocalNodejsConsoleWebScraperSettings settings,
-                                          ILogger<LocalNodejsConsoleWebScraper>? logger = null) : IWebScraper
+                                          ILogger<LocalNodejsConsoleWebScraper>? logger = null,
+                                          IProcessRunner? processRunner = null) : IWebScraper
 {
     private const int ProcessExitDelaySeconds = 3;
 
     private static readonly Encoding DefaultPageEncoding = Encoding.UTF8;
+    private readonly LocalNodejsConsoleWebScraperSettings _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+    private readonly IProcessRunner _processRunner = processRunner ?? new SystemProcessRunner();
 
     public async Task<string> GetFullWebPageContentAsync(string url, Encoding? pageEncoding = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(url);
 
-        return await GetFullWebPageContentAsync(new Uri(url), pageEncoding, cancellationToken);
+        return await GetFullWebPageContentAsync(new Uri(url), pageEncoding, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<string> GetFullWebPageContentAsync(Uri uri, Encoding? pageEncoding = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(uri);
 
-        if (settings.PageScrapingTimeoutSeconds < 0)
+        if (_settings.PageScrapingTimeoutSeconds < 0)
             throw new WebScraperException("Web scraping timeout has invalid value.");
-
-        // decide which console to use
-        string runner;
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            runner = "cmd.exe";
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            runner = "/bin/bash";
-        else throw new WebScraperException("Unknown operating system for running the script.");
 
         try
         {
             logger?.LogDebug("Creating process for scraping the page '{Url}'.", uri.OriginalString);
 
-            // create process
-            var process = new Process
-            {
-                StartInfo =
-                {
-                    FileName = runner,
-                    RedirectStandardError = true,
-                    RedirectStandardInput = true,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = true,
-                    UseShellExecute = false,
-                }
-            };
-            process.Start();
-
-            // build command
-            var command = $"node {settings.PathToScript} \"{settings.PageScrapingTimeoutSeconds}\" \"{uri.AbsoluteUri}\"";
-            if (!string.IsNullOrEmpty(settings.PathToCookiesFile))
-                command += $" \"{settings.PathToCookiesFile}\"";
+            var startInfo = new ProcessStartInfo { FileName = "node" };
+            startInfo.ArgumentList.Add(_settings.PathToScript);
+            startInfo.ArgumentList.Add(_settings.PageScrapingTimeoutSeconds.ToString(CultureInfo.InvariantCulture));
+            startInfo.ArgumentList.Add(uri.AbsoluteUri);
+            if (!string.IsNullOrEmpty(_settings.PathToCookiesFile))
+                startInfo.ArgumentList.Add(_settings.PathToCookiesFile);
 
             var startTime = Stopwatch.GetTimestamp();
-
             logger?.LogDebug("Scraping started...");
 
-            // execute external Node.js script
-            await process.StandardInput
-                         .WriteLineAsync(command)
-                         .ConfigureAwait(false);
-
-            await process.StandardInput
-                         .FlushAsync(cancellationToken)
-                         .ConfigureAwait(false);
-
-            process.StandardInput.Close();
-            process.WaitForExit(TimeSpan.FromSeconds(settings.PageScrapingTimeoutSeconds + ProcessExitDelaySeconds));
+            var result = await _processRunner.RunAsync(
+                startInfo,
+                pageEncoding ?? DefaultPageEncoding,
+                TimeSpan.FromSeconds(_settings.PageScrapingTimeoutSeconds + ProcessExitDelaySeconds),
+                cancellationToken).ConfigureAwait(false);
 
             logger?.LogDebug("Scraping finished in {Seconds} s.", Stopwatch.GetElapsedTime(startTime).TotalSeconds);
 
-            using var outputReader = new StreamReader(process.StandardOutput.BaseStream, pageEncoding ?? DefaultPageEncoding);
-            using var errorReader = new StreamReader(process.StandardError.BaseStream, pageEncoding ?? DefaultPageEncoding);
+            if (result.ExitCode is not 0 || !string.IsNullOrWhiteSpace(result.StandardError))
+            {
+                var details = string.IsNullOrWhiteSpace(result.StandardError)
+                    ? $"Node.js process exited with code {result.ExitCode}."
+                    : result.StandardError;
+                throw new WebScraperException($"Error scraping web page: {details}");
+            }
 
-            var output = await outputReader.ReadToEndAsync(cancellationToken)
-                                           .ConfigureAwait(false);
-            var errorOutput = await errorReader.ReadToEndAsync(cancellationToken)
-                                               .ConfigureAwait(false);
+            var startIndex = result.StandardOutput.IndexOf("<html", StringComparison.OrdinalIgnoreCase);
+            var closingTagIndex = result.StandardOutput.LastIndexOf("</html>", StringComparison.OrdinalIgnoreCase);
 
-            process.StandardOutput.Close();
-            process.StandardError.Close();
-
-            if (!string.IsNullOrEmpty(errorOutput))
-                throw new WebScraperException($"Error scraping web page: {errorOutput}");
-
-            // extract HTML content from whole output
-            var startIndex = output.IndexOf("<html", StringComparison.Ordinal);
-            var endIndex = output.LastIndexOf("</html>", StringComparison.Ordinal) + 7;
-
-            if (startIndex < 0 || endIndex < 0)
+            if (startIndex < 0 || closingTagIndex < startIndex)
                 throw new WebScraperException("No web page content has been scraped.");
 
             logger?.LogDebug("Successfully scraped page content.");
 
-            return output[startIndex..endIndex];
+            return result.StandardOutput[startIndex..(closingTagIndex + 7)];
         }
         catch (WebScraperException)
         {

@@ -65,6 +65,49 @@ public sealed class LocalFileAdPostsHandlerTests : IDisposable
     }
 
     [Fact]
+    public async Task Html_FirstNewPostCreatesACompletePage()
+    {
+        var path = Path.Combine(_directory, "new-only.html");
+        var handler = CreateHandler(path, PrintFormat.Html);
+
+        await handler.HandleNewRealEstateAdPostAsync(TestData.CreatePost("new-only"));
+        var content = await File.ReadAllTextAsync(path);
+
+        Assert.StartsWith("<!DOCTYPE html>", content.TrimStart());
+        Assert.Contains("/new-only", content);
+        Assert.Contains("<posts/>", content);
+    }
+
+    [Fact]
+    public async Task InvalidDirectory_WrapsFileSystemFailure()
+    {
+        var path = Path.Combine(_directory, "missing", "posts.txt");
+        var handler = CreateHandler(path, PrintFormat.PlainText);
+
+        var exception = await Assert.ThrowsAsync<RealEstateAdPostsHandlerException>(
+            () => handler.HandleInitialRealEstateAdPostsAsync([TestData.CreatePost()]));
+
+        Assert.IsType<DirectoryNotFoundException>(exception.InnerException);
+    }
+
+    [Fact]
+    public async Task MissingPrintFormat_PerformsNoWrite()
+    {
+        var path = Path.Combine(_directory, "unused.txt");
+        var handler = new LocalFileAdPostsHandler(new LocalFileAdPostsHandlerSettings
+        {
+            Enabled = true,
+            MainFilePath = path,
+            PrintFormat = null
+        });
+
+        await handler.HandleInitialRealEstateAdPostsAsync([TestData.CreatePost()]);
+        await handler.HandleNewRealEstatesAdPostsAsync([TestData.CreatePost("new")]);
+
+        Assert.False(File.Exists(path));
+    }
+
+    [Fact]
     public async Task MissingPath_ThrowsDomainException()
     {
         var handler = new LocalFileAdPostsHandler(new LocalFileAdPostsHandlerSettings

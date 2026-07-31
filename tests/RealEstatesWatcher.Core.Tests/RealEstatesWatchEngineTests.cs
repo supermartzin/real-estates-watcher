@@ -13,6 +13,16 @@ public class RealEstatesWatchEngineTests
         Assert.Throws<ArgumentNullException>(() => new RealEstatesWatchEngine(null!));
 
     [Fact]
+    public void Registration_RejectsNullDependencies()
+    {
+        var engine = CreateEngine();
+
+        Assert.Throws<ArgumentNullException>(() => engine.RegisterAdsPortal(null!));
+        Assert.Throws<ArgumentNullException>(() => engine.RegisterAdPostsHandler(null!));
+        Assert.Throws<ArgumentNullException>(() => engine.RegisterAdPostsFilter(null!));
+    }
+
+    [Fact]
     public async Task Start_RequiresAtLeastOnePortal()
     {
         var engine = CreateEngine();
@@ -86,6 +96,113 @@ public class RealEstatesWatchEngineTests
         {
             if (engine.IsRunning)
                 await engine.StopAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Start_WhenAllPostsAreFilteredOut_StillStartsWithoutNotification()
+    {
+        var engine = CreateEngine();
+        var handler = new RecordingHandler();
+        engine.RegisterAdsPortal(new StubPortal("Portal", [TestData.CreatePost()]));
+        engine.RegisterAdPostsFilter(new DelegateFilter(_ => []));
+        engine.RegisterAdPostsHandler(handler);
+
+        await engine.StartAsync();
+        try
+        {
+            Assert.True(engine.IsRunning);
+            Assert.Empty(handler.InitialBatches);
+        }
+        finally
+        {
+            await engine.StopAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Start_WhenPortalFails_ContinuesSchedulingOtherChecks()
+    {
+        var engine = CreateEngine();
+        var portal = new StubPortal("Portal", [])
+        {
+            Exception = new RealEstateAdsPortalException("unavailable")
+        };
+        engine.RegisterAdsPortal(portal);
+        engine.RegisterAdPostsHandler(new RecordingHandler());
+
+        await engine.StartAsync();
+        try
+        {
+            Assert.True(engine.IsRunning);
+            Assert.Equal(1, portal.CallCount);
+        }
+        finally
+        {
+            await engine.StopAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Start_WhenInitialHandlerFails_WrapsTheDomainException()
+    {
+        var engine = CreateEngine();
+        var expected = new RealEstateAdPostsHandlerException("write failed");
+        engine.RegisterAdsPortal(new StubPortal("Portal", [TestData.CreatePost()]));
+        engine.RegisterAdPostsHandler(new RecordingHandler { InitialException = expected });
+
+        var exception = await Assert.ThrowsAsync<RealEstatesWatchEngineException>(() => engine.StartAsync());
+
+        Assert.Same(expected, exception.InnerException);
+        Assert.False(engine.IsRunning);
+    }
+
+    [Fact]
+    public async Task Start_WithDeferredFirstCheck_DoesNotLoadPortalImmediately()
+    {
+        var portal = new StubPortal("Portal", [TestData.CreatePost()]);
+        var engine = CreateEngine(new WatchEngineSettings
+        {
+            CheckIntervalMinutes = 1,
+            PerformCheckOnStartup = false,
+            StartCheckAtSpecificTime = TimeOnly.FromDateTime(DateTime.UtcNow.AddSeconds(30))
+        });
+        engine.RegisterAdsPortal(portal);
+        engine.RegisterAdPostsHandler(new RecordingHandler());
+
+        await engine.StartAsync();
+        try
+        {
+            Assert.True(engine.IsRunning);
+            Assert.Equal(0, portal.CallCount);
+        }
+        finally
+        {
+            await engine.StopAsync();
+        }
+    }
+
+    [Fact]
+    public async Task DuplicateHandlerAndFilterInstances_AreOnlyInvokedOnce()
+    {
+        var engine = CreateEngine();
+        var handler = new RecordingHandler();
+        var filter = new DelegateFilter(posts => posts);
+        engine.RegisterAdsPortal(new StubPortal("Portal", [TestData.CreatePost()]));
+        engine.RegisterAdPostsHandler(handler);
+        engine.RegisterAdPostsHandler(handler);
+        engine.RegisterAdPostsFilter(filter);
+        engine.RegisterAdPostsFilter(filter);
+
+        await engine.StartAsync();
+        try
+        {
+            Assert.Single(handler.InitialBatches);
+            Assert.Equal(1, filter.CallCount);
+        }
+        finally
+        {
+            await engine.StopAsync();
         }
     }
 
@@ -184,11 +301,14 @@ public class RealEstatesWatchEngineTests
         public string Name { get; } = name;
         public string WatchedUrl => "https://example.test";
         public int CallCount { get; private set; }
+        public Exception? Exception { get; init; }
 
         public Task<IList<RealEstateAdPost>> GetLatestRealEstateAdsAsync()
         {
             CallCount++;
-            return Task.FromResult(posts);
+            return Exception is not null
+                ? Task.FromException<IList<RealEstateAdPost>>(Exception)
+                : Task.FromResult(posts);
         }
     }
 
@@ -196,12 +316,16 @@ public class RealEstatesWatchEngineTests
     {
         public bool IsEnabled { get; init; } = true;
         public List<IList<RealEstateAdPost>> InitialBatches { get; } = [];
+        public Exception? InitialException { get; init; }
 
         public Task HandleNewRealEstateAdPostAsync(RealEstateAdPost adPost, CancellationToken cancellationToken = default) => Task.CompletedTask;
         public Task HandleNewRealEstatesAdPostsAsync(IList<RealEstateAdPost> adPosts, CancellationToken cancellationToken = default) => Task.CompletedTask;
 
         public Task HandleInitialRealEstateAdPostsAsync(IList<RealEstateAdPost> adPosts, CancellationToken cancellationToken = default)
         {
+            if (InitialException is not null)
+                return Task.FromException(InitialException);
+
             InitialBatches.Add(adPosts);
             return Task.CompletedTask;
         }
@@ -209,6 +333,25 @@ public class RealEstatesWatchEngineTests
 
     private sealed class DelegateFilter(Func<IEnumerable<RealEstateAdPost>, IEnumerable<RealEstateAdPost>> filter) : IRealEstateAdPostsFilter
     {
-        public IEnumerable<RealEstateAdPost> Filter(IEnumerable<RealEstateAdPost> adPosts) => filter(adPosts);
+        public int CallCount { get; private set; }
+
+        public IEnumerable<RealEstateAdPost> Filter(IEnumerable<RealEstateAdPost> adPosts)
+        {
+            CallCount++;
+            return filter(adPosts);
+        }
+    }
+}
+
+public class RealEstatesWatchEngineExceptionTests
+{
+    [Fact]
+    public void Constructors_PreserveMessagesAndInnerExceptions()
+    {
+        var inner = new InvalidOperationException("inner");
+
+        Assert.Null(new RealEstatesWatchEngineException().InnerException);
+        Assert.Equal("message", new RealEstatesWatchEngineException("message").Message);
+        Assert.Same(inner, new RealEstatesWatchEngineException("message", inner).InnerException);
     }
 }

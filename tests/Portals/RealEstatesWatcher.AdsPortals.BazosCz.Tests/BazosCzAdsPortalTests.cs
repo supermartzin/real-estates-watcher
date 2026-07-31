@@ -18,4 +18,19 @@ public class BazosCzAdsPortalTests : PortalParserTestBase
         Assert.Equal("Praha Vinohrady", post.Address);
         Assert.Equal(new DateTime(2026, 7, 31), post.PublishTime);
     }
+
+    [Fact]
+    public void ParsesFallbackValuesFromDescription()
+    {
+        const string html = """
+            <div><div class="nadpis"><a href="/listing/fallback">Rodinný dům</a></div><div class="popis">Dispozice 1+kk, plocha 39.5 m²</div><div class="inzeratylok">Brno</div><div class="inzeratycena">Dohodou</div></div>
+            """;
+
+        var post = Parse(new BazosCzAdsPortal(WatchedUrl), html);
+
+        AssertPost(post, "Bazoš.cz", "Rodinný dům", decimal.Zero, 39.5m, Layout.OnePlusKk, "https://example.test/listing/fallback");
+        Assert.Equal("Dohodou", post.PriceComment);
+        Assert.Null(post.PublishTime);
+        Assert.Null(post.ImageUrl);
+    }
 }

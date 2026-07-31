@@ -52,6 +52,41 @@ public class CmdArgumentsTests
     }
 
     [Fact]
+    public async Task Parse_AcceptsConfiguredAliases()
+    {
+        var arguments = new CmdArguments();
+
+        var parsed = await arguments.ParseAsync(
+        [
+            "--p", "portals.ini",
+            "--h", "handlers.ini",
+            "--e", "engine.ini",
+            "--f", "filters.ini",
+            "--s", "scraper.ini"
+        ]);
+
+        Assert.True(parsed);
+        Assert.Equal("portals.ini", arguments.PortalsConfigFilePath);
+        Assert.Equal("scraper.ini", arguments.WebScraperConfigFilePath);
+    }
+
+    [Fact]
+    public async Task Parse_ReturnsFalseForUnknownOptions()
+    {
+        var arguments = new CmdArguments();
+
+        var parsed = await arguments.ParseAsync(
+        [
+            "-portals", "portals.ini",
+            "-handlers", "handlers.ini",
+            "-engine", "engine.ini",
+            "--unknown", "value"
+        ]);
+
+        Assert.False(parsed);
+    }
+
+    [Fact]
     public async Task Parse_RejectsNullArguments()
     {
         var arguments = new CmdArguments();

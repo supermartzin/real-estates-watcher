@@ -21,4 +21,23 @@ public class SrealityCzAdsPortalTests : PortalParserTestBase
         Assert.Equal("Praha 2", post.Address);
         Assert.Equal(new Uri("https://img.example.test/one.jpg"), post.ImageUrl);
     }
+
+    [Fact]
+    public async Task SparseListingUsesFallbackValues()
+    {
+        const string html = """
+            <html><body><ul><li id="estate-list-item-fallback"><a href="/fallback"><p>Ateliér</p></a></li></ul></body></html>
+            """;
+        var portal = new SrealityCzAdsPortal("https://www.sreality.cz/hledani", new StubWebScraper(html));
+
+        var post = Assert.Single(await portal.GetLatestRealEstateAdsAsync());
+
+        Assert.Equal("Ateliér", post.Title);
+        Assert.Equal(string.Empty, post.Address);
+        Assert.Equal(decimal.Zero, post.Price);
+        Assert.Equal(decimal.Zero, post.FloorArea);
+        Assert.Equal(Layout.NotSpecified, post.Layout);
+        Assert.Null(post.PriceComment);
+        Assert.Null(post.ImageUrl);
+    }
 }
