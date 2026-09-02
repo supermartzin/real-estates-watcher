@@ -6,15 +6,28 @@ using RealEstatesWatcher.Scrapers.Contracts;
 
 namespace RealEstatesWatcher.Scrapers;
 
-public class LocalNodejsConsoleWebScraper(LocalNodejsConsoleWebScraperSettings settings,
-                                          ILogger<LocalNodejsConsoleWebScraper>? logger = null,
-                                          IProcessRunner? processRunner = null) : IWebScraper
+public class LocalNodejsConsoleWebScraper : IWebScraper
 {
     private const int ProcessExitDelaySeconds = 3;
 
     private static readonly Encoding DefaultPageEncoding = Encoding.UTF8;
-    private readonly LocalNodejsConsoleWebScraperSettings _settings = settings ?? throw new ArgumentNullException(nameof(settings));
-    private readonly IProcessRunner _processRunner = processRunner ?? new SystemProcessRunner();
+    private readonly ILogger<LocalNodejsConsoleWebScraper>? _logger;
+    private readonly string _nodeExecutablePath;
+    private readonly LocalNodejsConsoleWebScraperSettings _settings;
+    private readonly IProcessRunner _processRunner;
+
+    public LocalNodejsConsoleWebScraper(
+        LocalNodejsConsoleWebScraperSettings settings,
+        ILogger<LocalNodejsConsoleWebScraper>? logger = null,
+        IProcessRunner? processRunner = null)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+
+        _settings = settings;
+        _logger = logger;
+        _processRunner = processRunner ?? new SystemProcessRunner();
+        _nodeExecutablePath = ResolveNodeExecutablePath(settings.PathToNodeExecutable);
+    }
 
     public async Task<string> GetFullWebPageContentAsync(string url, Encoding? pageEncoding = null, CancellationToken cancellationToken = default)
     {
@@ -32,9 +45,9 @@ public class LocalNodejsConsoleWebScraper(LocalNodejsConsoleWebScraperSettings s
 
         try
         {
-            logger?.LogDebug("Creating process for scraping the page '{Url}'.", uri.OriginalString);
+            _logger?.LogDebug("Creating process for scraping the page '{Url}'.", uri.OriginalString);
 
-            var startInfo = new ProcessStartInfo { FileName = "node" };
+            var startInfo = new ProcessStartInfo { FileName = _nodeExecutablePath };
             startInfo.ArgumentList.Add(_settings.PathToScript);
             startInfo.ArgumentList.Add(_settings.PageScrapingTimeoutSeconds.ToString(CultureInfo.InvariantCulture));
             startInfo.ArgumentList.Add(uri.AbsoluteUri);
@@ -42,7 +55,7 @@ public class LocalNodejsConsoleWebScraper(LocalNodejsConsoleWebScraperSettings s
                 startInfo.ArgumentList.Add(_settings.PathToCookiesFile);
 
             var startTime = Stopwatch.GetTimestamp();
-            logger?.LogDebug("Scraping started...");
+            _logger?.LogDebug("Scraping started...");
 
             var result = await _processRunner.RunAsync(
                 startInfo,
@@ -50,7 +63,7 @@ public class LocalNodejsConsoleWebScraper(LocalNodejsConsoleWebScraperSettings s
                 TimeSpan.FromSeconds(_settings.PageScrapingTimeoutSeconds + ProcessExitDelaySeconds),
                 cancellationToken).ConfigureAwait(false);
 
-            logger?.LogDebug("Scraping finished in {Seconds} s.", Stopwatch.GetElapsedTime(startTime).TotalSeconds);
+            _logger?.LogDebug("Scraping finished in {Seconds} s.", Stopwatch.GetElapsedTime(startTime).TotalSeconds);
 
             if (result.ExitCode is not 0 || !string.IsNullOrWhiteSpace(result.StandardError))
             {
@@ -66,7 +79,7 @@ public class LocalNodejsConsoleWebScraper(LocalNodejsConsoleWebScraperSettings s
             if (startIndex < 0 || closingTagIndex < startIndex)
                 throw new WebScraperException("No web page content has been scraped.");
 
-            logger?.LogDebug("Successfully scraped page content.");
+            _logger?.LogDebug("Successfully scraped page content.");
 
             return result.StandardOutput[startIndex..(closingTagIndex + 7)];
         }
@@ -79,4 +92,20 @@ public class LocalNodejsConsoleWebScraper(LocalNodejsConsoleWebScraperSettings s
             throw new WebScraperException($"Error scraping web page: {ex.Message}", ex);
         }
     }
+
+    private static string ResolveNodeExecutablePath(string? configuredPath)
+    {
+        var path = string.IsNullOrWhiteSpace(configuredPath)
+            ? GetDefaultNodeExecutablePath()
+            : configuredPath;
+
+        if (!Path.IsPathFullyQualified(path))
+            throw new ArgumentException("The Node.js executable path must be absolute.", nameof(configuredPath));
+
+        return Path.GetFullPath(path);
+    }
+
+    private static string GetDefaultNodeExecutablePath() => OperatingSystem.IsWindows()
+        ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "nodejs", "node.exe")
+        : "/usr/local/bin/node";
 }

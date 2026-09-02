@@ -175,6 +175,7 @@ public class ConsoleRunner
         
         return new LocalNodejsConsoleWebScraperSettings
         {
+            PathToNodeExecutable = configuration.GetValue<string?>(Attributes.GetSettingsKey<LocalNodejsConsoleWebScraperSettings>(nameof(LocalNodejsConsoleWebScraperSettings.PathToNodeExecutable)), null),
             PathToScript = configuration.GetValue(Attributes.GetSettingsKey<LocalNodejsConsoleWebScraperSettings>(nameof(LocalNodejsConsoleWebScraperSettings.PathToScript)), string.Empty),
             PageScrapingTimeoutSeconds = configuration.GetValue<int>(Attributes.GetSettingsKey<LocalNodejsConsoleWebScraperSettings>(nameof(LocalNodejsConsoleWebScraperSettings.PageScrapingTimeoutSeconds))),
             PathToCookiesFile = configuration.GetValue<string?>(Attributes.GetSettingsKey<LocalNodejsConsoleWebScraperSettings>(nameof(LocalNodejsConsoleWebScraperSettings.PathToCookiesFile)), null)

@@ -1,0 +1,3 @@
+[mcp_servers.sonarqube]
+command = "sonar"
+args = [ "run", "mcp", "--project", "supermartzin_real-estates-watcher" ]

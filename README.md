@@ -5,7 +5,7 @@ Supports watching adverts for **sells** as well as **leases**.
 [![Build and publish .NET commandline script](https://github.com/supermartzin/real-estates-watcher/actions/workflows/dotnet.yml/badge.svg?branch=main)](https://github.com/supermartzin/real-estates-watcher/actions/workflows/dotnet.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=supermartzin_real-estates-watcher&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=supermartzin_real-estates-watcher)
 
-**Frameworks:** .NET 10, Node.js (for web scraping script)
+**Frameworks:** .NET 10, Node.js 22.12 or later (for the web scraping script)
 
 **Supported OS:** Windows, macOS, Linux
 
@@ -64,9 +64,9 @@ Perform following steps and commands either from the [**root folder**](https://g
 
  6. **Deploy** the whole **publish directory** to server or run locally.
  
- 7.  On the target machine, enter `scraper` folder and **install** all required **Node.js dependencies** with command
+ 7.  On the target machine, enter `scraper` folder and **install** the locked **Node.js dependencies** with command
  
-      `npm install`
+      `npm ci`
       
       ##### * It's important to do this on the target platform as the dependencies are platform-specific
 
@@ -163,6 +163,7 @@ https://reality.bazos.cz/prodam/chata/...<b>↩</b>
 **scraper.ini** - configuration of the Web scraper script when Ad portal page is dynamic and require JavaScript in order to fully load the content (*optional* cmd argument `--s` or `-scraper`)
 
     [nodejs]
+    path_to_node_executable=          # <string>  | optional | absolute path to Node.js (defaults to the standard platform install path)
     path_to_script=                   # <string>  | required | path to web scraping script
     page_scraping_timeout_seconds=    # <number>  | required | maximum timeout for scraping a single webpage (when set to 0 waits indefinitely)
     path_to_cookies_file=             # <string>  | optional | path to file with cookies that may be needed with some Ad portals (see README)

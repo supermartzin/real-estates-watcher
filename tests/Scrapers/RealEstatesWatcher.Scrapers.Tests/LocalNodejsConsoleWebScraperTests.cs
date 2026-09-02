@@ -7,6 +7,10 @@ namespace RealEstatesWatcher.Tests;
 
 public class LocalNodejsConsoleWebScraperTests
 {
+    private static readonly string NodeExecutablePath = OperatingSystem.IsWindows()
+        ? @"C:\Program Files\nodejs\node.exe"
+        : "/usr/local/bin/node";
+
     [Fact]
     public void Constructor_RejectsNullSettings() =>
         Assert.Throws<ArgumentNullException>(() => new LocalNodejsConsoleWebScraper(null!));
@@ -61,6 +65,7 @@ public class LocalNodejsConsoleWebScraperTests
             string.Empty));
         var settings = new LocalNodejsConsoleWebScraperSettings
         {
+            PathToNodeExecutable = NodeExecutablePath,
             PathToScript = @"C:\scripts with spaces\scraper.js",
             PathToCookiesFile = @"C:\cookies with spaces\cookies.json",
             PageScrapingTimeoutSeconds = 7
@@ -74,13 +79,28 @@ public class LocalNodejsConsoleWebScraperTests
 
         Assert.Equal("<HTML lang=\"en\"><body>page</body></HTML>", result);
         Assert.NotNull(runner.StartInfo);
-        Assert.Equal("node", runner.StartInfo.FileName);
+        Assert.Equal(settings.PathToNodeExecutable, runner.StartInfo.FileName);
         Assert.Equal(
             [settings.PathToScript, "7", uri.AbsoluteUri, settings.PathToCookiesFile],
             runner.StartInfo.ArgumentList.ToArray());
         Assert.Same(encoding, runner.OutputEncoding);
         Assert.Equal(TimeSpan.FromSeconds(10), runner.Timeout);
         Assert.Equal(cancellation.Token, runner.CancellationToken);
+    }
+
+    [Fact]
+    public void Constructor_RejectsRelativeNodeExecutablePath()
+    {
+        var settings = new LocalNodejsConsoleWebScraperSettings
+        {
+            PathToNodeExecutable = "node",
+            PathToScript = "unused.js",
+            PageScrapingTimeoutSeconds = 1
+        };
+
+        var exception = Assert.Throws<ArgumentException>(() => new LocalNodejsConsoleWebScraper(settings));
+
+        Assert.Contains("must be absolute", exception.Message);
     }
 
     [Fact]
@@ -141,6 +161,7 @@ public class LocalNodejsConsoleWebScraperTests
     private static LocalNodejsConsoleWebScraper CreateScraper(int timeout = 1, IProcessRunner? runner = null) => new(
         new LocalNodejsConsoleWebScraperSettings
         {
+            PathToNodeExecutable = NodeExecutablePath,
             PathToScript = "unused.js",
             PageScrapingTimeoutSeconds = timeout
         },

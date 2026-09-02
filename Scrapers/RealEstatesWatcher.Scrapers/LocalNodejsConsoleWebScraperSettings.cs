@@ -5,6 +5,9 @@ namespace RealEstatesWatcher.Scrapers;
 [SettingsSectionKey("nodejs")]
 public record LocalNodejsConsoleWebScraperSettings
 {
+    [SettingsKey("path_to_node_executable")]
+    public string? PathToNodeExecutable { get; init; }
+
     [SettingsKey("path_to_script")]
     public required string PathToScript { get; init; }
 

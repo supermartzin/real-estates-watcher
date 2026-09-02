@@ -14,6 +14,8 @@
 **/azds.yaml
 **/bin
 **/charts
+**/configs/*.ini
+**/cookies.json
 **/docker-compose*
 **/Dockerfile*
 **/node_modules

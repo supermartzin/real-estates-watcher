@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \".codex/hooks/sonar-secrets/build-scripts/prompt-secrets.ps1\"",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}

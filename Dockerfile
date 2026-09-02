@@ -1,8 +1,3 @@
-# This stage is used when running from VS in fast mode (Default for Debug configuration)
-FROM mcr.microsoft.com/dotnet/runtime:10.0 AS base
-USER app
-WORKDIR /app
-
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
@@ -15,6 +10,7 @@ COPY "Filters/RealEstatesWatcher.AdPostsFilters.Contracts/RealEstatesWatcher.AdP
 COPY "RealEstatesWatcher.Models/RealEstatesWatcher.Models.csproj" "RealEstatesWatcher.Models/"
 COPY "Handlers/RealEstatesWatcher.AdPostsHandlers.Email/RealEstatesWatcher.AdPostsHandlers.Email.csproj" "Handlers/RealEstatesWatcher.AdPostsHandlers.Email/"
 COPY "Handlers/RealEstatesWatcher.AdPostsHandlers.Contracts/RealEstatesWatcher.AdPostsHandlers.Contracts.csproj" "Handlers/RealEstatesWatcher.AdPostsHandlers.Contracts/"
+COPY "Handlers/RealEstatesWatcher.AdPostsHandlers.Base.Html/RealEstatesWatcher.AdPostsHandlers.Base.Html.csproj" "Handlers/RealEstatesWatcher.AdPostsHandlers.Base.Html/"
 COPY "Handlers/RealEstatesWatcher.AdPostsHandlers.File/RealEstatesWatcher.AdPostsHandlers.File.csproj" "Handlers/RealEstatesWatcher.AdPostsHandlers.File/"
 COPY "Portals/RealEstatesWatcher.AdsPortals.BazosCz/RealEstatesWatcher.AdsPortals.BazosCz.csproj" "Portals/RealEstatesWatcher.AdsPortals.BazosCz/"
 COPY "Portals/RealEstatesWatcher.AdsPortals.Base/RealEstatesWatcher.AdsPortals.Base.csproj" "Portals/RealEstatesWatcher.AdsPortals.Base/"
@@ -32,25 +28,28 @@ COPY "Portals/RealEstatesWatcher.AdsPortals.SrealityCz/RealEstatesWatcher.AdsPor
 COPY "Portals/RealEstatesWatcher.AdsPortals.BezrealitkyCz/RealEstatesWatcher.AdsPortals.BezrealitkyCz.csproj" "Portals/RealEstatesWatcher.AdsPortals.BezrealitkyCz/"
 COPY "RealEstatesWatcher.Core/RealEstatesWatcher.Core.csproj" "RealEstatesWatcher.Core/"
 COPY "Scrapers/RealEstatesWatcher.Scrapers/RealEstatesWatcher.Scrapers.csproj" "Scrapers/RealEstatesWatcher.Scrapers/"
+COPY "Tools/RealEstatesWatcher.Tools.Attributes/RealEstatesWatcher.Tools.Attributes.csproj" "Tools/RealEstatesWatcher.Tools.Attributes/"
 RUN dotnet restore "./RealEstatesWatcher.UI.Console/RealEstatesWatcher.UI.Console.csproj"
 COPY . .
 WORKDIR "/src/RealEstatesWatcher.UI.Console/"
-RUN dotnet build "./RealEstatesWatcher.UI.Console.csproj" -c $BUILD_CONFIGURATION -o /app/build --no-restore
+RUN dotnet build "./RealEstatesWatcher.UI.Console.csproj" -c "$BUILD_CONFIGURATION" -o /app/build --no-restore
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-COPY "Tools/scraper/" "/app/publish/scraper/"
-RUN dotnet publish "./RealEstatesWatcher.UI.Console.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:PublishProfile=Linux-profile
-# install Node.js runtime for external Puppeteer web scraper
-WORKDIR /app/publish/scraper
-RUN apt-get update -yq && apt-get upgrade -yq && apt-get install -yq curl git nano
-RUN curl -sL https://deb.nodesource.com/setup_23.x | bash - && apt-get install -yq nodejs build-essential
-RUN npm install -g npm
-RUN npm install
+RUN dotnet publish "./RealEstatesWatcher.UI.Console.csproj" \
+    -c "$BUILD_CONFIGURATION" \
+    -r linux-x64 \
+    --self-contained true \
+    -o /app/publish \
+    /p:PublishProfile=Linux-profile
 
-# This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
-FROM base AS final
+# The official image includes Node.js, Puppeteer 25.4.0, its matching Chrome,
+# and the browser's runtime dependencies. The digest makes the supply chain reproducible.
+FROM ghcr.io/puppeteer/puppeteer:25.4.0@sha256:d93009ac8e1b8f307d59847b82404b51fd1672ddd6bdd5a4016a1cd9b5afd94d AS final
+ENV NODE_PATH=/home/pptruser/node_modules
 WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "RealEstatesWatcher.UI.Console.dll", "--e", "configs/engine.ini", "--h", "configs/handlers.ini", "--p", "configs/portals.ini"]
+COPY --from=publish --chown=10042:10042 /app/publish .
+COPY --chown=10042:10042 "Tools/scraper/index.js" "Tools/scraper/package.json" "Tools/scraper/package-lock.json" "/app/scraper/"
+USER 10042
+ENTRYPOINT ["./RealEstatesWatcher.UI.Console", "--e", "configs/engine.ini", "--h", "configs/handlers.ini", "--p", "configs/portals.ini"]

@@ -100,8 +100,9 @@ public class SystemProcessRunnerIntegrationTests
     public async Task Run_CapturesOutputFromARealChildProcess()
     {
         var runner = new SystemProcessRunner();
-        var startInfo = new ProcessStartInfo { FileName = "dotnet" };
-        startInfo.ArgumentList.Add("--version");
+        var startInfo = new ProcessStartInfo { FileName = GetFixtureExecutablePath() };
+        startInfo.ArgumentList.Add("write");
+        startInfo.ArgumentList.Add("fixture output");
 
         var result = await runner.RunAsync(
             startInfo,
@@ -109,7 +110,7 @@ public class SystemProcessRunnerIntegrationTests
             TimeSpan.FromSeconds(10));
 
         Assert.Equal(0, result.ExitCode);
-        Assert.Matches(@"^\d+\.\d+", result.StandardOutput.Trim());
+        Assert.Equal("fixture output", result.StandardOutput);
         Assert.True(string.IsNullOrWhiteSpace(result.StandardError));
     }
 
@@ -145,13 +146,15 @@ public class SystemProcessRunnerIntegrationTests
 
     private static ProcessStartInfo CreateDelayProcess(TimeSpan delay)
     {
-        var fixturePath = Path.Combine(
-            AppContext.BaseDirectory,
-            "RealEstatesWatcher.Integration.ProcessFixture.dll");
-        var startInfo = new ProcessStartInfo { FileName = "dotnet" };
-        startInfo.ArgumentList.Add(fixturePath);
+        var startInfo = new ProcessStartInfo { FileName = GetFixtureExecutablePath() };
         startInfo.ArgumentList.Add("delay");
         startInfo.ArgumentList.Add(((int)delay.TotalMilliseconds).ToString(CultureInfo.InvariantCulture));
         return startInfo;
     }
+
+    private static string GetFixtureExecutablePath() => Path.Combine(
+        AppContext.BaseDirectory,
+        OperatingSystem.IsWindows()
+            ? "RealEstatesWatcher.Integration.ProcessFixture.exe"
+            : "RealEstatesWatcher.Integration.ProcessFixture");
 }
