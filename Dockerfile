@@ -46,7 +46,7 @@ RUN dotnet publish "./RealEstatesWatcher.UI.Console.csproj" \
 
 # The official image includes Node.js, Puppeteer, its matching Chrome,
 # and the browser's runtime dependencies. The digest makes the supply chain reproducible.
-FROM ghcr.io/puppeteer/puppeteer@sha256:893118e0546f8cee371a0ae09c8489d1e9c40de28c45df9d811d4233203b81a3 AS final
+FROM ghcr.io/puppeteer/puppeteer@sha256:ced0f7e1b416fafb4166f9f9d26109ea7bbd7cb04b8a38ae8c14b61f364c3d6f AS final
 ENV NODE_PATH=/home/pptruser/node_modules
 WORKDIR /app
 COPY --from=publish --chown=10042:10042 /app/publish .
