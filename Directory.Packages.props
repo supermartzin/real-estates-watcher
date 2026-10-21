@@ -13,7 +13,7 @@
     <PackageVersion Include="NLog.Extensions.Logging" Version="6.2.2" />
     <PackageVersion Include="Sentry.Extensions.Logging" Version="6.12.1" />
     <PackageVersion Include="Sentry.Profiling" Version="6.12.1" />
-    <PackageVersion Include="System.CommandLine" Version="2.0.12" />
+    <PackageVersion Include="System.CommandLine" Version="2.0.13" />
     <PackageVersion Include="coverlet.collector" Version="10.1.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />
