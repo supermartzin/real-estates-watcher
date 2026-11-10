@@ -1,3 +1,5 @@
+#nullable enable
+
 using RealEstatesWatcher.UI.Console;
 
 namespace RealEstatesWatcher.Tests;

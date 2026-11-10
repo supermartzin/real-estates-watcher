@@ -1,3 +1,5 @@
+#nullable enable
+
 using RealEstatesWatcher.AdPostsFilters.BasicFilter;
 using RealEstatesWatcher.AdPostsHandlers.File;
 using RealEstatesWatcher.Models;
@@ -6,9 +8,15 @@ using RealEstatesWatcher.UI.Console;
 
 namespace RealEstatesWatcher.Tests;
 
-public class WatcherConfigurationTests : IDisposable
+public sealed class WatcherConfigurationTests : IDisposable
 {
     private readonly string _configPath = Path.Combine(Path.GetTempPath(), $"watcher-{Guid.NewGuid():N}.ini");
+
+    [Fact]
+    public void Constructor_RejectsNullConfiguration()
+    {
+        Assert.Throws<ArgumentNullException>(() => new WatcherConfiguration(null!));
+    }
 
     [Fact]
     public void Load_MapsAllSettingsFromOneFile()

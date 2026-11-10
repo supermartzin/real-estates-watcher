@@ -20,8 +20,10 @@ public sealed class WatcherConfiguration
     public LocalNodejsConsoleWebScraperSettings? WebScraper { get; }
     public IReadOnlyList<string> PortalUrls { get; }
 
-    private WatcherConfiguration(IConfiguration configuration)
+    public WatcherConfiguration(IConfiguration configuration)
     {
+        ArgumentNullException.ThrowIfNull(configuration);
+
         Engine = LoadWatchEngineSettings(configuration.GetSection(Attributes.GetSettingsSectionKey<WatchEngineSettings>()));
         GoogleCloud = LoadGoogleCloudSettings(configuration.GetSection(Attributes.GetSettingsSectionKey<GoogleCloudSettings>()));
         EmailHandler = LoadEmailSettings(configuration.GetSection(Attributes.GetSettingsSectionKey<EmailNotifyingAdPostsHandlerSettings>()));
@@ -35,8 +37,8 @@ public sealed class WatcherConfiguration
 
         PortalUrls = configuration.GetSection("portals").GetChildren()
             .Select(entry => entry.Value?.Trim())
-            .Where(value => !string.IsNullOrEmpty(value))
-            .Select(value => value!)
+            .OfType<string>()
+            .Where(value => value.Length > 0)
             .ToArray();
     }
 
