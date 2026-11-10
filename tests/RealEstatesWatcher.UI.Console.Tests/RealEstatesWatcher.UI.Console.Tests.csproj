@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="..\..\RealEstatesWatcher.UI.Console\RealEstatesWatcher.UI.Console.csproj" />
+    <None Include="..\..\RealEstatesWatcher.UI.Console\config-templates\watcher.ini" Link="watcher-template.ini" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
