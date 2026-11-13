@@ -29,7 +29,7 @@ ___
 
 Run the app by executing the following command
 
-    dotnet RealEstatesWatcher.UI.Console.dll --h <path to handlers.ini file> --p <path to portals.ini file> --f <path to filters.ini file> --e <path to engine.ini file>
+    dotnet RealEstatesWatcher.UI.Console.dll --config configs/watcher.ini
     
 ##### * Description of all command-line options can be obtained by running the `--help` option
 
@@ -55,12 +55,7 @@ Perform following steps and commands either from the [**root folder**](https://g
  
  4. **Copy Web scraper files** from [Tools/scraper folder](https://github.com/supermartzin/real-estates-watcher/tree/main/Tools/scraper) to **~/publish/scraper** directory.
  
- 5. Make sure you have a **/configs** folder in the publish directory with all the configuration files or copy them manually from [**RealEstatesWatcher.UI.Console/configs/** folder](https://github.com/supermartzin/real-estates-watcher/tree/main/RealEstatesWatcher.UI.Console/configs)
-    * `handlers.ini`
-    * `portals.ini`
-    * `filters.ini`
-    * `engine.ini`
-    * `scraper.ini`
+ 5. Copy [**config-templates/watcher.ini**](RealEstatesWatcher.UI.Console/config-templates/watcher.ini) to **RealEstatesWatcher.UI.Console/configs/watcher.ini** and edit it for your searches before building or publishing. The configured file is copied to **publish/configs/watcher.ini**. If configuring after publishing, create **publish/configs** and copy the template there as **watcher.ini**.
 
  6. **Deploy** the whole **publish directory** to server or run locally.
  
@@ -79,14 +74,33 @@ Perform following steps and commands either from the [**root folder**](https://g
 ### 🐋 Using Docker (recommended)
 
 There is a `Dockerfile` in the [**root**](https://github.com/supermartzin/real-estates-watcher) of the repository that you can use to automatic build and setup Docker image and run the app in containerized environment.
-Simply use basic build and run commands:
+Prepare **watcher.ini** from the [template](RealEstatesWatcher.UI.Console/config-templates/watcher.ini), build the image, and mount your configuration into the container. Replace `/absolute/path/to/watcher.ini` with the absolute path to your file:
 
     docker build -t real-estates-watcher:latest .
-    docker run -itd real-estates-watcher:latest
+    docker run -itd --mount type=bind,source=/absolute/path/to/watcher.ini,target=/app/configs/watcher.ini,readonly real-estates-watcher:latest
 
-## 📝 Configuration files description
+Runtime configs are excluded from the Docker build context by `.dockerignore`, so the mount is required. If you enable file output, set its paths to a writable directory or mounted volume.
 
-**engine.ini** - configuration of the watching engine (*required* cmd argument `--e` or `-engine`)
+## 📝 Configuration
+
+All watcher settings are read once from a single INI file. Pass its path with **`--config`** (or **`-c`**):
+
+```sh
+dotnet RealEstatesWatcher.UI.Console.dll --config configs/watcher.ini
+```
+
+Start from [**the unified template**](RealEstatesWatcher.UI.Console/config-templates/watcher.ini). Relative file paths resolve from the current working directory. The Node.js executable path must be absolute when specified. `NLog.config` remains the logging configuration, and scraper cookies remain in their JSON data file.
+
+### Migrating existing configurations
+
+1. Copy the sections from `engine.ini`, `handlers.ini`, `filters.ini` and `scraper.ini` into `watcher.ini` without changing their setting names.
+2. Convert the plain URL list from `portals.ini` to uniquely numbered entries under `[portals]`, as shown below. Change `//` comments to INI `;` comments.
+3. Replace the old per-file command-line arguments with `--config configs/watcher.ini`.
+4. Omit or comment out the **whole** `[basic]` or `[nodejs]` section, including its keys, to disable filtering or the scraper respectively. A dynamic portal still requires the Node.js scraper.
+
+### Sections
+
+**`[general]` and `[gcloud]`** - configuration of the watching engine and Google Cloud logging
 
 ❗**CHANGE**❗(since **v1.6**) 👇
 * Added support for **setting the exact time** of day of the periodic checks and ability to **start** the application **without the initial ads check** if the time is set.
@@ -107,21 +121,19 @@ Simply use basic build and run commands:
     service_name=                      # <string> | optional | name of the service to be used in Google Cloud Logging service (required when running outside of Google Cloud environment, applicable only in DEBUG mode).
 
 
-**portals.\*** - configuration of all Ad portals to watch (*required* cmd argument `--p` or `-portals`)
+**`[portals]`** - all search URLs to watch
 
-❗**CHANGE**❗(since **v1.4**)
-* Newline separated file with all URLs that you want to be watched.
-* If you don't want to watch specific portal, just comment whole line with (`// https://bazos.cz/...`) or remove it completely from the config file.
+Use a unique numeric key for each URL. INI comments (`;`) disable entries; blank values are ignored. URLs can contain query parameters and equals signs.
 
-<pre>
-https://reality.idnes.cz/s/prodej/domy/cena-do-7000000/...<b>↩</b>
-https://reality.idnes.cz/s/prodej/pozemky/...<b>↩</b>
-https://www.sreality.cz/hledani/prodej/domy/...<b>↩</b>
-https://reality.bazos.cz/prodam/dum/...<b>↩</b>
-https://reality.bazos.cz/prodam/chata/...<b>↩</b>
-</pre>
+```ini
+[portals]
+0=https://reality.idnes.cz/s/prodej/domy/cena-do-7000000/
+1=https://reality.idnes.cz/s/prodej/pozemky/
+; 2=https://www.sreality.cz/hledani/prodej/domy/
+3=https://reality.bazos.cz/prodam/dum/
+```
 
-**handlers.ini** - configuration of the classes handling the received Ad posts (*required* cmd argument `--h` or `-handlers`)
+**`[email]` and `[file]`** - configuration of the classes handling the received Ad posts
 
 ❗**CHANGE**❗(since **v1.4.7**)
 
@@ -142,10 +154,10 @@ https://reality.bazos.cz/prodam/chata/...<b>↩</b>
     enabled=                      # <bool>    | required | enable/disable this handler
     main_path=                    # <string>  | required | path to the file where to save initial and new Ad posts
     separate_new_posts=           # <bool>    | optional | set 'true' if you want to save new Ad posts in separate file from the initial list
-    new_posts_path=               # <bool>    | optional | path to the file where to save new Ad posts (required when separate_new_posts=true)
-    print_format=                 # <strings> | optional | format of printing parsed Ads to file, (allowed enum values below) (defaults to 'plain')
+    new_posts_path=               # <string>    | optional | path to the file where to save new Ad posts (required when separate_new_posts=true)
+    print_format=                 # <strings> | optional | format of printing parsed Ads to file, (allowed enum values below) (defaults to 'PlainText')
     
-**filters.ini** - configuration of the Ads filter (*optional* cmd argument `--f` or `-filters`)
+**`[basic]`** - optional configuration of the Ads filter (omit the section to disable filtering)
 
     [basic]
     price_min=          # <number>  | optional | minimal price of Real estate
@@ -156,11 +168,11 @@ https://reality.bazos.cz/prodam/chata/...<b>↩</b>
     
  * Leave any of the values empty if you don't want to filter Ad posts by it
  * **Layout** option supported values: `1+1, 1+kk, 2+1, 2+kk, 3+1, 3+kk, 4+1, 4+kk, 5+1, 5+kk`
- * **Format** option supported values: `plain, html`
+ * **Format** option supported values: `PlainText, Html` (case-insensitive)
 
 ❗**ADDED**❗(since **v1.4.6**) 👇
 
-**scraper.ini** - configuration of the Web scraper script when Ad portal page is dynamic and require JavaScript in order to fully load the content (*optional* cmd argument `--s` or `-scraper`)
+**`[nodejs]`** - optional configuration of the Web scraper for dynamic portal pages requiring JavaScript (omit the section when no scraper is needed)
 
     [nodejs]
     path_to_node_executable=          # <string>  | optional | absolute path to Node.js (defaults to the standard platform install path)

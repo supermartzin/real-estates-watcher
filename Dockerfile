@@ -52,4 +52,4 @@ WORKDIR /app
 COPY --from=publish --chown=10042:10042 /app/publish .
 COPY --chown=10042:10042 "Tools/scraper/index.js" "Tools/scraper/package.json" "Tools/scraper/package-lock.json" "/app/scraper/"
 USER 10042
-ENTRYPOINT ["./RealEstatesWatcher.UI.Console", "--e", "configs/engine.ini", "--h", "configs/handlers.ini", "--p", "configs/portals.ini"]
+ENTRYPOINT ["./RealEstatesWatcher.UI.Console", "--config", "configs/watcher.ini"]

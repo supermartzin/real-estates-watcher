@@ -355,3 +355,4 @@ MigrationBackup/
 /.idea
 */configs/*.ini
 /.configs
+/docs/superpowers/
