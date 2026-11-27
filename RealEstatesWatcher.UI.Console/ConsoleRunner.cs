@@ -51,7 +51,8 @@ public class ConsoleRunner
         if (!parsed)
             return;
 
-        
+        using var _ = InitializeSentry();
+
         Logger.LogInformation("------------------------------------------------");
 
         var configuration = WatcherConfiguration.Load(CmdArguments.ConfigFilePath);
@@ -85,6 +86,16 @@ public class ConsoleRunner
         }
     }
 
+    private static IDisposable InitializeSentry() =>
+        SentrySdk.Init(options =>
+        {
+            options.Dsn = "https://8a560ec7c9c241c6bc9f00e116bace08@o504575.ingest.sentry.io/5792424";
+            options.AutoSessionTracking = true;
+            options.TracesSampleRate = 1.0;
+            options.ProfilesSampleRate = 1.0;
+            options.AddIntegration(new ProfilingIntegration());
+        });
+
     private static void ConfigureDependencyInjection(WatcherConfiguration configuration)
     {
         var collection = new ServiceCollection();
@@ -98,14 +109,7 @@ public class ConsoleRunner
             // Sentry
             builder.AddSentry(options =>
             {
-                options.Dsn = "https://8a560ec7c9c241c6bc9f00e116bace08@o504575.ingest.sentry.io/5792424";
                 options.MinimumEventLevel = LogLevel.Warning;
-                options.InitializeSdk = true;
-                
-                options.AutoSessionTracking = true;
-                options.TracesSampleRate = 1.0;
-                options.ProfilesSampleRate = 1.0;
-                options.AddIntegration(new ProfilingIntegration());
             });
 
             // Google Cloud Logging
