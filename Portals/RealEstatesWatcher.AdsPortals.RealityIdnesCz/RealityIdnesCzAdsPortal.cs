@@ -32,13 +32,14 @@ public class RealityIdnesCzAdsPortal(string watchedUrl,
 
     private static string ParseTitle(HtmlNode node)
     {
-        var title = node.SelectSingleNode(".//h2[@class=\"c-products__title\"]").InnerText;
+        var title = node.SelectSingleNode(".//h2[@class=\"c-products__title\"]")?.InnerText;
+        if (string.IsNullOrWhiteSpace(title))
+            return string.Empty;
 
         title = title.Replace("\n", " ").Trim();
         title = HttpUtility.HtmlDecode(title);
-        title = title[0].ToString().ToUpper() + title[1..];
 
-        return title;
+        return title.Length > 0 ? title[0].ToString().ToUpper() + title[1..] : string.Empty;
     }
 
     private static decimal ParsePrice(HtmlNode node)
@@ -77,11 +78,11 @@ public class RealityIdnesCzAdsPortal(string watchedUrl,
         return LayoutExtensions.ToLayout(layoutValue);
     }
 
-    private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//p[@class=\"c-products__info\"]").InnerText.Trim();
+    private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//p[@class=\"c-products__info\"]")?.InnerText.Trim() ?? string.Empty;
 
     private static Uri ParseWebUrl(HtmlNode node, string rootHost)
     {
-        var relativePath = node.SelectSingleNode(".//a[@class=\"c-products__link\"]").GetAttributeValue("href", string.Empty);
+        var relativePath = node.SelectSingleNode(".//a[@class=\"c-products__link\"]")?.GetAttributeValue("href", string.Empty);
 
         return new Uri(relativePath ?? rootHost);
     }

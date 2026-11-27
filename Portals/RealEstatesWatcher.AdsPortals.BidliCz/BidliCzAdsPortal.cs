@@ -48,11 +48,13 @@ public partial class BidliCzAdsPortal(string watchedUrl,
         };
     }
         
-    private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//span[@class=\"kategorie\"]").InnerText;
+    private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//span[@class=\"kategorie\"]")?.InnerText ?? string.Empty;
 
     private static decimal ParsePrice(HtmlNode node)
     {
-        var value = node.SelectSingleNode(".//span[@class=\"cena\"]").InnerText;
+        var value = node.SelectSingleNode(".//span[@class=\"cena\"]")?.InnerText;
+        if (value is null)
+            return decimal.Zero;
 
         value = RegexMatchers.AllNonNumberValues().Replace(value, string.Empty);
         if (string.IsNullOrEmpty(value))
@@ -65,7 +67,9 @@ public partial class BidliCzAdsPortal(string watchedUrl,
 
     private static string? ParsePriceComment(HtmlNode node)
     {
-        var value = node.SelectSingleNode(".//span[@class=\"cena\"]").InnerText;
+        var value = node.SelectSingleNode(".//span[@class=\"cena\"]")?.InnerText;
+        if (value is null)
+            return null;
 
         return RegexMatchers.AtLeastOneDigitValue().IsMatch(value)
             ? null
@@ -86,7 +90,7 @@ public partial class BidliCzAdsPortal(string watchedUrl,
         return LayoutExtensions.ToLayout(layoutValue);
     }
 
-    private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//span[@class=\"adresa\"]").InnerText;
+    private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//span[@class=\"adresa\"]")?.InnerText ?? string.Empty;
 
     private static Uri ParseWebUrl(HtmlNode node, string rootHost)
     {

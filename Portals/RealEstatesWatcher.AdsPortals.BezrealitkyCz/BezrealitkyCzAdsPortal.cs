@@ -35,17 +35,17 @@ public partial class BezrealitkyCzAdsPortal(string watchedUrl,
 
     private static string ParseTitle(HtmlNode node)
     {
-        var label = node.SelectSingleNode(".//span[contains(@class,'propertyCardLabel')]").InnerText;
-        var address = node.SelectSingleNode(".//span[contains(@class,'propertyCardAddress')]").InnerText;
+        var label = node.SelectSingleNode(".//span[contains(@class,'propertyCardLabel')]")?.InnerText ?? string.Empty;
+        var address = node.SelectSingleNode(".//span[contains(@class,'propertyCardAddress')]")?.InnerText ?? string.Empty;
 
         return $"{label} {address}";
     }
 
-    private static string ParseText(HtmlNode node) => node.SelectSingleNode(".//div[contains(@class,'propertyCardContent')]//p").InnerText;
+    private static string ParseText(HtmlNode node) => node.SelectSingleNode(".//div[contains(@class,'propertyCardContent')]//p")?.InnerText ?? string.Empty;
 
-    private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//span[contains(@class,'propertyCardAddress')]").InnerText;
+    private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//span[contains(@class,'propertyCardAddress')]")?.InnerText ?? string.Empty;
 
-    private static Uri ParseWebUrl(HtmlNode node) => new(node.SelectSingleNode(".//h2[contains(@class,'propertyCardHeadline')]//a").GetAttributeValue("href", string.Empty));
+    private static Uri ParseWebUrl(HtmlNode node) => new(node.SelectSingleNode(".//h2[contains(@class,'propertyCardHeadline')]//a")?.GetAttributeValue("href", string.Empty) ?? string.Empty);
 
     private static decimal ParsePrice(HtmlNode node)
     {
@@ -79,7 +79,7 @@ public partial class BezrealitkyCzAdsPortal(string watchedUrl,
     private static Layout ParseLayout(HtmlNode node)
     {
         var values = node.SelectNodes(".//li[contains(@class,'featuresListItem')]");
-        if (values.Count < 1)
+        if (values is null || values.Count < 1)
             return Layout.NotSpecified;
 
         var value = HttpUtility.HtmlDecode(values[0].InnerText);
@@ -97,7 +97,7 @@ public partial class BezrealitkyCzAdsPortal(string watchedUrl,
     private static decimal ParseFloorArea(HtmlNode node)
     {
         var values = node.SelectNodes(".//li[contains(@class,'featuresListItem')]");
-        if (values.Count != 2)
+        if (values is null || values.Count != 2)
             return decimal.Zero;
         
         var value = HttpUtility.HtmlDecode(values[^1].InnerText);

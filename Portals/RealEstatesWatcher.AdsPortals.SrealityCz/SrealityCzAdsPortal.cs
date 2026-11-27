@@ -32,17 +32,25 @@ public class SrealityCzAdsPortal(string watchedUrl,
         PriceComment = ParsePriceComment(node)
     };
 
-    private static string ParseTitle(HtmlNode node) => node.SelectNodes(".//p").Count < 1
-        ? string.Empty
-        : HttpUtility.HtmlDecode(node.SelectNodes(".//p")[0].InnerText.Trim());
-
-    private static string ParseAddress(HtmlNode node) => node.SelectNodes(".//p").Count < 2 
+    private static string ParseTitle(HtmlNode node)
+    {
+        var paragraphs = node.SelectNodes(".//p");
+        return paragraphs is null || paragraphs.Count < 1
             ? string.Empty
-            : HttpUtility.HtmlDecode(node.SelectNodes(".//p")[1].InnerText.Trim());
+            : HttpUtility.HtmlDecode(paragraphs[0].InnerText.Trim());
+    }
+
+    private static string ParseAddress(HtmlNode node)
+    {
+        var paragraphs = node.SelectNodes(".//p");
+        return paragraphs is null || paragraphs.Count < 2
+            ? string.Empty
+            : HttpUtility.HtmlDecode(paragraphs[1].InnerText.Trim());
+    }
 
     private static Uri ParseWebUrl(HtmlNode node, string rootHost)
     {
-        var relativePath = node.FirstChild.GetAttributeValue("href", string.Empty);
+        var relativePath = node.FirstChild?.GetAttributeValue("href", string.Empty) ?? string.Empty;
 
         return new Uri(rootHost + relativePath);
     }
@@ -69,7 +77,7 @@ public class SrealityCzAdsPortal(string watchedUrl,
     private static decimal ParsePrice(HtmlNode node)
     {
         var descriptionNodes = node.SelectNodes(".//p");
-        if (descriptionNodes.Count < 3)
+        if (descriptionNodes is null || descriptionNodes.Count < 3)
             return decimal.Zero;
 
         var value = HttpUtility.HtmlDecode(descriptionNodes[2].InnerText);
@@ -87,8 +95,8 @@ public class SrealityCzAdsPortal(string watchedUrl,
             return null;
 
         var descriptionNodes = node.SelectNodes(".//p");
-        return descriptionNodes.Count < 3 
-            ? null 
+        return descriptionNodes is null || descriptionNodes.Count < 3
+            ? null
             : HttpUtility.HtmlDecode(descriptionNodes[2].InnerText.Trim());
     }
 

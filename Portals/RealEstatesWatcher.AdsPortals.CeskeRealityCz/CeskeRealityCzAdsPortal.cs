@@ -32,9 +32,9 @@ public partial class CeskeRealityCzAdsPortal(string watchedUrl,
         PriceComment = ParsePriceComment(node)
     };
 
-    private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//h2[@class='i-estate__header-title']").InnerText.Trim();
+    private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//h2[@class='i-estate__header-title']")?.InnerText.Trim() ?? string.Empty;
 
-    private static string ParseText(HtmlNode node) => node.SelectSingleNode(".//p[@class='i-estate__description-text']").InnerText.Trim();
+    private static string ParseText(HtmlNode node) => node.SelectSingleNode(".//p[@class='i-estate__description-text']")?.InnerText.Trim() ?? string.Empty;
 
     private static decimal ParsePrice(HtmlNode node)
     {

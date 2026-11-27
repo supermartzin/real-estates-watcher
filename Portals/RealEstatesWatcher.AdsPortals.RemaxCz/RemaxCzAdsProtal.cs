@@ -51,11 +51,11 @@ public class RemaxCzAdsProtal : RealEstateAdsPortalBase
         ? node.SelectSingleNode(".//div[contains(@class,'item-price')]/strong")?.InnerText?.Trim()
         : null;
 
-    private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//h2/strong").InnerText;
+    private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//h2/strong")?.InnerText ?? string.Empty;
 
     private static string ParseAddress(HtmlNode node)
     {
-        var address = node.SelectSingleNode(".//div[contains(@class,'item-info')]//p").InnerText?.Trim();
+        var address = node.SelectSingleNode(".//div[contains(@class,'item-info')]//p")?.InnerText?.Trim();
 
         if (address is null)
             return string.Empty;
@@ -69,7 +69,7 @@ public class RemaxCzAdsProtal : RealEstateAdsPortalBase
 
     private static Uri ParseWebUrl(HtmlNode node, string rootHost)
     {
-        var relativePath = node.SelectSingleNode("./a").GetAttributeValue("href", string.Empty);
+        var relativePath = node.SelectSingleNode("./a")?.GetAttributeValue("href", string.Empty) ?? string.Empty;
 
         return new Uri(rootHost + relativePath);
     }

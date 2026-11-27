@@ -32,6 +32,8 @@ public class FlatZoneCzAdsPortal(string watchedUrl,
                 
             // get HTML elements
             var elements = htmlDoc.DocumentNode.SelectNodes(GetPathToAdsElements());
+            if (elements is null)
+                return [];
                 
             // remove first and last elements - templates
             if (elements.Count > 1)
@@ -78,8 +80,8 @@ public class FlatZoneCzAdsPortal(string watchedUrl,
         
     private static string ParseTitle(HtmlNode node)
     {
-        var name = node.SelectSingleNode(".//span[contains(@class,\"js-project\")]").InnerText;
-        var developer = node.SelectSingleNode(".//span[contains(@class,\"js-developer\")]").InnerText;
+        var name = node.SelectSingleNode(".//span[contains(@class,\"js-project\")]")?.InnerText ?? string.Empty;
+        var developer = node.SelectSingleNode(".//span[contains(@class,\"js-developer\")]")?.InnerText ?? string.Empty;
 
         return $"{HttpUtility.HtmlDecode(name)} | {HttpUtility.HtmlDecode(developer)}";
     }
@@ -97,10 +99,10 @@ public class FlatZoneCzAdsPortal(string watchedUrl,
             : decimal.Zero;
     }
 
-    private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//span[contains(@class,\"js-locality\")]").InnerText;
+    private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//span[contains(@class,\"js-locality\")]")?.InnerText ?? string.Empty;
 
     private static Uri ParseWebUrl(HtmlNode node) => new(node.SelectSingleNode(".//a[contains(@class,\"js-project-detail-btn\")]")
-        .GetAttributeValue<string>("href", string.Empty));
+        ?.GetAttributeValue<string>("href", string.Empty) ?? string.Empty);
 
     private static Uri? ParseImageUrl(HtmlNode node)
     {

@@ -30,9 +30,9 @@ public class RealcityCzAdsPortal(string watchedUrl,
         ImageUrl = ParseImageUrl(node)
     };
 
-    private static string ParseTitle(HtmlNode node) => HttpUtility.HtmlDecode(node.SelectSingleNode(".//div[@class=\"title\"]").InnerText).Trim();
+    private static string ParseTitle(HtmlNode node) => HttpUtility.HtmlDecode(node.SelectSingleNode(".//div[@class=\"title\"]")?.InnerText ?? string.Empty).Trim();
 
-    private static string ParseText(HtmlNode node) => HttpUtility.HtmlDecode(node.SelectSingleNode(".//div[@class=\"description\"]").InnerText).Trim();
+    private static string ParseText(HtmlNode node) => HttpUtility.HtmlDecode(node.SelectSingleNode(".//div[@class=\"description\"]")?.InnerText ?? string.Empty).Trim();
 
     private static decimal ParsePrice(HtmlNode node)
     {
@@ -65,11 +65,11 @@ public class RealcityCzAdsPortal(string watchedUrl,
         return LayoutExtensions.ToLayout(layoutValue);
     }
 
-    private static string ParseAddress(HtmlNode node) => HttpUtility.HtmlDecode(node.SelectSingleNode(".//div[@class=\"address\"]").InnerText).Trim();
+    private static string ParseAddress(HtmlNode node) => HttpUtility.HtmlDecode(node.SelectSingleNode(".//div[@class=\"address\"]")?.InnerText ?? string.Empty).Trim();
 
     private static Uri ParseWebUrl(HtmlNode node, string rootHost)
     {
-        var relativePath = node.SelectSingleNode(".//div[@class=\"title\"]/a").GetAttributeValue("href", string.Empty);
+        var relativePath = node.SelectSingleNode(".//div[@class=\"title\"]/a")?.GetAttributeValue("href", string.Empty) ?? string.Empty;
 
         return new Uri(rootHost + relativePath);
     }

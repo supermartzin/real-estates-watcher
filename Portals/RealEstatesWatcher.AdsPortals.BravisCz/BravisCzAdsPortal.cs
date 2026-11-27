@@ -31,7 +31,7 @@ public class BravisCzAdsPortal(string watchedUrl,
         ImageUrl = ParseImageUrl(node, RootHost)
     };
         
-    private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//h1").InnerText.Trim();
+    private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//h1")?.InnerText.Trim() ?? string.Empty;
 
     private static decimal ParsePrice(HtmlNode node)
     {
@@ -73,7 +73,9 @@ public class BravisCzAdsPortal(string watchedUrl,
 
     private static Layout ParseLayout(HtmlNode node)
     {
-        var value = node.SelectSingleNode(".//ul[@class='params']/li[contains(text(),\"Typ\")]").InnerText;
+        var value = node.SelectSingleNode(".//ul[@class='params']/li[contains(text(),\"Typ\")]")?.InnerText;
+        if (value is null)
+            return Layout.NotSpecified;
 
         var result = RegexMatchers.Layout().Match(value);
         if (!result.Success)
@@ -85,18 +87,20 @@ public class BravisCzAdsPortal(string watchedUrl,
         return LayoutExtensions.ToLayout(layoutValue);
     }
 
-    private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//em[@class=\"location\"]").InnerText;
+    private static string ParseAddress(HtmlNode node) => node.SelectSingleNode(".//em[@class=\"location\"]")?.InnerText ?? string.Empty;
 
     private static Uri ParseWebUrl(HtmlNode node, string rootHost)
     {
-        var relativePath = node.SelectSingleNode(".//a[@class=\"main\"]").GetAttributeValue<string?>("href", null);
+        var relativePath = node.SelectSingleNode(".//a[@class=\"main\"]")?.GetAttributeValue<string?>("href", null);
 
         return new Uri(rootHost +  UrlPathSeparator + relativePath);
     }
 
     private static decimal ParseFloorArea(HtmlNode node)
     {
-        var value = node.SelectSingleNode(".//ul[@class='params']/li[contains(text(),\"Plocha\")]").InnerText;
+        var value = node.SelectSingleNode(".//ul[@class='params']/li[contains(text(),\"Plocha\")]")?.InnerText;
+        if (value is null)
+            return decimal.Zero;
 
         var result = RegexMatchers.FloorArea().Match(value);
         if (!result.Success)

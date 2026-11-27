@@ -42,7 +42,7 @@ public partial class BazosCzAdsPortal(string watchedUrl,
 
     private static Uri ParseWebUrl(HtmlNode node, string rootHost)
     {
-        var relativePath = node.SelectSingleNode(""".//*[@class="nadpis"]""")!.FirstChild.GetAttributeValue("href", string.Empty);
+        var relativePath = node.SelectSingleNode(""".//*[@class="nadpis"]""")?.FirstChild?.GetAttributeValue("href", string.Empty) ?? string.Empty;
 
         return new Uri(rootHost + relativePath);
     }

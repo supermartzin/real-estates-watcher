@@ -34,7 +34,7 @@ public partial class MmRealityCzAdsPortal(string watchedUrl,
         ImageUrl = ParseImageUrl(node)
     };
 
-    private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//h4[contains(@class, 'rds-property-title')]").InnerText;
+    private static string ParseTitle(HtmlNode node) => node.SelectSingleNode(".//h4[contains(@class, 'rds-property-title')]")?.InnerText ?? string.Empty;
 
     private static decimal ParsePrice(HtmlNode node)
     {
@@ -78,7 +78,7 @@ public partial class MmRealityCzAdsPortal(string watchedUrl,
             : string.Empty;
     }
 
-    private Uri ParseWebUrl(HtmlNode node) => new($"{RootHost}{node.PreviousSibling.GetAttributeValue("href", string.Empty)}");
+    private Uri ParseWebUrl(HtmlNode node) => new($"{RootHost}{node.PreviousSibling?.GetAttributeValue("href", string.Empty)}");
 
     private static decimal ParseFloorArea(HtmlNode node)
     {
