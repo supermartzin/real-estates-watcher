@@ -2,7 +2,7 @@
   "profiles": {
     "RealEstatesWatcher.UI.Console": {
       "commandName": "Project",
-      "commandLineArgs": "--config ./configs/watcher.ini"
+      "commandLineArgs": "--config ./config.ini"
     },
     "Container (Dockerfile)": {
       "commandName": "Docker"

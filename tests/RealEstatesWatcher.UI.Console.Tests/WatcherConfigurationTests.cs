@@ -194,7 +194,7 @@ public sealed class WatcherConfigurationTests : IDisposable
     [Fact]
     public void Load_TemplateProvidesUsableDefaults()
     {
-        var settings = WatcherConfiguration.Load(Path.Combine(AppContext.BaseDirectory, "watcher-template.ini"));
+        var settings = WatcherConfiguration.Load(Path.Combine(AppContext.BaseDirectory, "config.template.ini"));
 
         Assert.Equal(10, settings.Engine.CheckIntervalMinutes);
         Assert.True(settings.Engine.PerformCheckOnStartup);

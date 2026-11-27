@@ -60,10 +60,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="config-templates\watcher.ini">
+    <None Update="config.template.ini">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
-    <None Update="configs\watcher.ini">
+    <None Update="config.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </None>

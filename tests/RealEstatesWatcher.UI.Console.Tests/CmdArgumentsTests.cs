@@ -13,14 +13,14 @@ public class CmdArgumentsTests
     {
         var arguments = new CmdArguments();
 
-        Assert.True(await arguments.ParseAsync([option, "configs/watcher.ini"]));
-        Assert.Equal("configs/watcher.ini", arguments.ConfigFilePath);
+        Assert.True(await arguments.ParseAsync([option, "config.ini"]));
+        Assert.Equal("config.ini", arguments.ConfigFilePath);
     }
 
     [Theory]
     [InlineData()]
     [InlineData("--config")]
-    [InlineData("--config", "watcher.ini", "--unknown", "value")]
+    [InlineData("--config", "config.ini", "--unknown", "value")]
     [InlineData("--e", "engine.ini", "--h", "handlers.ini", "--p", "portals.ini")]
     public async Task Parse_RejectsMissingOrUnsupportedArguments(params string[] values)
     {

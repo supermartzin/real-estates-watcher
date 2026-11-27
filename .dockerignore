@@ -15,6 +15,7 @@
 **/bin
 **/charts
 **/configs/*.ini
+RealEstatesWatcher.UI.Console/config.ini
 **/cookies.json
 **/docker-compose*
 **/Dockerfile*

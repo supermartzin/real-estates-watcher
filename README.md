@@ -29,7 +29,7 @@ ___
 
 Run the app by executing the following command
 
-    dotnet RealEstatesWatcher.UI.Console.dll --config configs/watcher.ini
+    dotnet RealEstatesWatcher.UI.Console.dll --config config.ini
     
 ##### * Description of all command-line options can be obtained by running the `--help` option
 
@@ -55,7 +55,7 @@ Perform following steps and commands either from the [**root folder**](https://g
  
  4. **Copy Web scraper files** from [Tools/scraper folder](https://github.com/supermartzin/real-estates-watcher/tree/main/Tools/scraper) to **~/publish/scraper** directory.
  
- 5. Copy [**config-templates/watcher.ini**](RealEstatesWatcher.UI.Console/config-templates/watcher.ini) to **RealEstatesWatcher.UI.Console/configs/watcher.ini** and edit it for your searches before building or publishing. The configured file is copied to **publish/configs/watcher.ini**. If configuring after publishing, create **publish/configs** and copy the template there as **watcher.ini**.
+ 5. Copy [**config.template.ini**](RealEstatesWatcher.UI.Console/config.template.ini) to **RealEstatesWatcher.UI.Console/config.ini** and edit it for your searches before building or publishing. The configured file is copied to **publish/config.ini**. If configuring after publishing, copy the template directly into **publish/** as **config.ini**.
 
  6. **Deploy** the whole **publish directory** to server or run locally.
  
@@ -74,10 +74,10 @@ Perform following steps and commands either from the [**root folder**](https://g
 ### 🐋 Using Docker (recommended)
 
 There is a `Dockerfile` in the [**root**](https://github.com/supermartzin/real-estates-watcher) of the repository that you can use to automatic build and setup Docker image and run the app in containerized environment.
-Prepare **watcher.ini** from the [template](RealEstatesWatcher.UI.Console/config-templates/watcher.ini), build the image, and mount your configuration into the container. Replace `/absolute/path/to/watcher.ini` with the absolute path to your file:
+Prepare **config.ini** from the [template](RealEstatesWatcher.UI.Console/config.template.ini), build the image, and mount your configuration into the container. Replace `/absolute/path/to/config.ini` with the absolute path to your file:
 
     docker build -t real-estates-watcher:latest .
-    docker run -itd --mount type=bind,source=/absolute/path/to/watcher.ini,target=/app/configs/watcher.ini,readonly real-estates-watcher:latest
+    docker run -itd --mount type=bind,source=/absolute/path/to/config.ini,target=/app/config.ini,readonly real-estates-watcher:latest
 
 Runtime configs are excluded from the Docker build context by `.dockerignore`, so the mount is required. If you enable file output, set its paths to a writable directory or mounted volume.
 
@@ -86,16 +86,16 @@ Runtime configs are excluded from the Docker build context by `.dockerignore`, s
 All watcher settings are read once from a single INI file. Pass its path with **`--config`** (or **`-c`**):
 
 ```sh
-dotnet RealEstatesWatcher.UI.Console.dll --config configs/watcher.ini
+dotnet RealEstatesWatcher.UI.Console.dll --config config.ini
 ```
 
-Start from [**the unified template**](RealEstatesWatcher.UI.Console/config-templates/watcher.ini). Relative file paths resolve from the current working directory. The Node.js executable path must be absolute when specified. `NLog.config` remains the logging configuration, and scraper cookies remain in their JSON data file.
+Start from [**the unified template**](RealEstatesWatcher.UI.Console/config.template.ini). Relative file paths resolve from the current working directory. The Node.js executable path must be absolute when specified. `NLog.config` remains the logging configuration, and scraper cookies remain in their JSON data file.
 
 ### Migrating existing configurations
 
-1. Copy the sections from `engine.ini`, `handlers.ini`, `filters.ini` and `scraper.ini` into `watcher.ini` without changing their setting names.
+1. Copy the sections from `engine.ini`, `handlers.ini`, `filters.ini` and `scraper.ini` into `config.ini` without changing their setting names.
 2. Convert the plain URL list from `portals.ini` to uniquely numbered entries under `[portals]`, as shown below. Change `//` comments to INI `;` comments.
-3. Replace the old per-file command-line arguments with `--config configs/watcher.ini`.
+3. Replace the old per-file command-line arguments with `--config config.ini`.
 4. Omit or comment out the **whole** `[basic]` or `[nodejs]` section, including its keys, to disable filtering or the scraper respectively. A dynamic portal still requires the Node.js scraper.
 
 ### Sections
