@@ -16,12 +16,19 @@ function parseCookies(pathToCookiesFile) {
 }
 
 (async function () {
+    const startTimeMs = Date.now();
+    const waitSeconds = Number(process.argv[2]);
+    const totalBudgetMs = Number.isFinite(waitSeconds) && waitSeconds > 0 ? waitSeconds * 1000 : 10000;
+    const deadlineMs = startTimeMs + totalBudgetMs;
+
+    let browser;
     try {
-        const browser = await puppeteer.launch({
-            ignoreDefaultArgs: ['--disable-extensions --user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'],
+        browser = await puppeteer.launch({
+            ignoreDefaultArgs: ['--disable-extensions'],
+            args: ['--disable-features=NetworkServiceSandbox'],
             headless: false
         });
-    
+
         const page = await browser.newPage();
 
         const cookies = parseCookies(process.argv[4]);
@@ -29,19 +36,22 @@ function parseCookies(pathToCookiesFile) {
             await page.setCookie(...cookies);
         }
 
-        await page.goto(process.argv[3]).then(async () => {
-            // wait for the specified time before closing the browser
-            setTimeout(async () => {
-                console.log(await page.content());
+        const gotoTimeoutMs = Math.max(1000, deadlineMs - Date.now());
+        await page.goto(process.argv[3], { timeout: gotoTimeoutMs });
 
-                await browser.close();
-            }, process.argv[2] * 1000);
-        }).catch(async (err) => {
-            console.error(err);
+        // Wait within the remaining scraping budget for dynamic content to settle before closing.
+        const settleDelayMs = Math.min(Math.max(0, deadlineMs - Date.now()), 5000);
+        if (settleDelayMs > 0) {
+            await new Promise((resolve) => setTimeout(resolve, settleDelayMs));
+        }
 
-            await browser.close();
-        });
+        console.log(await page.content());
     } catch (err) {
         console.error(err);
+        process.exitCode = 1;
+    } finally {
+        if (browser) {
+            await browser.close();
+        }
     }
 })();
