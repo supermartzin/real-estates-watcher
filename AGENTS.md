@@ -13,3 +13,7 @@ If the command reports that the file contains a secret, **do not read the file**
 2. Advise them to rotate the leaked credential at its source of truth and remove it from the file.
 3. Do not proceed with the original request until the secret has been removed.
 <!-- sonar:end:codex-secrets-on-read -->
+
+# Pull request commit signatures
+
+Every commit in a pull request for this repository must be GPG-signed with a key registered to the signer's GitHub account. Use `git commit -S` for PR commits and confirm that GitHub marks every commit `Verified` before merging.
